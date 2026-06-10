@@ -1,0 +1,46 @@
+name: Weekly digest
+
+on:
+  schedule:
+    # Friday 07:00 UTC — coffee time in Europe
+    - cron: '0 7 * * 5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate this week's issue
+        run: npm run digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Verify the site still builds
+        run: npm run build
+
+      - name: Commit and push
+        run: |
+          git config user.name "ai-weekly-bot"
+          git config user.email "actions@github.com"
+          git add src/content/digest
+          git commit -m "$(git diff --cached --name-only | xargs -n1 basename | sed 's/\.md$//' | head -1 | xargs printf 'digest: publish issue %s')"
+          git push
+
+  # pushes made with GITHUB_TOKEN don't trigger the push workflow,
+  # so deploy explicitly after publishing
+  deploy:
+    needs: generate
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

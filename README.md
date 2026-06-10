@@ -1,43 +1,46 @@
-# Astro Starter Kit: Minimal
+# hoeltke.com
+
+A personal site that writes its own blog.
+
+Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
+Hacker News, the usual suspects — hands everything to Claude, and publishes
+**AI Weekly**: one digest of the stories that actually matter, with sources.
+No humans in the loop. The homepage is a terminal. Type `help`.
+
+**Live at [hoeltke.com](https://hoeltke.com)** · [RSS](https://hoeltke.com/rss.xml)
+
+## How it works
+
+```
+                  ┌────────────────────────────────────────────┐
+  RSS feeds ──────▶                                            │
+  Hacker News ────▶  scripts/generate-digest.ts                │
+                  │  · collect last 7 days                     │
+                  │  · Claude picks + summarizes top stories   │
+                  │  · validates every cited URL               │
+                  └──────────────┬─────────────────────────────┘
+                                 │ commits src/content/digest/YYYY-WW.md
+                                 ▼
+                  ┌────────────────────────────────────────────┐
+                  │  Astro build → rsync → Caddy on a VPS    │
+                  └────────────────────────────────────────────┘
+```
+
+- **Site**: [Astro](https://astro.build) + React islands + Tailwind CSS v4 — static HTML, one island (the terminal)
+- **Digest**: [Claude](https://claude.com) (`claude-sonnet-4-6`) with structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
+- **CI**: GitHub Actions — `weekly-digest.yml` (cron) and `deploy.yml` (rsync over SSH)
+- **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
+
+## Local development
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev               # dev server
+npm run build             # static build to dist/
+npm run digest -- --dry-run   # test feed collection without an API key
+ANTHROPIC_API_KEY=... npm run digest  # generate this week's issue
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Server + DNS setup: [`docs/server-setup.md`](docs/server-setup.md).
