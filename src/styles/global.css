@@ -29,46 +29,8 @@
   color-scheme: dark;
 }
 
-[data-theme='light'] {
-  --bg: #f7f7f9;
-  --bg-raised: #ffffff;
-  --panel: #ffffff;
-  --term-bg: #050507;
-  --line: #e4e4e9;
-  --line-bright: #cdcdd5;
-  --text: #0a0a0d;
-  --muted: #5d5d66;
-  --faint: #8e8e98;
-  --accent: #7700ff;
-  --accent-vivid: #7700ff;
-  --green: #04b35a;
-  --blue: #0164ff;
-  --amber: #9a6e1b;
-  --red: #c22941;
-  --prompt: #04b35a;
-  --dot: rgba(10, 10, 13, 0.5);
-  --glow: rgba(119, 0, 255, 0.16);
-  color-scheme: light;
-}
-
-/* terminal-style boxes are always dark, regardless of theme */
 .term {
   background-color: var(--term-bg);
-}
-
-[data-theme='light'] .term {
-  --panel: #0a0a0d;
-  --line: #222228;
-  --line-bright: #3a3a42;
-  --text: #ffffff;
-  --muted: #9a9aa2;
-  --faint: #5f5f67;
-  --accent: #9050ff;
-  --green: #3ef78f;
-  --amber: #d9a43b;
-  --red: #d33043;
-  --prompt: #3ef78f;
-  color-scheme: dark;
 }
 
 @theme inline {
@@ -109,6 +71,11 @@ body {
   background-attachment: fixed;
 }
 
+/* reading pages: no grid at all */
+body.no-grid {
+  background-image: none;
+}
+
 /* content sits above the spotlight layer */
 body > header,
 body > main,
@@ -126,13 +93,13 @@ body > footer {
   background-image: radial-gradient(var(--dot) 1.6px, transparent 1.6px);
   background-size: 28px 28px;
   -webkit-mask-image: radial-gradient(
-    circle 240px at var(--mx, -500px) var(--my, -500px),
+    circle 140px at var(--mx, -500px) var(--my, -500px),
     black 0%,
     rgba(0, 0, 0, 0.35) 60%,
     transparent 100%
   );
   mask-image: radial-gradient(
-    circle 240px at var(--mx, -500px) var(--my, -500px),
+    circle 140px at var(--mx, -500px) var(--my, -500px),
     black 0%,
     rgba(0, 0, 0, 0.35) 60%,
     transparent 100%

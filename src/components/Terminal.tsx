@@ -76,7 +76,6 @@ export default function Terminal({ issues }: Props) {
               ['subscribe', 'stay up to date (RSS)'],
               ['whoami', 'who runs this thing'],
               ['about', 'go to the about page'],
-              ['theme', 'toggle dark/light'],
               ['clear', 'clear the screen'],
             ].map(([cmd, desc]) => (
               <span>
@@ -130,8 +129,7 @@ export default function Terminal({ issues }: Props) {
               <span className="text-faint">×</span> AI
             </span>,
             <span>
-              AI Engineer @ <span className="text-accent">Datadog</span>, building the internal
-              Cursor
+              AI Engineer @ <span className="text-accent">Datadog</span>
             </span>,
             <span>
               <span className="text-faint">more → </span>
@@ -145,12 +143,6 @@ export default function Terminal({ issues }: Props) {
           run: () => {
             window.location.href = '/about';
             return [<span className="text-muted">opening /about …</span>];
-          },
-        },
-        theme: {
-          run: () => {
-            const next = (window as any).__setTheme?.();
-            return [<span className="text-muted">theme set to {next}.</span>];
           },
         },
         clear: { run: () => 'clear' },
@@ -177,8 +169,8 @@ export default function Terminal({ issues }: Props) {
         pwd: { run: () => [<span>/home/fabian/hoeltke.com</span>] },
         cd: {
           run: (arg) => {
-            const target = arg.trim();
-            if (/(^|\/)\.?travel\/?$/.test(target)) {
+            const target = arg.trim().replace(/\/+$/, '').toLowerCase();
+            if (/(^|\/)\.?travel$/.test(target)) {
               setTimeout(() => (window.location.href = '/travel'), 900);
               return [
                 <span className="text-muted">
@@ -186,8 +178,16 @@ export default function Terminal({ issues }: Props) {
                 </span>,
               ];
             }
-            if (target === '' || target === '~') return [];
-            return [<span className="text-red">cd: no such directory: {target}</span>];
+            // strip ~/, ./ and leading / so `cd about`, `cd /about`, `cd ~/about` all work
+            const norm = target.replace(/^(~\/|\.\/|\/)/, '');
+            const routes: Record<string, string> = { digest: '/digest', about: '/about' };
+            if (norm in routes) {
+              const dest = routes[norm];
+              setTimeout(() => (window.location.href = dest), 400);
+              return [<span className="text-muted">opening {dest} …</span>];
+            }
+            if (target === '' || target === '~' || target === '..' || norm === '') return [];
+            return [<span className="text-red">cd: no such directory: {arg.trim()}</span>];
           },
         },
         chuck: {
@@ -346,10 +346,22 @@ export default function Terminal({ issues }: Props) {
       setInput(next >= 0 ? history[next] : '');
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      const matches = Object.keys(commands).filter((c) => c.startsWith(input.toLowerCase()));
-      if (matches.length === 1) setInput(matches[0] + ' ');
-      else if (matches.length > 1 && input)
-        append(<span className="text-faint">{matches.join('  ')}</span>);
+      const lower = input.toLowerCase();
+      // only complete the command token, not arguments
+      if (!lower.includes(' ')) {
+        const matches = Object.keys(commands).filter((c) => c.startsWith(lower));
+        if (matches.length === 1) {
+          setInput(matches[0] + ' ');
+        } else if (matches.length > 1) {
+          // extend to the longest common prefix and show the candidates
+          let prefix = matches[0];
+          for (const m of matches) {
+            while (!m.startsWith(prefix)) prefix = prefix.slice(0, -1);
+          }
+          if (prefix.length > lower.length) setInput(prefix);
+          append(<span className="text-faint">{matches.join('  ')}</span>);
+        }
+      }
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
       setLines([]);

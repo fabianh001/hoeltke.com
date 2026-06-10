@@ -25,7 +25,13 @@ const articleSchema = {
 };
 ---
 
-<Base title={title} description={description} ogType="article" ogImage={`/og/digest/${entry.id}.png`}>
+<Base
+  title={title}
+  description={description}
+  ogType="article"
+  ogImage={`/og/digest/${entry.id}.png`}
+  dotGrid={false}
+>
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
   <article class="pt-10">
