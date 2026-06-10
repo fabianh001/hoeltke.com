@@ -1,0 +1,80 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+
+import reef from '../assets/travel/reef.png';
+import station from '../assets/travel/station.png';
+import surfing from '../assets/travel/surfing800.png';
+import ferrywheel from '../assets/travel/ferrywheel800.png';
+import mission from '../assets/travel/mission.png';
+import whitsundays from '../assets/travel/whitsundays.png';
+import sunset from '../assets/travel/sunset.png';
+
+const photos = [
+  { src: reef, caption: 'flying over the Great Barrier Reef' },
+  { src: whitsundays, caption: 'Whitehaven Beach from the lookout' },
+  { src: surfing, caption: 'surfing like a pro at Noosa 🏄' },
+  { src: mission, caption: 'a beach on Magnetic Island' },
+  { src: station, caption: 'a random station in a random town' },
+  { src: ferrywheel, caption: "Brisbane's ferris wheel by night" },
+  { src: sunset, caption: 'sunset over Cairns' },
+];
+---
+
+<Base
+  title="~/travel"
+  description="A recovered artifact: Australia's east coast, 3200km in a camper van."
+  noindex
+>
+  <section class="pt-10 font-mono">
+    <div class="rounded-xl border border-line bg-panel/70 p-5 text-sm leading-7">
+      <p class="text-faint"># you found the hidden directory.</p>
+      <p class="mt-3">
+        <span class="text-prompt">$</span> cat ~/travel/README
+      </p>
+      <p class="mt-2 text-muted">
+        Recovered from a 2019 version of this site: three weeks, 3200&nbsp;km, one camper van from
+        Cairns to Brisbane along Australia's east coast. 🇦🇺🚐
+      </p>
+      <p class="mt-2 text-muted">
+        There's also a
+        <a
+          href="https://www.youtube.com/watch?v=mPepULX4xHA"
+          class="text-accent hover:underline"
+          rel="noopener">10-minute movie summary</a
+        > of the trip, if you're into that.
+      </p>
+    </div>
+  </section>
+
+  <section class="mt-8 grid gap-4 sm:grid-cols-2">
+    {
+      photos.map((photo, i) => (
+        <figure
+          class:list={[
+            'rise overflow-hidden rounded-xl border border-line bg-panel/70',
+            i === 0 && 'sm:col-span-2',
+          ]}
+          style={`animation-delay: ${i * 80}ms`}
+        >
+          <Image
+            src={photo.src}
+            alt={photo.caption}
+            widths={[480, 800, 1200]}
+            sizes="(max-width: 640px) 100vw, 50vw"
+            format="webp"
+            class="h-64 w-full object-cover sm:h-72"
+            loading={i < 2 ? 'eager' : 'lazy'}
+          />
+          <figcaption class="px-4 py-2.5 font-mono text-xs text-muted">
+            <span class="text-prompt">→</span> {photo.caption}
+          </figcaption>
+        </figure>
+      ))
+    }
+  </section>
+
+  <p class="mt-8 font-mono text-xs text-faint">
+    <span class="text-prompt">$</span> cd <a href="/" class="text-muted hover:text-accent">~</a> # back to the present
+  </p>
+</Base>
