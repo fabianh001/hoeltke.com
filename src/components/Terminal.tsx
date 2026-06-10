@@ -251,7 +251,7 @@ export default function Terminal({ issues }: Props) {
 
   const prompt = (
     <span className="select-none">
-      <span className="text-prompt">fabian@hoeltke</span>
+      <span className="text-prompt">fabian</span>
       <span className="text-faint">:~$</span>
     </span>
   );
@@ -366,7 +366,7 @@ export default function Terminal({ issues }: Props) {
         <span className="size-2.5 rounded-full bg-red/80" />
         <span className="size-2.5 rounded-full bg-amber/80" />
         <span className="size-2.5 rounded-full bg-green/80" />
-        <span className="ml-2 font-mono text-xs text-faint">fabian@hoeltke — zsh</span>
+        <span className="ml-2 font-mono text-xs text-faint">fabian — zsh</span>
       </div>
 
       {/* output */}

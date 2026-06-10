@@ -11,12 +11,14 @@ const { entry, index = 0 } = Astro.props;
 const { title, description, date, issue, tags } = entry.data;
 const dateStr = date.toISOString().slice(0, 10);
 const readMinutes = Math.max(2, Math.round(entry.body!.split(/\s+/).length / 220));
+// issue hairlines cycle green → purple → blue
+const edge = ['var(--green)', 'var(--accent-vivid)', 'var(--blue)'][index % 3];
 ---
 
 <a
   href={`/digest/${entry.id}/`}
   class="rise group block rounded-xl border border-line bg-panel/70 p-5 no-underline backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-line-bright hover:shadow-[0_0_24px_var(--glow)]"
-  style={`animation-delay: ${index * 70}ms`}
+  style={`animation-delay: ${index * 70}ms; border-top-color: ${edge}`}
 >
   <div class="flex items-baseline justify-between gap-4 font-mono text-xs text-faint">
     <span class="text-prompt">issue #{String(issue).padStart(2, '0')}</span>

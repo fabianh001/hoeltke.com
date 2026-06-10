@@ -83,11 +83,12 @@ const personSchema = {
     <slot name="head" />
   </head>
   <body class="font-sans antialiased">
+    <div class="dot-spotlight" aria-hidden="true"></div>
     <header class="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 pt-6 pb-2 font-mono text-sm">
       <a href="/" class="group flex items-center gap-2 text-ink no-underline">
         <span class="text-prompt">$</span>
         <span class="font-semibold tracking-tight group-hover:text-accent transition-colors"
-          >fabian@hoeltke</span
+          >hoeltke.com</span
         >
         <span class="hidden text-faint sm:inline">~</span>
       </a>
@@ -126,6 +127,29 @@ const personSchema = {
 
     <script is:inline>
       document.getElementById('theme-toggle')?.addEventListener('click', () => window.__setTheme());
+
+      // cursor-follow dot spotlight
+      (() => {
+        const spot = document.querySelector('.dot-spotlight');
+        if (!spot) return;
+        let x = 0;
+        let y = 0;
+        let raf = 0;
+        window.addEventListener(
+          'pointermove',
+          (e) => {
+            x = e.clientX;
+            y = e.clientY;
+            if (raf) return;
+            raf = requestAnimationFrame(() => {
+              raf = 0;
+              spot.style.setProperty('--mx', x + 'px');
+              spot.style.setProperty('--my', y + 'px');
+            });
+          },
+          { passive: true }
+        );
+      })();
     </script>
   </body>
 </html>

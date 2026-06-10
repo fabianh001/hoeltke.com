@@ -7,22 +7,25 @@
 /* ── Theme tokens ─────────────────────────────────────────────── */
 
 :root {
-  /* dark charcoal */
-  --bg: #1d1d1f;
-  --bg-raised: #222126;
-  --panel: #222126;
-  --term-bg: #131316;
-  --line: #2e2d33;
-  --line-bright: #403f47;
-  --text: #e6e6ea;
-  --muted: #9c9ca5;
-  --faint: #68686f;
-  --accent: #b48ce8;
-  --green: #3ca85f;
+  /* pure black with neon accents */
+  --bg: #000000;
+  --bg-raised: #0a0a0d;
+  --panel: #0a0a0d;
+  --term-bg: #050507;
+  --line: #222228;
+  --line-bright: #3a3a42;
+  --text: #ffffff;
+  --muted: #9a9aa2;
+  --faint: #5f5f67;
+  --accent: #9050ff;
+  --accent-vivid: #7700ff;
+  --green: #3ef78f;
+  --blue: #0164ff;
   --amber: #d9a43b;
   --red: #d33043;
-  --prompt: #3ca85f;
-  --glow: rgba(99, 44, 166, 0.4);
+  --prompt: #3ef78f;
+  --dot: rgba(255, 255, 255, 0.65);
+  --glow: rgba(119, 0, 255, 0.35);
   color-scheme: dark;
 }
 
@@ -30,18 +33,21 @@
   --bg: #f7f7f9;
   --bg-raised: #ffffff;
   --panel: #ffffff;
-  --term-bg: #131316;
+  --term-bg: #050507;
   --line: #e4e4e9;
   --line-bright: #cdcdd5;
-  --text: #1d1d1f;
+  --text: #0a0a0d;
   --muted: #5d5d66;
   --faint: #8e8e98;
-  --accent: #632ca6;
-  --green: #2c8a4b;
+  --accent: #7700ff;
+  --accent-vivid: #7700ff;
+  --green: #04b35a;
+  --blue: #0164ff;
   --amber: #9a6e1b;
   --red: #c22941;
-  --prompt: #2c8a4b;
-  --glow: rgba(99, 44, 166, 0.18);
+  --prompt: #04b35a;
+  --dot: rgba(10, 10, 13, 0.5);
+  --glow: rgba(119, 0, 255, 0.16);
   color-scheme: light;
 }
 
@@ -51,23 +57,25 @@
 }
 
 [data-theme='light'] .term {
-  --panel: #222126;
-  --line: #2e2d33;
-  --line-bright: #403f47;
-  --text: #e6e6ea;
-  --muted: #9c9ca5;
-  --faint: #68686f;
-  --accent: #b48ce8;
-  --green: #3ca85f;
+  --panel: #0a0a0d;
+  --line: #222228;
+  --line-bright: #3a3a42;
+  --text: #ffffff;
+  --muted: #9a9aa2;
+  --faint: #5f5f67;
+  --accent: #9050ff;
+  --green: #3ef78f;
   --amber: #d9a43b;
   --red: #d33043;
-  --prompt: #3ca85f;
+  --prompt: #3ef78f;
   color-scheme: dark;
 }
 
 @theme inline {
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
   --font-sans: 'Inter Variable', system-ui, -apple-system, sans-serif;
+
+  --color-blue: var(--blue);
 
   --color-bg: var(--bg);
   --color-bg-raised: var(--bg-raised);
@@ -95,10 +103,46 @@ html {
 
 body {
   min-height: 100dvh;
-  /* faint dot grid over the page background */
+  /* near-invisible base dot grid; the spotlight reveals it around the cursor */
   background-image: radial-gradient(var(--line) 1px, transparent 1px);
   background-size: 28px 28px;
   background-attachment: fixed;
+}
+
+/* content sits above the spotlight layer */
+body > header,
+body > main,
+body > footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* dot grid revealed in a soft radius around the cursor */
+.dot-spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--dot) 1.6px, transparent 1.6px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(
+    circle 240px at var(--mx, -500px) var(--my, -500px),
+    black 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle 240px at var(--mx, -500px) var(--my, -500px),
+    black 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    transparent 100%
+  );
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .dot-spotlight {
+    display: none;
+  }
 }
 
 ::selection {
