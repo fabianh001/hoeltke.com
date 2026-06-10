@@ -347,19 +347,39 @@ export default function Terminal({ issues }: Props) {
     } else if (e.key === 'Tab') {
       e.preventDefault();
       const lower = input.toLowerCase();
-      // only complete the command token, not arguments
-      if (!lower.includes(' ')) {
-        const matches = Object.keys(commands).filter((c) => c.startsWith(lower));
+      const complete = (
+        candidates: string[],
+        typed: string,
+        rebuild: (m: string) => string,
+        uniqueSuffix = ''
+      ) => {
+        const matches = candidates.filter((c) => c.startsWith(typed));
         if (matches.length === 1) {
-          setInput(matches[0] + ' ');
+          setInput(rebuild(matches[0]) + uniqueSuffix);
         } else if (matches.length > 1) {
           // extend to the longest common prefix and show the candidates
           let prefix = matches[0];
           for (const m of matches) {
             while (!m.startsWith(prefix)) prefix = prefix.slice(0, -1);
           }
-          if (prefix.length > lower.length) setInput(prefix);
+          if (prefix.length > typed.length) setInput(rebuild(prefix));
           append(<span className="text-faint">{matches.join('  ')}</span>);
+        }
+      };
+
+      const spaceIdx = lower.indexOf(' ');
+      if (spaceIdx === -1) {
+        // complete the command token; unique match gets a trailing space
+        complete(Object.keys(commands), lower, (m) => m, ' ');
+      } else {
+        // complete a path argument for filesystem-ish commands
+        const cmd = lower.slice(0, spaceIdx).trim();
+        const arg = lower.slice(spaceIdx + 1).trimStart();
+        if (['cd', 'ls', 'cat'].includes(cmd)) {
+          const paths = ['about/', 'digest/', 'rss.xml'];
+          // dotfiles only complete once you've typed the dot, like a real shell
+          if (arg.startsWith('.')) paths.push('.travel/');
+          complete(paths, arg, (m) => input.slice(0, spaceIdx + 1) + m);
         }
       }
     } else if (e.key === 'l' && e.ctrlKey) {
