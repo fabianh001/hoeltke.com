@@ -1,0 +1,10 @@
+---
+interface Props {
+  color?: 'green' | 'amber' | 'red';
+}
+const { color = 'green' } = Astro.props;
+const colors = { green: 'bg-green', amber: 'bg-amber', red: 'bg-red' };
+---
+
+<span class:list={['status-dot inline-block size-2 rounded-full', colors[color]]} aria-hidden="true"
+></span>

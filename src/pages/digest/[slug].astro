@@ -1,0 +1,71 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ShareRow from '../../components/ShareRow.astro';
+
+export async function getStaticPaths() {
+  const issues = await getCollection('digest');
+  return issues.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, description, date, issue, tags, sources } = entry.data;
+const dateStr = date.toISOString().slice(0, 10);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  datePublished: date.toISOString(),
+  url: canonical.toString(),
+  author: { '@type': 'Person', name: 'Fabian Hoeltke', url: 'https://hoeltke.com' },
+};
+---
+
+<Base title={title} description={description} ogType="article" ogImage={`/og/digest/${entry.id}.png`}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <article class="pt-10">
+    <header class="border-b border-line pb-6">
+      <div class="flex flex-wrap items-center gap-3 font-mono text-xs text-faint">
+        <span class="text-prompt">issue #{String(issue).padStart(2, '0')}</span>
+        <span>{dateStr}</span>
+        {tags.map((tag) => <span class="rounded border border-line px-1.5 py-0.5">{tag}</span>)}
+      </div>
+      <h1 class="mt-3 font-mono text-3xl font-bold tracking-tight text-balance">{title}</h1>
+      <p class="mt-3 max-w-2xl text-lg leading-relaxed text-muted">{description}</p>
+    </header>
+
+    <div class="prose prose-digest mt-8 max-w-none prose-headings:font-mono prose-headings:tracking-tight">
+      <Content />
+    </div>
+
+    {
+      sources.length > 0 && (
+        <aside class="mt-10 rounded-xl border border-line bg-panel/50 p-5 font-mono text-sm">
+          <h2 class="text-xs font-semibold tracking-widest text-faint uppercase">$ cat sources.txt</h2>
+          <ul class="mt-3 space-y-1.5">
+            {sources.map((s) => (
+              <li>
+                <span class="text-faint">→</span>{' '}
+                <a href={s.url} class="text-accent hover:underline" rel="noopener">
+                  {s.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+
+    <footer class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+      <ShareRow title={title} url={canonical} />
+      <p class="font-mono text-[11px] text-faint">
+        auto-curated &amp; AI-summarized · sources linked above
+      </p>
+    </footer>
+  </article>
+</Base>

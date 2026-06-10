@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DigestCard from '../../components/DigestCard.astro';
+
+const issues = (await getCollection('digest')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<Base
+  title="AI Weekly — all issues"
+  description="Every issue of AI Weekly: an auto-generated digest of the week in AI, published every Friday."
+>
+  <header class="pt-10 pb-8">
+    <h1 class="font-mono text-2xl font-bold tracking-tight">
+      <span class="text-prompt">$</span> ls digest/ <span class="text-faint">| wc -l → {issues.length}</span>
+    </h1>
+    <p class="mt-3 max-w-xl text-muted">
+      One issue per week. AI-curated, AI-summarized, sources always linked.
+      <a href="/rss.xml" class="text-accent hover:underline">Subscribe via RSS</a> to stay up to date.
+    </p>
+  </header>
+
+  <div class="grid gap-4">
+    {issues.map((entry, i) => <DigestCard entry={entry} index={i} />)}
+  </div>
+</Base>

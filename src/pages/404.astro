@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="404" description="Command not found." noindex>
+  <section class="pt-16 font-mono">
+    <div class="crt rounded-xl border border-line bg-panel/80 p-6 text-sm leading-7">
+      <p>
+        <span class="text-prompt">$</span> open <span id="nf-path" class="text-amber">/this-page</span>
+      </p>
+      <p class="text-red">zsh: command not found: 404</p>
+      <p class="mt-4 text-muted">The page you're looking for doesn't exist (anymore).</p>
+      <p class="mt-4">
+        <span class="text-prompt">$</span> cd <a href="/" class="text-accent hover:underline">~</a>
+        <span class="cursor-block ml-1"></span>
+      </p>
+    </div>
+  </section>
+
+  <script is:inline>
+    const el = document.getElementById('nf-path');
+    if (el) el.textContent = location.pathname;
+  </script>
+</Base>

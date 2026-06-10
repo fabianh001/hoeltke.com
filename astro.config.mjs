@@ -7,7 +7,13 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react(), sitemap()],
+  site: 'https://hoeltke.com',
+  integrations: [
+    react(),
+    sitemap({
+      filter: (page) => !page.includes('/travel'),
+    }),
+  ],
 
   vite: {
     plugins: [tailwindcss()]
