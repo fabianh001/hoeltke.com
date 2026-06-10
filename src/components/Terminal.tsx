@@ -156,20 +156,29 @@ export default function Terminal({ issues }: Props) {
         clear: { run: () => 'clear' },
         // ── unlisted ────────────────────────────────────────────────
         ls: {
-          run: () => [
-            <span>
-              <span className="text-accent">digest/</span>{' '}
-              <span className="text-accent">about/</span>{' '}
-              <span className="text-green">rss.xml</span>{' '}
-              <span className="text-faint">.secrets/</span>
-            </span>,
-          ],
+          run: (arg) =>
+            arg.split(/\s+/).some((flag) => /^-\w*a/.test(flag))
+              ? [
+                  <span>
+                    <span className="text-faint">./ ../ .travel/</span>{' '}
+                    <span className="text-accent">digest/</span>{' '}
+                    <span className="text-accent">about/</span>{' '}
+                    <span className="text-green">rss.xml</span>
+                  </span>,
+                ]
+              : [
+                  <span>
+                    <span className="text-accent">digest/</span>{' '}
+                    <span className="text-accent">about/</span>{' '}
+                    <span className="text-green">rss.xml</span>
+                  </span>,
+                ],
         },
         pwd: { run: () => [<span>/home/fabian/hoeltke.com</span>] },
         cd: {
           run: (arg) => {
             const target = arg.trim();
-            if (/travel/.test(target)) {
+            if (/(^|\/)\.?travel\/?$/.test(target)) {
               setTimeout(() => (window.location.href = '/travel'), 900);
               return [
                 <span className="text-muted">
@@ -221,10 +230,7 @@ export default function Terminal({ issues }: Props) {
           ],
         },
         cat: {
-          run: (arg) =>
-            /secret/i.test(arg)
-              ? [<span className="text-amber">nice try. the only secret here is in ~/travel</span>]
-              : [<span className="text-red">cat: {arg || '?'}: no such file</span>],
+          run: (arg) => [<span className="text-red">cat: {arg || '?'}: no such file</span>],
         },
         echo: { run: (arg) => [<span>{arg}</span>] },
         exit: {
@@ -245,7 +251,7 @@ export default function Terminal({ issues }: Props) {
 
   const prompt = (
     <span className="select-none">
-      <span className="text-prompt">fabian</span>
+      <span className="text-prompt">fabian@hoeltke</span>
       <span className="text-faint">:~$</span>
     </span>
   );
@@ -352,7 +358,7 @@ export default function Terminal({ issues }: Props) {
 
   return (
     <div
-      className="crt rounded-xl border border-line bg-panel/80 shadow-[0_0_50px_var(--glow)] backdrop-blur-sm"
+      className="term crt rounded-xl border border-line shadow-[0_0_50px_var(--glow)]"
       onClick={() => inputRef.current?.focus()}
     >
       {/* title bar */}
@@ -360,7 +366,7 @@ export default function Terminal({ issues }: Props) {
         <span className="size-2.5 rounded-full bg-red/80" />
         <span className="size-2.5 rounded-full bg-amber/80" />
         <span className="size-2.5 rounded-full bg-green/80" />
-        <span className="ml-2 font-mono text-xs text-faint">fabian — zsh</span>
+        <span className="ml-2 font-mono text-xs text-faint">fabian@hoeltke — zsh</span>
       </div>
 
       {/* output */}

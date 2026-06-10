@@ -24,10 +24,10 @@ export const { getStaticPaths, GET } = await OGImageRoute({
     title: `$ ${page.title}`,
     description: page.description,
     bgGradient: [
-      [10, 14, 20],
-      [15, 23, 34],
+      [19, 19, 22],
+      [29, 29, 31],
     ],
-    border: { color: [69, 224, 160], width: 14, side: 'inline-start' },
+    border: { color: [99, 44, 166], width: 14, side: 'inline-start' },
     padding: 72,
     font: {
       title: {
@@ -35,13 +35,13 @@ export const { getStaticPaths, GET } = await OGImageRoute({
         lineHeight: 1.25,
         families: ['JetBrains Mono'],
         weight: 'Bold',
-        color: [211, 224, 238],
+        color: [230, 230, 234],
       },
       description: {
         size: 30,
         lineHeight: 1.5,
         families: ['JetBrains Mono'],
-        color: [126, 145, 168],
+        color: [156, 156, 165],
       },
     },
     fonts: [
