@@ -3,6 +3,15 @@
 The site is plain static files served by [Caddy](https://caddyserver.com) (automatic HTTPS).
 GitHub Actions rsyncs `dist/` to the server on every push to `master`.
 
+Works on any small Linux VPS — the cheapest instance at any provider is more than
+enough for a static site. Requirements:
+
+- Debian or Ubuntu (other distros work too; adjust the Caddy install)
+- inbound TCP 22, 80 **and** 443 (80 is required for the TLS certificate challenge)
+- both IPv4 and IPv6 if possible — note that GitHub-hosted runners can only reach
+  IPv4, so an IPv6-only server cannot receive deploys
+- DNS control for your domain
+
 ## 1. Install Caddy (Debian/Ubuntu)
 
 ```sh
@@ -13,14 +22,16 @@ curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo 
 sudo apt update && sudo apt install -y caddy
 ```
 
-## 2. Create the deploy user and webroot
+## 2. Create an unprivileged deploy user and the webroot
+
+The CI job logs in as this user — it should own the webroot and nothing else.
+Names and paths are examples; whatever you choose goes into the repo secrets in step 4.
 
 ```sh
 sudo adduser --disabled-password --gecos "" deploy
-sudo mkdir -p /var/www/hoeltke.com
-sudo chown -R deploy:deploy /var/www/hoeltke.com
+sudo mkdir -p /var/www/site
+sudo chown -R deploy:deploy /var/www/site
 
-# key used by GitHub Actions (generate locally, see step 4)
 sudo -u deploy mkdir -p /home/deploy/.ssh
 sudo -u deploy chmod 700 /home/deploy/.ssh
 echo "<PUBLIC KEY FROM STEP 4>" | sudo -u deploy tee /home/deploy/.ssh/authorized_keys
@@ -29,11 +40,11 @@ sudo -u deploy chmod 600 /home/deploy/.ssh/authorized_keys
 
 ## 3. Caddyfile
 
-Replace `/etc/caddy/Caddyfile` with:
+Replace `/etc/caddy/Caddyfile` (swap in your domain and webroot):
 
 ```caddy
-hoeltke.com {
-	root * /var/www/hoeltke.com
+example.com {
+	root * /var/www/site
 	encode zstd gzip
 	file_server
 
@@ -54,47 +65,48 @@ hoeltke.com {
 	}
 }
 
-www.hoeltke.com {
-	redir https://hoeltke.com{uri} permanent
+www.example.com {
+	redir https://example.com{uri} permanent
 }
 ```
 
 Then: `sudo systemctl reload caddy`
 
-## 4. GitHub repo secrets
+## 4. Deploy key and GitHub repo secrets
 
-Generate a dedicated deploy key on your laptop:
+Generate a dedicated keypair on your own machine — never reuse your personal key for CI:
 
 ```sh
-ssh-keygen -t ed25519 -C "hoeltke-deploy" -f hoeltke_deploy -N ""
+ssh-keygen -t ed25519 -C "site-deploy" -f site_deploy -N ""
 ```
 
-Put the **public** key (`hoeltke_deploy.pub`) in `/home/deploy/.ssh/authorized_keys` (step 2).
-In the GitHub repo → Settings → Secrets and variables → Actions, add:
+Put the **public** key (`site_deploy.pub`) into the deploy user's
+`authorized_keys` (step 2). In the GitHub repo → Settings → Secrets and
+variables → Actions, add:
 
-| Secret              | Value                                  |
-| ------------------- | -------------------------------------- |
-| `DEPLOY_SSH_KEY`    | contents of the **private** key file   |
-| `DEPLOY_HOST`       | server IP or hostname      |
-| `DEPLOY_USER`       | `deploy`                               |
-| `DEPLOY_PATH`       | `/var/www/hoeltke.com`                 |
-| `ANTHROPIC_API_KEY` | API key from console.anthropic.com     |
+| Secret              | Value                                   |
+| ------------------- | --------------------------------------- |
+| `DEPLOY_SSH_KEY`    | contents of the **private** key file    |
+| `DEPLOY_HOST`       | server IP or hostname                   |
+| `DEPLOY_USER`       | the user from step 2 (e.g. `deploy`)    |
+| `DEPLOY_PATH`       | the webroot from step 2                 |
+| `ANTHROPIC_API_KEY` | API key from console.anthropic.com (digest generation) |
 
 ## 5. DNS
 
-Point the domain at the server:
+At your DNS provider, point the domain at the server:
 
-| Type  | Name | Value              |
-| ----- | ---- | ------------------ |
-| A     | @    | `<server IPv4>`    |
-| AAAA  | @    | `<server IPv6>`    |
-| CNAME | www  | `hoeltke.com.`     |
+| Type  | Name | Value           |
+| ----- | ---- | --------------- |
+| A     | @    | `<server IPv4>` |
+| AAAA  | @    | `<server IPv6>` |
+| CNAME | www  | `example.com.`  |
 
-Caddy picks up the certificates automatically once DNS resolves.
-Done.
+Caddy obtains and renews certificates automatically once DNS resolves —
+no certbot, no cron.
 
 ## 6. First deploy
 
-Push to `master` (or run the **Deploy** workflow manually) — the site lands in
-`/var/www/hoeltke.com`. Then run the **Weekly digest** workflow once via
-*Actions → Weekly digest → Run workflow* to publish the first real issue.
+Push to `master` (or run the **Deploy** workflow manually). Then run the
+**Weekly digest** workflow once via *Actions → Weekly digest → Run workflow*
+to publish the first issue.

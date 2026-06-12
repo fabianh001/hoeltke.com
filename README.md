@@ -22,7 +22,7 @@ No humans in the loop. The homepage is a terminal. Type `help`.
                                  │ commits src/content/digest/YYYY-WW.md
                                  ▼
                   ┌────────────────────────────────────────────┐
-                  │  Astro build → rsync → Caddy on a VPS    │
+                  │  Astro build → rsync → Caddy on a VPS      │
                   └────────────────────────────────────────────┘
 ```
 
