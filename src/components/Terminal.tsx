@@ -30,8 +30,8 @@ const SUGGESTED = ['help', 'latest', 'whoami', 'subscribe', 'chuck'];
 
 const BOOT_LINES = [
   '▸ booting hoeltke.com … ok',
-  '▸ ingesting feeds        … ok',
-  '▸ summarizing week       … 200 OK',
+  '▸ ingesting feeds   … ok',
+  '▸ summarizing week  … 200',
 ];
 
 let lineId = 0;
@@ -391,7 +391,11 @@ export default function Terminal({ issues }: Props) {
   return (
     <div
       className="term crt rounded-xl border border-line shadow-[0_0_50px_var(--glow)]"
-      onClick={() => inputRef.current?.focus()}
+      onClick={() => {
+        // on touch devices, focusing here would pop the keyboard on every tap;
+        // the input itself stays tappable for intentional typing
+        if (!matchMedia('(pointer: coarse)').matches) inputRef.current?.focus();
+      }}
     >
       {/* title bar */}
       <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
@@ -404,7 +408,7 @@ export default function Terminal({ issues }: Props) {
       {/* output */}
       <div
         ref={scrollRef}
-        className="h-72 overflow-y-auto px-4 py-3 font-mono text-[13px] leading-6 sm:h-80 sm:text-sm"
+        className="h-72 overflow-y-auto px-4 py-3 font-mono text-base leading-6 sm:h-80 sm:text-sm"
         aria-live="polite"
       >
         {lines.map((l) => (
@@ -445,7 +449,7 @@ export default function Terminal({ issues }: Props) {
             onClick={(e) => {
               e.stopPropagation();
               runCommand(cmd);
-              inputRef.current?.focus();
+              if (!matchMedia('(pointer: coarse)').matches) inputRef.current?.focus();
             }}
             className="cursor-pointer rounded-md border border-line px-2 py-0.5 font-mono text-xs text-muted transition-colors hover:border-line-bright hover:text-accent"
           >
