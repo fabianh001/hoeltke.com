@@ -72,10 +72,6 @@ www.example.com {
 
 Then: `sudo systemctl reload caddy`
 
-> **Note:** every hostname whose DNS points at this server needs its own site
-> block (even if it just redirects) — otherwise Caddy has no certificate for it
-> and browsers show `ERR_SSL_PROTOCOL_ERROR` for that name.
-
 ## 4. Deploy key and GitHub repo secrets
 
 Generate a dedicated keypair on your own machine — never reuse your personal key for CI:
@@ -170,11 +166,3 @@ View the dashboard from your own machine:
 ```sh
 ssh -t <user>@<server> goaccess /var/log/caddy/access.log --log-format=CADDY
 ```
-
-**Troubleshooting:** a failed `systemctl reload caddy` never takes the site
-down — Caddy keeps serving the old config. If the journal shows
-`setting up custom log … permission denied`, the directory or an existing
-`access.log` is not owned by `caddy` (`chown -R caddy:caddy /var/log/caddy`
-and reload again). The decisive test:
-`sudo -u caddy touch /var/log/caddy/access.log` — if that fails, Caddy can't
-write either.
