@@ -29,7 +29,7 @@ const CHUCK_JOKES = [
 const SUGGESTED = ['help', 'latest', 'whoami', 'subscribe', 'chuck'];
 
 const BOOT_LINES = [
-  '▸ booting hoeltke.com v2 … ok',
+  '▸ booting hoeltke.com … ok',
   '▸ ingesting feeds        … ok',
   '▸ summarizing week       … 200 OK',
 ];
