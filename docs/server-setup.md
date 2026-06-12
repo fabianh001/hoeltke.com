@@ -110,3 +110,40 @@ no certbot, no cron.
 Push to `main` (or run the **Deploy** workflow manually). Then run the
 **Weekly digest** workflow once via *Actions → Weekly digest → Run workflow*
 to publish the first issue.
+
+## 7. Analytics (optional, no cookies, no JavaScript)
+
+Server-side counting via Caddy access logs + [GoAccess](https://goaccess.io) —
+no client-side script, no consent banner needed. Visitor IPs are anonymized
+before they're written to disk.
+
+```sh
+mkdir -p /var/log/caddy && chown caddy:caddy /var/log/caddy
+apt install -y goaccess
+```
+
+Add inside the site block of the Caddyfile, then `systemctl reload caddy`:
+
+```caddy
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 20mb
+			roll_keep 3
+		}
+		format filter {
+			wrap json
+			fields {
+				request>remote_ip ip_mask {
+					ipv4 24
+					ipv6 56
+				}
+			}
+		}
+	}
+```
+
+View the dashboard from your own machine:
+
+```sh
+ssh -t <user>@<server> goaccess /var/log/caddy/access.log --log-format=CADDY
+```
