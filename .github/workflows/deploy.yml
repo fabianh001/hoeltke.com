@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
   workflow_call:
 
@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          # always deploy the tip of master, also when called from the digest workflow
-          ref: master
+          # always deploy the tip of main, also when called from the digest workflow
+          ref: main
 
       - uses: actions/setup-node@v5
         with:

@@ -1,7 +1,7 @@
 # Server setup (one-time)
 
 The site is plain static files served by [Caddy](https://caddyserver.com) (automatic HTTPS).
-GitHub Actions rsyncs `dist/` to the server on every push to `master`.
+GitHub Actions rsyncs `dist/` to the server on every push to `main`.
 
 Works on any small Linux VPS — the cheapest instance at any provider is more than
 enough for a static site. Requirements:
@@ -107,6 +107,6 @@ no certbot, no cron.
 
 ## 6. First deploy
 
-Push to `master` (or run the **Deploy** workflow manually). Then run the
+Push to `main` (or run the **Deploy** workflow manually). Then run the
 **Weekly digest** workflow once via *Actions → Weekly digest → Run workflow*
 to publish the first issue.
