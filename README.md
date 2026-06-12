@@ -2,6 +2,9 @@
 
 A personal site that writes its own blog.
 
+<img width="1174" height="920" alt="image" src="https://github.com/user-attachments/assets/0252ece2-8a72-4618-8a27-76135e6161a7" />
+
+
 Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
 Hacker News, the usual suspects — hands everything to Claude, and publishes
 **AI Weekly**: one digest of the stories that actually matter, with sources.
