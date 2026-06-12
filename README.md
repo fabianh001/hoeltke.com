@@ -2,7 +2,8 @@
 
 A personal site that writes its own blog.
 
-<img width="1174" height="920" alt="image" src="https://github.com/user-attachments/assets/0252ece2-8a72-4618-8a27-76135e6161a7" />
+<img width="1001" height="776" alt="image" src="https://github.com/user-attachments/assets/4a7da535-3f95-4906-8b7d-92a04a36ed90" />
+
 
 
 Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
