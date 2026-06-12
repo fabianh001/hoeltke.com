@@ -26,7 +26,7 @@ const CHUCK_JOKES = [
   'Chuck Norris merges without resolving conflicts. Conflicts resolve themselves.',
 ];
 
-const SUGGESTED = ['help', 'latest', 'whoami', 'subscribe', 'chuck'];
+const SUGGESTED = ['help', 'latest', 'whoami', 'subscribe'];
 
 const BOOT_LINES = [
   '▸ booting hoeltke.com … ok',
