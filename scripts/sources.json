@@ -1,0 +1,14 @@
+{
+  "feeds": [
+    { "name": "OpenAI News", "url": "https://openai.com/news/rss.xml" },
+    { "name": "Google AI Blog", "url": "https://blog.google/technology/ai/rss/" },
+    { "name": "Hugging Face Blog", "url": "https://huggingface.co/blog/feed.xml" },
+    { "name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/" },
+    { "name": "DeepMind Blog", "url": "https://deepmind.google/blog/rss.xml" },
+    { "name": "MIT Technology Review AI", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed" }
+  ],
+  "hackerNews": {
+    "query": "AI",
+    "minPoints": 150
+  }
+}
