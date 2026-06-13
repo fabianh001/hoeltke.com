@@ -328,6 +328,13 @@ export default function Terminal({ issues }: Props) {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [lines]);
 
+  // focus the input once it's mounted, so typing works immediately on load
+  useEffect(() => {
+    if (booted && !matchMedia('(pointer: coarse)').matches) {
+      inputRef.current?.focus();
+    }
+  }, [booted]);
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       runCommand(input);
