@@ -230,7 +230,25 @@ export default function Terminal({ issues }: Props) {
           ],
         },
         cat: {
-          run: (arg) => [<span className="text-red">cat: {arg || '?'}: no such file</span>],
+          run: (arg) => {
+            const target = arg.trim().replace(/^(~\/|\.\/|\/)/, '').toLowerCase();
+            if (target === 'rss.xml') {
+              fetch('/rss.xml')
+                .then((res) => res.text())
+                .then((text) => {
+                  const snippet = text.slice(0, 500);
+                  append(
+                    <span className="text-muted">{snippet}</span>,
+                    ...(text.length > snippet.length
+                      ? [<span className="text-faint">… truncated — full feed at /rss.xml</span>]
+                      : [])
+                  );
+                })
+                .catch(() => append(<span className="text-red">cat: rss.xml: I/O error</span>));
+              return [];
+            }
+            return [<span className="text-red">cat: {arg || '?'}: no such file</span>];
+          },
         },
         echo: { run: (arg) => [<span>{arg}</span>] },
         exit: {
@@ -246,7 +264,7 @@ export default function Terminal({ issues }: Props) {
           ],
         },
       }),
-      [issues]
+      [issues, append]
     );
 
   const prompt = (
