@@ -25,7 +25,10 @@ jobs:
       - name: Generate this week's issue
         run: npm run digest
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # optional: override the model without touching code (e.g. openai/gpt-5.1).
+          # Unset → the script default (anthropic/claude-sonnet-4-6).
+          DIGEST_MODEL: ${{ vars.DIGEST_MODEL }}
 
       - name: Verify the site still builds
         run: npm run build

@@ -5,10 +5,12 @@
     { "name": "Hugging Face Blog", "url": "https://huggingface.co/blog/feed.xml" },
     { "name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/" },
     { "name": "DeepMind Blog", "url": "https://deepmind.google/blog/rss.xml" },
-    { "name": "MIT Technology Review AI", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed" }
+    { "name": "MIT Technology Review AI", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed" },
+    { "name": "Steve Yegge", "url": "https://steve-yegge.medium.com/feed" },
+    { "name": "Geoffrey Huntley", "url": "https://ghuntley.com/tag/ai/rss/" }
   ],
   "hackerNews": {
-    "query": "AI",
-    "minPoints": 150
+    "minPoints": 150,
+    "maxItems": 30
   }
 }

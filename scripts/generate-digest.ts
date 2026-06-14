@@ -2,14 +2,14 @@
  * AI Weekly digest generator.
  *
  * Collects the last 7 days from curated sources (sources.json + Hacker News),
- * asks Claude to pick and summarize the top stories, and writes a new issue to
+ * asks the model to pick and summarize the top stories, and writes a new issue to
  * src/content/digest/. Fails loudly on any problem — a broken issue must never
  * be committed.
  *
  * Usage: ANTHROPIC_API_KEY=... npm run digest
  */
-import Anthropic from '@anthropic-ai/sdk';
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
+import OpenAI from 'openai';
+import { zodResponseFormat } from 'openai/helpers/zod';
 import Parser from 'rss-parser';
 import { z } from 'zod';
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -18,9 +18,15 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIGEST_DIR = join(ROOT, 'src/content/digest');
+// Local-only preview file (gitignored). --preview overwrites it so `npm run dev`
+// renders the generated issue at /digest/preview without publishing anything.
+const PREVIEW_PATH = join(DIGEST_DIR, 'preview.md');
 const WINDOW_DAYS = 7;
 const MAX_ITEMS_PER_SOURCE = 12;
 const MAX_SNIPPET_CHARS = 700;
+const MAX_OUTPUT_TOKENS = 8000;
+// Any OpenRouter model slug. Override per-run with DIGEST_MODEL=… to A/B providers.
+const DIGEST_MODEL = process.env.DIGEST_MODEL || 'anthropic/claude-sonnet-4-6';
 
 interface RawItem {
   source: string;
@@ -64,15 +70,22 @@ async function collectFeeds(): Promise<RawItem[]> {
     }
   }
 
-  // Hacker News via Algolia: high-signal AI stories from the last week
+  // Hacker News via Algolia: the week's top stories by points. No keyword filter —
+  // major launches ("Claude Fable 5", model/company names) rarely contain the word
+  // "AI", so a query=AI prefilter silently drops the biggest stories. Instead we
+  // hand the curator the top-voted stories and let it pick the AI-relevant ones.
   try {
     const since = Math.floor(cutoff / 1000);
     const hn = config.hackerNews;
-    const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(hn.query)}&tags=story&numericFilters=points>${hn.minPoints},created_at_i>${since}&hitsPerPage=20`;
+    const url = `https://hn.algolia.com/api/v1/search?tags=story&numericFilters=points>${hn.minPoints},created_at_i>${since}&hitsPerPage=50`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = (await res.json()) as { hits: any[] };
-    for (const hit of data.hits) {
+    const top = data.hits
+      .filter((h) => h.title)
+      .sort((a, b) => b.points - a.points)
+      .slice(0, hn.maxItems ?? 30);
+    for (const hit of top) {
       items.push({
         source: `Hacker News (${hit.points} points)`,
         title: hit.title,
@@ -81,7 +94,7 @@ async function collectFeeds(): Promise<RawItem[]> {
         snippet: '',
       });
     }
-    console.log(`✓ Hacker News: ${data.hits.length} items`);
+    console.log(`✓ Hacker News: ${top.length} items`);
   } catch (err) {
     console.warn(`⚠ Hacker News failed: ${(err as Error).message}`);
   }
@@ -105,40 +118,83 @@ const DigestSchema = z.object({
   stories: z.array(StorySchema),
 });
 
+/**
+ * Ask the model for the digest as JSON. Prefers strict json_schema (best
+ * adherence on capable models — Claude, GPT, Gemini); falls back to the
+ * widely-supported json_object mode when a model rejects json_schema (400).
+ * Returns the raw JSON string; the caller validates it against DigestSchema.
+ */
+async function complete(
+  client: OpenAI,
+  messages: OpenAI.Chat.ChatCompletionMessageParam[],
+): Promise<string> {
+  const base = { model: DIGEST_MODEL, max_tokens: MAX_OUTPUT_TOKENS, messages };
+
+  try {
+    const res = await client.chat.completions.create({
+      ...base,
+      response_format: zodResponseFormat(DigestSchema, 'digest'),
+    });
+    const content = res.choices[0]?.message?.content;
+    if (content) return content;
+    throw new Error('json_schema response had empty content');
+  } catch (err) {
+    // Only fall back when the model rejects the schema param itself (400).
+    // Auth / rate-limit / network errors should surface, not double-fire.
+    if ((err as OpenAI.APIError)?.status !== 400) throw err;
+    console.warn(`⚠ ${DIGEST_MODEL} rejected strict json_schema; retrying with json_object`);
+  }
+
+  const res = await client.chat.completions.create({
+    ...base,
+    response_format: { type: 'json_object' },
+  });
+  const content = res.choices[0]?.message?.content;
+  if (!content) throw new Error('model returned empty content');
+  return content;
+}
+
 async function summarize(items: RawItem[], issueNumber: number) {
-  const client = new Anthropic();
+  const client = new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+    // Optional OpenRouter attribution (shows on their model-usage leaderboards).
+    defaultHeaders: { 'HTTP-Referer': 'https://hoeltke.com', 'X-Title': 'AI Weekly' },
+  });
   const itemList = items
     .map((i) => `- [${i.source}] ${i.title} (${i.date})\n  ${i.url}\n  ${i.snippet}`)
     .join('\n');
 
-  const response = await client.messages.parse({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 8000,
-    system: `You write "AI Weekly", a sharply curated weekly digest of AI news for software engineers. Voice: direct, technically literate, a little dry-witted, zero hype. You pick only stories that will still matter in a month: model releases, meaningful research, tooling worth adopting, consequential industry/policy moves. Skip funding-round noise, product marketing, and duplicate coverage (merge duplicates into one story, citing the best source).`,
-    messages: [
-      {
-        role: 'user',
-        content: `Here is everything published in the last ${WINDOW_DAYS} days by my sources:\n\n${itemList}\n\nProduce issue #${issueNumber} of AI Weekly:
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    {
+      role: 'system',
+      content: `You write "AI Weekly", a sharply curated weekly digest of AI news for software engineers. Voice: direct, technically literate, a little dry-witted, zero hype. You pick only stories that will still matter in a month: model releases, meaningful research, tooling worth adopting, consequential industry/policy moves. Skip funding-round noise, product marketing, and duplicate coverage (merge duplicates into one story, citing the best source).`,
+    },
+    {
+      role: 'user',
+      content: `Here is everything published in the last ${WINDOW_DAYS} days by my sources:\n\n${itemList}\n\nProduce issue #${issueNumber} of AI Weekly as a single JSON object with these fields:
 - "hook": a short, punchy issue subtitle (max 8 words, lowercase, no period) capturing the week's theme
 - "description": one sentence (max 160 chars) summarizing the issue, for meta tags and the feed
 - "intro": 2-3 sentences opening the issue with the week's big picture
 - "stories": the top 4-6 stories. For each: "headline" (your own words), "summary" (2-3 sentences, factual, no hype), "whyItMatters" (1-2 sentences for working engineers), "sourceTitle" + "sourceUrl" (must be copied exactly from the list above), "tag" (one lowercase word, e.g. models, research, tooling, policy, infra)
 
 Only reference stories from the list. Never invent facts or URLs.`,
-      },
-    ],
-    output_config: { format: zodOutputFormat(DigestSchema) },
-  });
+    },
+  ];
 
-  const digest = response.parsed_output;
-  if (!digest) throw new Error('model returned no parsable output');
-  return digest;
+  const raw = await complete(client, messages);
+  const parsed = DigestSchema.safeParse(JSON.parse(raw));
+  if (!parsed.success) {
+    throw new Error(`model output did not match the digest schema: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
 function nextIssueNumber(): number {
   if (!existsSync(DIGEST_DIR)) return 1;
   const numbers = readdirSync(DIGEST_DIR)
-    .filter((f) => f.endsWith('.md'))
+    .filter((f) => /^\d{4}-\d{2}\.md$/.test(f)) // real issues only — ignore preview.md
+
     .map((f) => {
       const match = readFileSync(join(DIGEST_DIR, f), 'utf8').match(/^issue:\s*(\d+)/m);
       return match ? Number(match[1]) : 0;
@@ -192,8 +248,11 @@ function renderMarkdown(digest: z.infer<typeof DigestSchema>, issue: number, dat
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
-  if (!dryRun && !process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not set');
+  // --preview: run the real model + validation but print the issue instead of
+  // writing it, so nothing can be accidentally committed/published.
+  const preview = process.argv.includes('--preview');
+  if (!dryRun && !process.env.OPENROUTER_API_KEY) {
+    throw new Error('OPENROUTER_API_KEY is not set');
   }
 
   console.log('collecting sources …');
@@ -204,13 +263,13 @@ async function main() {
   console.log(`${items.length} items total`);
 
   if (dryRun) {
-    console.log('\n--dry-run: skipping Claude call. sample of collected items:');
-    for (const i of items.slice(0, 10)) console.log(`  [${i.source}] ${i.title}`);
+    console.log('\n--dry-run: skipping the model call. collected items:');
+    for (const i of items) console.log(`  [${i.source}] ${i.title}`);
     return;
   }
 
   const issue = nextIssueNumber();
-  console.log(`summarizing issue #${issue} with Claude …`);
+  console.log(`summarizing issue #${issue} with ${DIGEST_MODEL} …`);
   const digest = await summarize(items, issue);
 
   if (digest.stories.length < 3) {
@@ -225,6 +284,16 @@ async function main() {
   }
 
   const now = new Date();
+
+  if (preview) {
+    const markdown = renderMarkdown(digest, issue, now);
+    console.log(`\n--preview: rendered issue #${issue}:\n`);
+    console.log(markdown);
+    writeFileSync(PREVIEW_PATH, markdown);
+    console.log(`\n✓ wrote ${PREVIEW_PATH} (gitignored) — run \`npm run dev\` and open /digest/preview`);
+    return;
+  }
+
   const slug = isoWeekSlug(now);
   const path = join(DIGEST_DIR, `${slug}.md`);
   if (existsSync(path)) {
