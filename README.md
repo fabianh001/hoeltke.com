@@ -7,7 +7,7 @@ A personal site that writes its own blog.
 
 
 Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
-Hacker News, the usual suspects — hands everything to Claude, and publishes
+Hacker News, the usual suspects — hands everything to an LLM, and publishes
 **AI Weekly**: one digest of the stories that actually matter, with sources.
 No humans in the loop. The homepage is a terminal. Type `help`.
 
@@ -20,7 +20,7 @@ No humans in the loop. The homepage is a terminal. Type `help`.
   RSS feeds ──────▶                                            │
   Hacker News ────▶  scripts/generate-digest.ts                │
                   │  · collect last 7 days                     │
-                  │  · Claude picks + summarizes top stories   │
+                  │  · an LLM picks + summarizes top stories   │
                   │  · validates every cited URL               │
                   └──────────────┬─────────────────────────────┘
                                  │ commits src/content/digest/YYYY-WW.md

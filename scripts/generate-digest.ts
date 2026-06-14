@@ -2,7 +2,7 @@
  * AI Weekly digest generator.
  *
  * Collects the last 7 days from curated sources (sources.json + Hacker News),
- * asks Claude to pick and summarize the top stories, and writes a new issue to
+ * asks the model to pick and summarize the top stories, and writes a new issue to
  * src/content/digest/. Fails loudly on any problem — a broken issue must never
  * be committed.
  *
@@ -252,13 +252,13 @@ async function main() {
   console.log(`${items.length} items total`);
 
   if (dryRun) {
-    console.log('\n--dry-run: skipping Claude call. sample of collected items:');
+    console.log('\n--dry-run: skipping the model call. sample of collected items:');
     for (const i of items.slice(0, 10)) console.log(`  [${i.source}] ${i.title}`);
     return;
   }
 
   const issue = nextIssueNumber();
-  console.log(`summarizing issue #${issue} with Claude …`);
+  console.log(`summarizing issue #${issue} with ${DIGEST_MODEL} …`);
   const digest = await summarize(items, issue);
 
   if (digest.stories.length < 3) {
