@@ -237,6 +237,9 @@ function renderMarkdown(digest: z.infer<typeof DigestSchema>, issue: number, dat
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
+  // --preview: run the real model + validation but print the issue instead of
+  // writing it, so nothing can be accidentally committed/published.
+  const preview = process.argv.includes('--preview');
   if (!dryRun && !process.env.OPENROUTER_API_KEY) {
     throw new Error('OPENROUTER_API_KEY is not set');
   }
@@ -270,6 +273,13 @@ async function main() {
   }
 
   const now = new Date();
+
+  if (preview) {
+    console.log(`\n--preview: not writing to src/content/digest/. rendered issue #${issue}:\n`);
+    console.log(renderMarkdown(digest, issue, now));
+    return;
+  }
+
   const slug = isoWeekSlug(now);
   const path = join(DIGEST_DIR, `${slug}.md`);
   if (existsSync(path)) {
