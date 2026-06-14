@@ -193,7 +193,7 @@ Only reference stories from the list. Never invent facts or URLs.`,
 function nextIssueNumber(): number {
   if (!existsSync(DIGEST_DIR)) return 1;
   const numbers = readdirSync(DIGEST_DIR)
-    .filter((f) => /^\d{4}-\d{2}\.md$/.test(f)) // real issues only — ignore preview.md
+    .filter((f) => f.endsWith('.md') && f !== 'preview.md') // all issues; skip the local preview
 
     .map((f) => {
       const match = readFileSync(join(DIGEST_DIR, f), 'utf8').match(/^issue:\s*(\d+)/m);
@@ -251,6 +251,14 @@ async function main() {
   // --preview: run the real model + validation but print the issue instead of
   // writing it, so nothing can be accidentally committed/published.
   const preview = process.argv.includes('--preview');
+  // --slug <name>: override the output filename (default: ISO week). Use it to
+  // publish an extra issue alongside the normal one-per-week cadence. Avoid a
+  // future YYYY-WW value or it will block that week's scheduled run.
+  const slugFlag = process.argv.indexOf('--slug');
+  const slugOverride = slugFlag >= 0 ? process.argv[slugFlag + 1] : undefined;
+  if (slugFlag >= 0 && (!slugOverride || slugOverride.startsWith('--'))) {
+    throw new Error('--slug requires a name, e.g. --slug 2026-24-extra');
+  }
   if (!dryRun && !process.env.OPENROUTER_API_KEY) {
     throw new Error('OPENROUTER_API_KEY is not set');
   }
@@ -294,10 +302,10 @@ async function main() {
     return;
   }
 
-  const slug = isoWeekSlug(now);
+  const slug = slugOverride ?? isoWeekSlug(now);
   const path = join(DIGEST_DIR, `${slug}.md`);
   if (existsSync(path)) {
-    throw new Error(`${slug}.md already exists — this week's issue was already generated`);
+    throw new Error(`${slug}.md already exists — pass --slug <name> to write a different file`);
   }
 
   writeFileSync(path, renderMarkdown(digest, issue, now));
