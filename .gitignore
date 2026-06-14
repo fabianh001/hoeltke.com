@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # AI Weekly local preview (npm run digest -- --preview)
 src/content/digest/preview.md
+
+# goaccess reports
+report.html
