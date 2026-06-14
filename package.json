@@ -13,7 +13,6 @@
     "digest": "tsx scripts/generate-digest.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.104.1",
     "@astrojs/react": "^5.0.7",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.3",
@@ -26,6 +25,7 @@
     "astro": "^6.4.6",
     "astro-og-canvas": "^0.11.1",
     "motion": "^12.40.0",
+    "openai": "^6.42.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "rss-parser": "^3.13.0",

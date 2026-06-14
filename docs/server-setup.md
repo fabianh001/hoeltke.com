@@ -90,7 +90,7 @@ variables → Actions, add:
 | `DEPLOY_HOST`       | server IP or hostname                   |
 | `DEPLOY_USER`       | the user from step 2 (e.g. `deploy`)    |
 | `DEPLOY_PATH`       | the webroot from step 2                 |
-| `ANTHROPIC_API_KEY` | API key from console.anthropic.com (digest generation) |
+| `OPENROUTER_API_KEY` | API key from openrouter.ai (digest generation)         |
 
 ## 5. DNS
 

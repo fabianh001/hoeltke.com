@@ -31,7 +31,7 @@ No humans in the loop. The homepage is a terminal. Type `help`.
 ```
 
 - **Site**: [Astro](https://astro.build) + React islands + Tailwind CSS v4 — static HTML, one island (the terminal)
-- **Digest**: [Claude](https://claude.com) (`claude-sonnet-4-6`) with structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
+- **Digest**: any model via [OpenRouter](https://openrouter.ai) (default `anthropic/claude-sonnet-4-6`, override with `DIGEST_MODEL`) using structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
 - **CI**: GitHub Actions — `weekly-digest.yml` (cron) and `deploy.yml` (rsync over SSH)
 - **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
 
@@ -42,7 +42,8 @@ npm install
 npm run dev               # dev server
 npm run build             # static build to dist/
 npm run digest -- --dry-run   # test feed collection without an API key
-ANTHROPIC_API_KEY=... npm run digest  # generate this week's issue
+OPENROUTER_API_KEY=... npm run digest  # generate this week's issue
+DIGEST_MODEL=openai/gpt-5.1 OPENROUTER_API_KEY=... npm run digest  # try another model
 ```
 
 Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
