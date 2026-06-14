@@ -10,7 +10,7 @@
     { "name": "Geoffrey Huntley", "url": "https://ghuntley.com/tag/ai/rss/" }
   ],
   "hackerNews": {
-    "query": "AI",
-    "minPoints": 150
+    "minPoints": 150,
+    "maxItems": 30
   }
 }

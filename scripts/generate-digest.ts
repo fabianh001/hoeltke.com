@@ -70,15 +70,22 @@ async function collectFeeds(): Promise<RawItem[]> {
     }
   }
 
-  // Hacker News via Algolia: high-signal AI stories from the last week
+  // Hacker News via Algolia: the week's top stories by points. No keyword filter —
+  // major launches ("Claude Fable 5", model/company names) rarely contain the word
+  // "AI", so a query=AI prefilter silently drops the biggest stories. Instead we
+  // hand the curator the top-voted stories and let it pick the AI-relevant ones.
   try {
     const since = Math.floor(cutoff / 1000);
     const hn = config.hackerNews;
-    const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(hn.query)}&tags=story&numericFilters=points>${hn.minPoints},created_at_i>${since}&hitsPerPage=20`;
+    const url = `https://hn.algolia.com/api/v1/search?tags=story&numericFilters=points>${hn.minPoints},created_at_i>${since}&hitsPerPage=50`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = (await res.json()) as { hits: any[] };
-    for (const hit of data.hits) {
+    const top = data.hits
+      .filter((h) => h.title)
+      .sort((a, b) => b.points - a.points)
+      .slice(0, hn.maxItems ?? 30);
+    for (const hit of top) {
       items.push({
         source: `Hacker News (${hit.points} points)`,
         title: hit.title,
@@ -87,7 +94,7 @@ async function collectFeeds(): Promise<RawItem[]> {
         snippet: '',
       });
     }
-    console.log(`✓ Hacker News: ${data.hits.length} items`);
+    console.log(`✓ Hacker News: ${top.length} items`);
   } catch (err) {
     console.warn(`⚠ Hacker News failed: ${(err as Error).message}`);
   }
@@ -256,8 +263,8 @@ async function main() {
   console.log(`${items.length} items total`);
 
   if (dryRun) {
-    console.log('\n--dry-run: skipping the model call. sample of collected items:');
-    for (const i of items.slice(0, 10)) console.log(`  [${i.source}] ${i.title}`);
+    console.log('\n--dry-run: skipping the model call. collected items:');
+    for (const i of items) console.log(`  [${i.source}] ${i.title}`);
     return;
   }
 
