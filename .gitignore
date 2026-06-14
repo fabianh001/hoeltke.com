@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# AI Weekly local preview (npm run digest -- --preview)
+src/content/digest/preview.md

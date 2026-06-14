@@ -18,6 +18,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIGEST_DIR = join(ROOT, 'src/content/digest');
+// Local-only preview file (gitignored). --preview overwrites it so `npm run dev`
+// renders the generated issue at /digest/preview without publishing anything.
+const PREVIEW_PATH = join(DIGEST_DIR, 'preview.md');
 const WINDOW_DAYS = 7;
 const MAX_ITEMS_PER_SOURCE = 12;
 const MAX_SNIPPET_CHARS = 700;
@@ -183,7 +186,8 @@ Only reference stories from the list. Never invent facts or URLs.`,
 function nextIssueNumber(): number {
   if (!existsSync(DIGEST_DIR)) return 1;
   const numbers = readdirSync(DIGEST_DIR)
-    .filter((f) => f.endsWith('.md'))
+    .filter((f) => /^\d{4}-\d{2}\.md$/.test(f)) // real issues only — ignore preview.md
+
     .map((f) => {
       const match = readFileSync(join(DIGEST_DIR, f), 'utf8').match(/^issue:\s*(\d+)/m);
       return match ? Number(match[1]) : 0;
@@ -275,8 +279,11 @@ async function main() {
   const now = new Date();
 
   if (preview) {
-    console.log(`\n--preview: not writing to src/content/digest/. rendered issue #${issue}:\n`);
-    console.log(renderMarkdown(digest, issue, now));
+    const markdown = renderMarkdown(digest, issue, now);
+    console.log(`\n--preview: rendered issue #${issue}:\n`);
+    console.log(markdown);
+    writeFileSync(PREVIEW_PATH, markdown);
+    console.log(`\n✓ wrote ${PREVIEW_PATH} (gitignored) — run \`npm run dev\` and open /digest/preview`);
     return;
   }
 
