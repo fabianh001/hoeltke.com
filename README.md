@@ -44,6 +44,7 @@ npm run build             # static build to dist/
 npm run digest -- --dry-run   # test feed collection without an API key
 OPENROUTER_API_KEY=... npm run digest -- --preview  # generate + print + write a gitignored preview (npm run dev → /digest/preview)
 OPENROUTER_API_KEY=... npm run digest  # generate this week's issue (writes the file)
+OPENROUTER_API_KEY=... npm run digest -- --slug 2026-24-extra  # extra issue under a custom slug
 DIGEST_MODEL=openai/gpt-5.1 OPENROUTER_API_KEY=... npm run digest -- --preview  # try another model
 ```
 
