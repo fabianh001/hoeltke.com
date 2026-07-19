@@ -41,6 +41,16 @@ jobs:
           git commit -m "$(git diff --cached --name-only | xargs -n1 basename | sed 's/\.md$//' | head -1 | xargs printf 'digest: publish issue %s')"
           git push
 
+      # Email the freshly-published issue to subscribers as a Resend broadcast.
+      # Idempotent: skips if a non-draft broadcast for this issue already exists.
+      - name: Email the new issue to subscribers
+        run: npm run send-newsletter
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_SEGMENT_ID: ${{ secrets.RESEND_SEGMENT_ID }}
+          # optional reply-to mailbox; kept in repo settings so no personal address lives in the repo
+          RESEND_REPLY_TO: ${{ vars.RESEND_REPLY_TO }}
+
   # pushes made with GITHUB_TOKEN don't trigger the push workflow,
   # so deploy explicitly after publishing
   deploy:

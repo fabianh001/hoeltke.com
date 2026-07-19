@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { TerminalSubscribe } from './TerminalSubscribe';
 
 export interface TerminalIssue {
   issue: number;
@@ -73,7 +74,7 @@ export default function Terminal({ issues }: Props) {
             ...[
               ['latest', 'open the newest AI Weekly issue'],
               ['issues', 'list recent issues'],
-              ['subscribe', 'stay up to date (RSS)'],
+              ['subscribe', 'subscribe by email (or grab the RSS feed)'],
               ['whoami', 'who runs this thing'],
               ['about', 'go to the about page'],
               ['clear', 'clear the screen'],
@@ -114,12 +115,10 @@ export default function Terminal({ issues }: Props) {
         },
         subscribe: {
           run: () => [
-            <span>
-              <span className="text-muted">one issue every Friday. grab the feed: </span>
-              <a href="/rss.xml" className="text-amber hover:underline">
-                /rss.xml
-              </a>
+            <span className="text-muted">
+              AI Weekly — one issue every Friday. no spam, unsubscribe anytime.
             </span>,
+            <TerminalSubscribe onDone={() => inputRef.current?.focus()} />,
           ],
         },
         whoami: {

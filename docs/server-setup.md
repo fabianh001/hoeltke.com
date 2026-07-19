@@ -166,3 +166,129 @@ View the dashboard from your own machine:
 ```sh
 ssh -t <user>@<server> goaccess /var/log/caddy/access.log --log-format=CADDY
 ```
+
+## 8. Newsletter (Resend + subscribe service)
+
+One-time setup for the AI Weekly email pipeline. Sending and contact storage
+is [Resend](https://resend.com) (free tier: 3,000 emails/mo, 100/day,
+1,000 contacts); the double-opt-in endpoint is a tiny Node service deployed
+by CI to `~/subscribe/` and run by systemd.
+
+### Resend account
+
+1. Create a Resend account and add the **subdomain** `mail.hoeltke.com` (not
+   the root domain). The newsletter sends from `ai-weekly@mail.hoeltke.com`,
+   which keeps its sending reputation isolated from any mail on the root
+   domain. Add the DKIM/SPF/MX records Resend shows you — they all live under
+   the subdomain, so they never touch the root domain's existing MX/SPF:
+
+   | Record | Host (name) | Notes |
+   | ------ | ----------- | ----- |
+   | MX     | `send.mail` | Resend's bounce/return-path, value + region from Resend |
+   | TXT (SPF)  | `send.mail`          | `v=spf1 include:amazonses.com ~all` |
+   | TXT (DKIM) | `resend._domainkey.mail` | the long `p=…` key from Resend |
+   | TXT (DMARC, optional) | `_dmarc.mail` | `v=DMARC1; p=none;` |
+
+   Leave every root-level record (apex MX, apex SPF, existing DKIM) untouched —
+   that's what protects any mailbox on the root domain. Wait for Resend to mark
+   the subdomain **Verified**.
+2. Create a segment for subscribers; copy its ID.
+3. Create an API key with full access.
+4. GitHub repo → Settings → Secrets and variables → Actions:
+   add `RESEND_API_KEY` and `RESEND_SEGMENT_ID`. Under *Variables*, optionally
+   add `RESEND_REPLY_TO` with the mailbox newsletter replies should reach —
+   it lives in repo settings so no personal address sits in the code.
+   Delete the old
+   `BUTTONDOWN_API_KEY` secret and `PUBLIC_BUTTONDOWN_USERNAME` variable.
+
+### Node on the server
+
+```sh
+sudo apt install -y nodejs   # needs Node >= 20; use nodesource if the distro's is older
+node --version
+```
+
+### Service env + systemd unit
+
+```sh
+sudo tee /etc/subscribe.env > /dev/null <<'EOF'
+RESEND_API_KEY=re_xxxxxxxx
+RESEND_SEGMENT_ID=00000000-0000-0000-0000-000000000000
+SUBSCRIBE_HMAC_SECRET=<openssl rand -hex 32>
+PORT=8787
+EOF
+sudo chmod 600 /etc/subscribe.env
+```
+
+The service files live under the deploy user's home (`/home/deploy/subscribe/`,
+where CI rsyncs them), so the unit runs as `User=deploy` — a systemd
+`DynamicUser` gets a transient UID that can't traverse the `750` home directory
+to read them. `/etc/systemd/system/subscribe.service` (swap `deploy` for your
+deploy user):
+
+```ini
+[Unit]
+Description=hoeltke.com newsletter subscribe service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/deploy/subscribe/subscribe.mjs
+EnvironmentFile=/etc/subscribe.env
+User=deploy
+Group=deploy
+ProtectSystem=strict
+ProtectHome=read-only
+NoNewPrivileges=yes
+PrivateTmp=yes
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+```
+
+The service files only land on the box once the deploy workflow rsyncs
+`server/` (or you copy them over manually), so `enable` it now and let the
+first deploy start it:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable subscribe
+# after the files exist (first deploy, or a manual scp):
+sudo systemctl start subscribe
+curl -s http://127.0.0.1:8787/api/healthz   # → ok
+```
+
+Let the CI deploy user restart it (visudo):
+
+```
+deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart subscribe
+```
+
+### Caddy
+
+Add inside the site block of the Caddyfile (Caddy orders `reverse_proxy`
+before `file_server` automatically):
+
+```caddy
+	reverse_proxy /api/* 127.0.0.1:8787
+```
+
+```sh
+caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
+curl -s https://hoeltke.com/api/healthz   # → ok
+```
+
+### First-send checklist
+
+1. Push to `main` → deploy also rsyncs `server/` and restarts the service.
+2. Subscribe yourself on the site → confirmation email arrives (dark) →
+   confirm → you land on `/subscribed` → contact appears in the Resend segment.
+3. `npm run send-newsletter -- --draft` locally → review the broadcast in the
+   Resend dashboard, test-send it to yourself. Check Gmail (light + app dark
+   mode — iOS dark fully inverts, verify it stays readable) and Apple Mail
+   (light + dark).
+4. Delete the draft, then let Friday's workflow do the real send — or run
+   `npm run send-newsletter` yourself.
+5. Unsubscribe via the footer link of a received email and confirm the
+   contact flips to unsubscribed in Resend.

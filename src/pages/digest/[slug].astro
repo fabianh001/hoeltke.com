@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ShareRow from '../../components/ShareRow.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
 
 export async function getStaticPaths() {
   const issues = await getCollection('digest');
@@ -73,5 +74,9 @@ const articleSchema = {
         auto-curated &amp; AI-summarized · sources linked above
       </p>
     </footer>
+
+    <section class="mt-8 rounded-xl border border-line bg-panel/50 p-7">
+      <SubscribeForm variant="card" />
+    </section>
   </article>
 </Base>
