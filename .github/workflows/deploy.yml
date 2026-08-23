@@ -27,6 +27,9 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      - name: Build confirmation-email template
+        run: npm run build:confirm-email
+
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
@@ -39,3 +42,11 @@ jobs:
           rsync -az --delete \
             dist/ \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+
+      - name: Deploy subscribe service
+        run: |
+          rsync -az --delete --exclude '*.test.mjs' \
+            server/ \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/home/${{ secrets.DEPLOY_USER }}/subscribe/"
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'sudo /usr/bin/systemctl restart subscribe'

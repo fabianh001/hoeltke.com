@@ -28,3 +28,9 @@ src/content/digest/preview.md
 
 # goaccess reports
 report.html
+
+# generated email template (built in CI by build:confirm-email)
+server/confirm-email.json
+
+# superpowers scratch + local process-doc archive (never commit)
+.superpowers/

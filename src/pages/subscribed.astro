@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
+---
+
+<Base title="subscribed" description="AI Weekly subscription status" noindex dotGrid={false}>
+  <section class="pt-16">
+    {/* confirmed is the visible default so a no-JS visitor never sees a blank page */}
+    <div data-when="confirmed">
+      <p class="font-mono text-sm text-prompt">$ subscription confirmed</p>
+      <h1 class="mt-3 font-mono text-3xl font-bold tracking-tight">you're in ✓</h1>
+      <p class="mt-3 max-w-xl text-muted">
+        AI Weekly lands in your inbox every Friday. curated by AI, not a human — unsubscribe anytime.
+      </p>
+    </div>
+
+    <div data-when="pending" hidden>
+      <p class="font-mono text-sm text-prompt">$ confirmation sent</p>
+      <h1 class="mt-3 font-mono text-3xl font-bold tracking-tight">check your inbox</h1>
+      <p class="mt-3 max-w-xl text-muted">
+        click the link in the email to confirm your subscription. the link is valid for 48 hours.
+      </p>
+    </div>
+
+    <div data-when="expired" hidden>
+      <p class="font-mono text-sm text-red">$ link expired</p>
+      <h1 class="mt-3 font-mono text-3xl font-bold tracking-tight">that link is stale</h1>
+      <p class="mt-3 max-w-xl text-muted">confirmation links are valid for 48 hours — grab a fresh one:</p>
+      <div class="mt-6 max-w-xl rounded-xl border border-line bg-panel/50 p-7">
+        <SubscribeForm variant="card" />
+      </div>
+    </div>
+
+    <p class="mt-10 font-mono text-sm">
+      <a href="/" class="text-accent hover:underline">← back to hoeltke.com</a>
+    </p>
+  </section>
+
+  <script>
+    // static page, three states — pick one from ?s=
+    const s = new URLSearchParams(location.search).get('s');
+    const state = s === 'pending' || s === 'expired' ? s : 'confirmed';
+    document.querySelectorAll<HTMLElement>('[data-when]').forEach((el) => {
+      el.hidden = el.dataset.when !== state;
+    });
+  </script>
+</Base>
