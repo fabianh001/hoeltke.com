@@ -9,7 +9,8 @@ A personal site that writes its own blog.
 Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
 Hacker News, the usual suspects — hands everything to an LLM, and publishes
 **AI Weekly**: one digest of the stories that actually matter, with sources.
-No humans in the loop. The homepage is a terminal. Type `help`.
+No humans in the loop. Read it on the web, subscribe by email, or grab the RSS
+feed. The homepage is a terminal. Type `help`.
 
 **Live at [hoeltke.com](https://hoeltke.com)** · [RSS](https://hoeltke.com/rss.xml)
 
@@ -27,12 +28,23 @@ No humans in the loop. The homepage is a terminal. Type `help`.
                                  ▼
                   ┌────────────────────────────────────────────┐
                   │  Astro build → rsync → Caddy on a VPS      │
+                  └──────────────┬─────────────────────────────┘
+                                 │ same run emails the new issue
+                                 ▼
+                  ┌────────────────────────────────────────────┐
+                  │  send-newsletter → Resend broadcast        │
+                  │  → subscribers (dark, on-brand email)      │
                   └────────────────────────────────────────────┘
 ```
 
+Readers subscribe on the site; a zero-dependency Node service on the VPS
+(`server/subscribe.mjs`, behind Caddy) handles HMAC double opt-in and adds
+confirmed contacts to Resend.
+
 - **Site**: [Astro](https://astro.build) + React islands + Tailwind CSS v4 — static HTML, one island (the terminal)
 - **Digest**: any model via [OpenRouter](https://openrouter.ai) (default `anthropic/claude-sonnet-4-6`, override with `DIGEST_MODEL`) using structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
-- **CI**: GitHub Actions — `weekly-digest.yml` (cron) and `deploy.yml` (rsync over SSH)
+- **Newsletter**: each issue also goes out by email via [Resend](https://resend.com) as a dark, on-brand broadcast built from the site's own design tokens; $0 on the free tier at this scale
+- **CI**: GitHub Actions — `weekly-digest.yml` (cron: generate + email) and `deploy.yml` (rsync the site + subscribe service over SSH)
 - **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
 
 ## Local development
@@ -46,6 +58,8 @@ OPENROUTER_API_KEY=... npm run digest -- --preview  # generate + print + write a
 OPENROUTER_API_KEY=... npm run digest  # generate this week's issue (writes the file)
 OPENROUTER_API_KEY=... npm run digest -- --slug 2026-24-extra  # extra issue under a custom slug
 DIGEST_MODEL=openai/gpt-5.1 OPENROUTER_API_KEY=... npm run digest -- --preview  # try another model
+npm run send-newsletter -- --dry-run  # build the issue email and print, no send (no key needed)
+npm test                  # unit + component tests
 ```
 
 Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
