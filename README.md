@@ -53,13 +53,13 @@ confirmed contacts to Resend.
 npm install
 npm run dev               # dev server
 npm run build             # static build to dist/
+npm test                  # unit + component tests
 npm run digest -- --dry-run   # test feed collection without an API key
 OPENROUTER_API_KEY=... npm run digest -- --preview  # generate + print + write a gitignored preview (npm run dev → /digest/preview)
 OPENROUTER_API_KEY=... npm run digest  # generate this week's issue (writes the file)
 OPENROUTER_API_KEY=... npm run digest -- --slug 2026-24-extra  # extra issue under a custom slug
 DIGEST_MODEL=openai/gpt-5.1 OPENROUTER_API_KEY=... npm run digest -- --preview  # try another model
 npm run send-newsletter -- --dry-run  # build the issue email and print, no send (no key needed)
-npm test                  # unit + component tests
 ```
 
 Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
