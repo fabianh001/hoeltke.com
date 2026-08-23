@@ -38,3 +38,34 @@ test('escapes HTML in the title/description', () => {
   expect(html).toContain('A &lt;b&gt;x&lt;/b&gt; &amp; y');
   expect(html).toContain('1 &lt; 2');
 });
+
+test('renders tag pills matching the site style, in order', () => {
+  const { html } = buildIssueEmail({ ...input, tags: ['policy', 'models'] });
+  const tagIndex = html.indexOf('class="tag"');
+  expect(tagIndex).toBeGreaterThan(-1);
+  expect(html).toContain('>policy<');
+  expect(html).toContain('>models<');
+  expect(html.indexOf('>policy<')).toBeLessThan(html.indexOf('>models<'));
+});
+
+test('omits the tag/source markup entirely when none are given', () => {
+  const { html } = buildIssueEmail(input);
+  expect(html).not.toContain('class="tag"');
+  expect(html).not.toContain('class="sources"');
+  expect(html).not.toContain('cat sources.txt');
+});
+
+test('renders a sources box with escaped titles and hrefs', () => {
+  const { html } = buildIssueEmail({
+    ...input,
+    sources: [
+      { title: 'A <script> tag', url: 'https://example.com/a?x=1&y=2' },
+      { title: 'Second source', url: 'https://example.com/b' },
+    ],
+  });
+  expect(html).toContain('cat sources.txt');
+  expect(html).toContain('A &lt;script&gt; tag');
+  expect(html).toContain('href="https://example.com/a?x=1&amp;y=2"');
+  expect(html).toContain('Second source');
+  expect(html.indexOf('A &lt;script&gt; tag')).toBeLessThan(html.indexOf('Second source'));
+});

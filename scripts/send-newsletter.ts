@@ -30,7 +30,14 @@ const slug = args.includes('--slug') ? args[args.indexOf('--slug') + 1] : undefi
 
 interface Loaded {
   slug: string;
-  data: { title: string; description: string; date: string; issue: number };
+  data: {
+    title: string;
+    description: string;
+    date: string;
+    issue: number;
+    tags?: string[];
+    sources?: { title: string; url: string }[];
+  };
   body: string;
 }
 
@@ -76,6 +83,8 @@ async function main() {
     body: issue.body,
     issue: issue.data.issue,
     date: new Date(issue.data.date),
+    tags: issue.data.tags,
+    sources: issue.data.sources,
   });
   const name = `ai-weekly-${issue.slug}`;
 
