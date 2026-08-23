@@ -11,14 +11,18 @@ test('emits a complete dark document with color-scheme metas', () => {
   expect(html).toContain('bgcolor="#000001"'); // email-safe near-black, edge to edge
 });
 
-test('floors the black band so no client background shows below the card', () => {
+test('floors the black band in px so no client background shows below the card', () => {
   const html = renderEmailShell(base);
   const wrap = html.match(/<td class="wrap"[^>]*>/)![0];
-  // px first as the fallback for clients that strip vh (Gmail web/Android),
-  // vh second so WebKit clients fill the actual reading pane. On a table cell
-  // `height` is a minimum, so long issues still grow past it.
-  expect(wrap).toMatch(/height: 800px; height: 100vh/);
-  expect(wrap).toContain('height="800"'); // attribute fallback for Outlook
+  expect(wrap).toContain('height: 1200px');
+  expect(wrap).toContain('height="1200"'); // juice mirrors it onto the attribute for Outlook
+  // Never vh: the message renders in a content-sized container, so 100vh
+  // resolves to the content height (or 0 in Apple Mail iOS) and, being the
+  // later declaration, would silently override the px floor.
+  expect(html).not.toContain('vh');
+  // pane-height tiers, kept in a retained <style> block by juice
+  expect(html).toMatch(/@media only screen and \(max-width:600px\)/);
+  expect(html).toMatch(/@media only screen and \(min-height:900px\)/);
 });
 
 test('keeps @font-face pointing at stable /fonts/ URLs after juice inlining', () => {

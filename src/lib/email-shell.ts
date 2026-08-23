@@ -47,9 +47,13 @@ export function renderEmailShell({ preheader, contentHtml, extraCss = '', footer
   html, body { margin:0; padding:0; width:100%; height:100%; background:${t.bg}; }
   .preheader { display:none; max-height:0; overflow:hidden; }
   /* On a table cell CSS height is a MINIMUM (content still grows it), so this
-     floors the black band instead of capping it. Clients that strip vh units
-     (Gmail web/Android) fall back to the px value declared just before. */
-  .wrap { background:${t.bg}; padding:24px 12px; font-family:${SANS}; height:800px; height:100vh; }
+     floors the black band instead of capping it. Deliberately px, never vh:
+     clients render the message in a content-sized container, so 100vh resolves
+     to the content height (or 0 in Apple Mail iOS) and floors nothing. Media
+     queries on the pane height step the floor up when there is room for it. */
+  .wrap { background:${t.bg}; padding:24px 12px; font-family:${SANS}; height:1200px; }
+  @media only screen and (max-width:600px) { td.wrap { height:800px !important; } }
+  @media only screen and (min-height:900px) { td.wrap { height:1600px !important; } }
   .card { text-align:left; background:${t['term-bg']}; border:1px solid ${t.line}; border-radius:12px; padding:28px; font-family:${SANS}; }
   .brand { font-family:${MONO}; font-size:14px; color:${t.faint}; margin:0 0 18px 0; }
   .brand b { color:${t.text}; }
@@ -64,7 +68,7 @@ export function renderEmailShell({ preheader, contentHtml, extraCss = '', footer
   <div class="preheader">${preheader}</div>
   <table role="presentation" width="100%" height="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${t.bg}" style="width:100%;height:100%;">
     <tr>
-      <td class="wrap" height="800" align="center" valign="top" bgcolor="${t.bg}">
+      <td class="wrap" align="center" valign="top" bgcolor="${t.bg}">
         <table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;">
           <tr>
             <td class="card" align="left">${contentHtml}${footerHtml}</td>
