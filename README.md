@@ -59,7 +59,7 @@ OPENROUTER_API_KEY=... npm run digest -- --preview  # generate + print + write a
 OPENROUTER_API_KEY=... npm run digest  # generate this week's issue (writes the file)
 OPENROUTER_API_KEY=... npm run digest -- --slug 2026-24-extra  # extra issue under a custom slug
 DIGEST_MODEL=openai/gpt-5.1 OPENROUTER_API_KEY=... npm run digest -- --preview  # try another model
-npm run send-newsletter -- --dry-run  # build the issue email and print, no send (no key needed)
+npm run send-newsletter -- --dry-run  # build the most recently generated issue's email and print, no send (no key needed)
 ```
 
 Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
