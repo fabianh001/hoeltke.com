@@ -1,0 +1,77 @@
+name: Newsletter
+
+# Emails an issue to subscribers. Three ways in:
+#   push        — a digest landed on main (merging a review PR)
+#   workflow_call — weekly-digest.yml published straight to main
+#   workflow_dispatch — manual (re-)send; blank slug means the newest issue
+on:
+  push:
+    branches: [main]
+    paths: ['src/content/digest/**']
+  workflow_call:
+    inputs:
+      slug:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Issue slug to send (blank → newest issue)'
+        type: string
+        required: false
+
+concurrency:
+  group: newsletter
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          # full history: the push trigger diffs against the previous main tip
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # An explicit slug wins. Otherwise take the digest file this push added:
+      # "newest issue" would send the wrong one when a review PR is merged after
+      # a later issue has already gone out.
+      - name: Pick the issue
+        id: pick
+        env:
+          INPUT_SLUG: ${{ inputs.slug }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          slug="$INPUT_SLUG"
+          if [ -z "$slug" ] && [ "$GITHUB_EVENT_NAME" = 'push' ]; then
+            slug="$(git diff --name-only "$BEFORE" "$SHA" -- src/content/digest \
+              | xargs -n1 basename \
+              | sed 's/\.md$//' \
+              | grep -v '^preview$' \
+              | head -1)"
+          fi
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      # Idempotent: skips if a non-draft broadcast for this issue already exists.
+      - name: Email the issue to subscribers
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_SEGMENT_ID: ${{ secrets.RESEND_SEGMENT_ID }}
+          # optional reply-to mailbox; kept in repo settings so no personal address lives in the repo
+          RESEND_REPLY_TO: ${{ vars.RESEND_REPLY_TO }}
+        run: |
+          if [ -n "$SLUG" ]; then
+            npm run send-newsletter -- --slug "$SLUG"
+          else
+            npm run send-newsletter
+          fi

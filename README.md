@@ -44,7 +44,8 @@ confirmed contacts to Resend.
 - **Site**: [Astro](https://astro.build) + React islands + Tailwind CSS v4 — static HTML, one island (the terminal)
 - **Digest**: any model via [OpenRouter](https://openrouter.ai) (default `anthropic/claude-sonnet-4-6`, override with `DIGEST_MODEL`) using structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
 - **Newsletter**: each issue also goes out by email via [Resend](https://resend.com) as a dark, on-brand broadcast built from the site's own design tokens; $0 on the free tier at this scale
-- **CI**: GitHub Actions — `weekly-digest.yml` (cron: generate + email) and `deploy.yml` (rsync the site + subscribe service over SSH)
+- **CI**: GitHub Actions — `weekly-digest.yml` (cron: generate), `newsletter.yml` (email an issue), `deploy.yml` (rsync the site + subscribe service over SSH)
+- **Review gate**: with repo variable `NEWSLETTER_REQUIRE_APPROVAL=true` the weekly issue lands in a PR instead of on `main` — edit the copy, then merge to deploy the site and email subscribers; unset it and the issue publishes and sends automatically
 - **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
 
 ## Local development
