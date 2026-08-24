@@ -10,3 +10,4 @@ jobs:
     environment: ${{ vars.NEWSLETTER_REQUIRE_APPROVAL == 'true' && 'newsletter-approval' || 'newsletter-auto' }}
     steps:
       - run: echo "ran in an environment; if you saw an approval prompt, the flag works"
+# flag flipped to false for this run
