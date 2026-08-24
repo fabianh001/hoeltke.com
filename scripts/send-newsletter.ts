@@ -21,7 +21,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIGEST_DIR = join(ROOT, 'src/content/digest');
 const API = 'https://api.resend.com';
 const FROM = 'AI Weekly <ai-weekly@mail.hoeltke.com>';
-const REPLY_TO = process.env.RESEND_REPLY_TO; // keep the personal mailbox out of the repo
+// Keep the personal mailbox out of the repo. `|| undefined` matters in CI:
+// an unset repo variable still defines the env var as an empty string, and
+// reply_to: '' would reach the API instead of the field being omitted.
+const REPLY_TO = process.env.RESEND_REPLY_TO || undefined;
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
