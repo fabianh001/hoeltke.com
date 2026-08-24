@@ -198,8 +198,12 @@ by CI to `~/subscribe/` and run by systemd.
    add `RESEND_API_KEY` and `RESEND_SEGMENT_ID`. Under *Variables*, optionally
    add `RESEND_REPLY_TO` with the mailbox newsletter replies should reach —
    it lives in repo settings so no personal address sits in the code.
-   Delete the old
-   `BUTTONDOWN_API_KEY` secret and `PUBLIC_BUTTONDOWN_USERNAME` variable.
+
+   Leaving `RESEND_REPLY_TO` unset doesn't discard replies: they go to the
+   from address, `ai-weekly@mail.hoeltke.com`. The apex has a wildcard MX, so
+   that lands at the root domain's mail host (not Resend, whose MX only covers
+   `send.mail`) — with no mailbox or catch-all there, the *subscriber* gets a
+   bounce. Set the variable, add a discard alias, or accept the bounces.
 
 ### Node on the server
 
