@@ -8,12 +8,14 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   generate:
     runs-on: ubuntu-latest
     outputs:
       slug: ${{ steps.publish.outputs.slug }}
+      published: ${{ steps.publish.outputs.published }}
     steps:
       - uses: actions/checkout@v5
 
@@ -35,55 +37,50 @@ jobs:
       - name: Verify the site still builds
         run: npm run build
 
-      - name: Commit and push
+      # Human in the loop: with NEWSLETTER_REQUIRE_APPROVAL=true the issue goes
+      # to a branch and opens a review PR, and nothing else happens — merging it
+      # deploys the site and emails subscribers. Anything else (including unset)
+      # publishes straight to main, as before.
+      - name: Publish
         id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUIRE_APPROVAL: ${{ vars.NEWSLETTER_REQUIRE_APPROVAL }}
         run: |
           git config user.name "ai-weekly-bot"
           git config user.email "actions@github.com"
           git add src/content/digest
           slug="$(git diff --cached --name-only | xargs -n1 basename | sed 's/\.md$//' | head -1)"
           git commit -m "digest: publish issue $slug"
-          git push
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
-  # Email the freshly-published issue to subscribers as a Resend broadcast.
-  # Idempotent: skips if a non-draft broadcast for this issue already exists.
-  #
-  # Human-in-the-loop flag: set the repo variable NEWSLETTER_REQUIRE_APPROVAL
-  # to 'true' and this job runs in an environment with a required reviewer, so
-  # it waits for a manual approval in the Actions tab. Anything else (including
-  # unset) routes it through an unprotected environment and it sends straight
-  # away. Deploy doesn't wait on this job — only the email does.
-  send:
-    needs: generate
-    runs-on: ubuntu-latest
-    environment: ${{ vars.NEWSLETTER_REQUIRE_APPROVAL == 'true' && 'newsletter-approval' || 'newsletter-auto' }}
-    steps:
-      # ref: main — a scheduled run's default SHA predates the digest commit above
-      - uses: actions/checkout@v5
-        with:
-          ref: main
+          if [ "$REQUIRE_APPROVAL" = 'true' ]; then
+            branch="digest/$slug"
+            git push --force origin "HEAD:$branch"
+            if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
+              gh pr create --head "$branch" --base main \
+                --title "digest: issue $slug" \
+                --body 'Auto-generated issue awaiting review. Edit the copy here if you want, then merge — merging deploys the site and emails subscribers.'
+            fi
+            echo 'published=false' >> "$GITHUB_OUTPUT"
+          else
+            git push
+            echo 'published=true' >> "$GITHUB_OUTPUT"
+          fi
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      # --slug pins the issue that was approved: an approval left sitting past
-      # the next Friday would otherwise send the newer issue and skip this one.
-      - name: Email the new issue to subscribers
-        run: npm run send-newsletter -- --slug "${{ needs.generate.outputs.slug }}"
-        env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          RESEND_SEGMENT_ID: ${{ secrets.RESEND_SEGMENT_ID }}
-          # optional reply-to mailbox; kept in repo settings so no personal address lives in the repo
-          RESEND_REPLY_TO: ${{ vars.RESEND_REPLY_TO }}
-
-  # pushes made with GITHUB_TOKEN don't trigger the push workflow,
-  # so deploy explicitly after publishing
+  # Pushes made with GITHUB_TOKEN don't trigger the push workflows, so publishing
+  # straight to main has to call deploy and the newsletter explicitly. In review
+  # mode merging the PR is a human push, which triggers both on its own.
   deploy:
     needs: generate
+    if: needs.generate.outputs.published == 'true'
     uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
+  send:
+    needs: generate
+    if: needs.generate.outputs.published == 'true'
+    uses: ./.github/workflows/newsletter.yml
+    with:
+      slug: ${{ needs.generate.outputs.slug }}
     secrets: inherit
