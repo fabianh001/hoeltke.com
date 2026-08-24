@@ -45,6 +45,7 @@ confirmed contacts to Resend.
 - **Digest**: any model via [OpenRouter](https://openrouter.ai) (default `anthropic/claude-sonnet-4-6`, override with `DIGEST_MODEL`) using structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
 - **Newsletter**: each issue also goes out by email via [Resend](https://resend.com) as a dark, on-brand broadcast built from the site's own design tokens; $0 on the free tier at this scale
 - **CI**: GitHub Actions — `weekly-digest.yml` (cron: generate + email) and `deploy.yml` (rsync the site + subscribe service over SSH)
+- **Approval gate**: repo variable `NEWSLETTER_REQUIRE_APPROVAL=true` holds the email behind a required reviewer in the Actions tab (the issue still publishes and deploys on schedule); unset it to send automatically
 - **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
 
 ## Local development
