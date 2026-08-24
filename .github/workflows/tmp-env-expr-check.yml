@@ -1,0 +1,12 @@
+name: TEMP env expression check
+
+on:
+  push:
+    branches: [fabianh001/newsletter-approval-gate]
+
+jobs:
+  gated:
+    runs-on: ubuntu-latest
+    environment: ${{ vars.NEWSLETTER_REQUIRE_APPROVAL == 'true' && 'newsletter-approval' || 'newsletter-auto' }}
+    steps:
+      - run: echo "ran in an environment; if you saw an approval prompt, the flag works"
