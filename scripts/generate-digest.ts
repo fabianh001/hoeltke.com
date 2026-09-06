@@ -25,6 +25,10 @@ const WINDOW_DAYS = 7;
 const MAX_ITEMS_PER_SOURCE = 12;
 const MAX_SNIPPET_CHARS = 700;
 const MAX_OUTPUT_TOKENS = 8000;
+// How many past issues the curator sees so it doesn't re-run a story. Stories
+// resurface under new URLs (follow-ups, post-mortems, third-party write-ups),
+// so a URL blocklist alone isn't enough — the model needs the headlines too.
+const LOOKBACK_ISSUES = 4;
 // Any OpenRouter model slug. Override per-run with DIGEST_MODEL=… to A/B providers.
 const DIGEST_MODEL = process.env.DIGEST_MODEL || 'anthropic/claude-sonnet-4-6';
 
@@ -102,6 +106,31 @@ async function collectFeeds(): Promise<RawItem[]> {
   return items;
 }
 
+interface PastIssue {
+  issue: number;
+  date: string;
+  headlines: string[];
+  urls: string[];
+}
+
+/** The most recent published issues (newest first), for repetition checks. */
+function loadPastIssues(limit = LOOKBACK_ISSUES): PastIssue[] {
+  if (!existsSync(DIGEST_DIR)) return [];
+  return readdirSync(DIGEST_DIR)
+    .filter((f) => f.endsWith('.md') && f !== 'preview.md')
+    .map((f) => {
+      const text = readFileSync(join(DIGEST_DIR, f), 'utf8');
+      return {
+        issue: Number(text.match(/^issue:\s*(\d+)/m)?.[1] ?? 0),
+        date: text.match(/^date:\s*(\S+)/m)?.[1] ?? '',
+        headlines: [...text.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim()),
+        urls: [...text.matchAll(/^\s+url:\s*'(.+)'\s*$/gm)].map((m) => m[1].replace(/''/g, "'")),
+      };
+    })
+    .sort((a, b) => b.issue - a.issue)
+    .slice(0, limit);
+}
+
 const StorySchema = z.object({
   headline: z.string(),
   summary: z.string(),
@@ -154,7 +183,7 @@ async function complete(
   return content;
 }
 
-async function summarize(items: RawItem[], issueNumber: number) {
+async function summarize(items: RawItem[], issueNumber: number, past: PastIssue[]) {
   const client = new OpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
     apiKey: process.env.OPENROUTER_API_KEY,
@@ -164,11 +193,17 @@ async function summarize(items: RawItem[], issueNumber: number) {
   const itemList = items
     .map((i) => `- [${i.source}] ${i.title} (${i.date})\n  ${i.url}\n  ${i.snippet}`)
     .join('\n');
+  const coveredList = past
+    .map((p) => `Issue #${p.issue} (${p.date}):\n${p.headlines.map((h) => `  - ${h}`).join('\n')}`)
+    .join('\n');
+  const coveredBlock = past.length
+    ? `\n\nStories already covered in recent issues — do NOT run these again, even from a different source or angle. The only exception is a genuinely new development (a new release, a reversal, a major finding); in that case say what is new and reference the earlier coverage in one clause.\n\n${coveredList}`
+    : '';
 
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     {
       role: 'system',
-      content: `You write "AI Weekly", a sharply curated weekly digest of AI news for software engineers. Voice: direct, technically literate, a little dry-witted, zero hype. You pick only stories that will still matter in a month: model releases, meaningful research, tooling worth adopting, consequential industry/policy moves. Skip funding-round noise, product marketing, and duplicate coverage (merge duplicates into one story, citing the best source).`,
+      content: `You write "AI Weekly", a sharply curated weekly digest of AI news for software engineers. Voice: direct, technically literate, a little dry-witted, zero hype. You pick only stories that will still matter in a month: model releases, meaningful research, tooling worth adopting, consequential industry/policy moves. Skip funding-round noise, product marketing, and duplicate coverage (merge duplicates into one story, citing the best source). Never repeat a story a previous issue already covered — readers get this every week.`,
     },
     {
       role: 'user',
@@ -178,7 +213,7 @@ async function summarize(items: RawItem[], issueNumber: number) {
 - "intro": 2-3 sentences opening the issue with the week's big picture
 - "stories": the top 4-6 stories. For each: "headline" (your own words), "summary" (2-3 sentences, factual, no hype), "whyItMatters" (1-2 sentences for working engineers), "sourceTitle" + "sourceUrl" (must be copied exactly from the list above), "tag" (one lowercase word, e.g. models, research, tooling, policy, infra)
 
-Only reference stories from the list. Never invent facts or URLs.`,
+Only reference stories from the list. Never invent facts or URLs.${coveredBlock}`,
     },
   ];
 
@@ -264,7 +299,13 @@ async function main() {
   }
 
   console.log('collecting sources …');
-  const items = await collectFeeds();
+  const past = loadPastIssues();
+  const citedBefore = new Set(past.flatMap((p) => p.urls));
+  const collected = await collectFeeds();
+  // Hard rule: anything a recent issue already linked never reaches the curator.
+  const items = collected.filter((i) => !citedBefore.has(i.url));
+  const dropped = collected.length - items.length;
+  if (dropped) console.log(`↷ dropped ${dropped} item(s) already cited in issues #${past.map((p) => p.issue).join(', #')}`);
   if (items.length < 5) {
     throw new Error(`only ${items.length} items collected — refusing to generate a thin issue`);
   }
@@ -278,16 +319,24 @@ async function main() {
 
   const issue = nextIssueNumber();
   console.log(`summarizing issue #${issue} with ${DIGEST_MODEL} …`);
-  const digest = await summarize(items, issue);
+  const digest = await summarize(items, issue, past);
 
   if (digest.stories.length < 3) {
     throw new Error(`model returned only ${digest.stories.length} stories — aborting`);
   }
-  // every story must link back to a collected item — no invented URLs
-  const knownUrls = new Set(items.map((i) => i.url));
+  // every story must link back to a collected item — no invented URLs. The
+  // sourceTitle is taken from that item too: models sometimes copy the feed
+  // name ("OpenAI News") instead of the article title, and the item is the
+  // source of truth anyway.
+  const byUrl = new Map(items.map((i) => [i.url, i]));
   for (const story of digest.stories) {
-    if (!knownUrls.has(story.sourceUrl)) {
+    const item = byUrl.get(story.sourceUrl);
+    if (!item) {
       throw new Error(`story "${story.headline}" cites unknown URL: ${story.sourceUrl}`);
+    }
+    if (story.sourceTitle !== item.title) {
+      console.warn(`⚠ "${story.headline}": sourceTitle "${story.sourceTitle}" → "${item.title}"`);
+      story.sourceTitle = item.title;
     }
   }
 
