@@ -64,4 +64,6 @@ npm run send-newsletter -- --dry-run  # build the most recently generated issue'
 
 Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
 
+Repetition guard: the generator reads the last 4 issues, drops any collected item whose URL was already cited, and hands the model the past headlines with an instruction to skip already-covered stories unless there is a genuinely new development (`LOOKBACK_ISSUES` in `scripts/generate-digest.ts`).
+
 Server + DNS setup: [`docs/server-setup.md`](docs/server-setup.md).
