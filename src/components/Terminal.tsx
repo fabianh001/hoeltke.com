@@ -12,6 +12,13 @@ export interface TerminalIssue {
 
 interface Props {
   issues: TerminalIssue[];
+  /**
+   * The server-rendered transcript: the boot lines and `cat digest/latest`
+   * output that Astro emits into the island's slot. It ships in the HTML, so
+   * the newest issue is readable at first paint and without JavaScript. The
+   * island hydrates over it rather than painting it; `clear` drops it.
+   */
+  children?: ReactNode;
 }
 
 type Line = { id: number; node: ReactNode };
@@ -29,24 +36,19 @@ const CHUCK_JOKES = [
 
 const SUGGESTED = ['help', 'latest', 'whoami', 'subscribe'];
 
-const BOOT_LINES = [
-  '▸ booting hoeltke.com … ok',
-  '▸ ingesting feeds   … ok',
-  '▸ summarizing week  … 200',
-];
-
 let lineId = 0;
 const mkLine = (node: ReactNode): Line => ({ id: ++lineId, node });
 
-export default function Terminal({ issues }: Props) {
+export default function Terminal({ issues, children }: Props) {
   const [lines, setLines] = useState<Line[]>([]);
   const [input, setInput] = useState('');
-  const [booted, setBooted] = useState(false);
+  // The transcript ships server-rendered, so the terminal is live on arrival.
+  // `clear` and Ctrl-L drop it the same way they drop typed output.
+  const [showTranscript, setShowTranscript] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const bootStarted = useRef(false);
 
   const append = useCallback((...nodes: ReactNode[]) => {
     setLines((prev) => [...prev, ...nodes.map(mkLine)]);
@@ -299,6 +301,7 @@ export default function Terminal({ issues }: Props) {
       const result = entry.run(arg);
       if (result === 'clear') {
         setLines([]);
+        setShowTranscript(false);
         return;
       }
       append(...result);
@@ -306,51 +309,21 @@ export default function Terminal({ issues }: Props) {
     [append, commands]
   );
 
-  // boot sequence
+  // Follow typed output only. The server-rendered transcript is the top of the
+  // scroll region and must stay where it is on load — auto-scrolling on mount
+  // would push the newest issue out of the frame before it is read.
   useEffect(() => {
-    if (bootStarted.current) return;
-    bootStarted.current = true;
-
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const finishBoot = () => {
-      append(
-        <span>
-          {prompt} <span className="text-ink">latest</span>
-        </span>,
-        ...(latest
-          ? [
-              <span className="text-muted">newest issue:</span>,
-              renderIssueLink(latest),
-              <span className="text-faint">type 'help' to look around.</span>,
-            ]
-          : [<span className="text-faint">type 'help' to look around.</span>])
-      );
-      setBooted(true);
-    };
-
-    if (reduced) {
-      append(...BOOT_LINES.map((l) => <span className="text-faint">{l}</span>));
-      finishBoot();
-      return;
-    }
-
-    BOOT_LINES.forEach((l, i) => {
-      setTimeout(() => append(<span className="text-faint">{l}</span>), 350 * (i + 1));
-    });
-    setTimeout(finishBoot, 350 * (BOOT_LINES.length + 1));
-  }, []);
-
-  // keep scrolled to bottom
-  useEffect(() => {
+    if (lines.length === 0) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [lines]);
 
-  // focus the input once it's mounted, so typing works immediately on load
+  // Focus the input so typing works immediately, without scrolling the page:
+  // the terminal sits in the first viewport and a focus scroll would jump it.
   useEffect(() => {
-    if (booted && !matchMedia('(pointer: coarse)').matches) {
-      inputRef.current?.focus();
+    if (!matchMedia('(pointer: coarse)').matches) {
+      inputRef.current?.focus({ preventScroll: true });
     }
-  }, [booted]);
+  }, []);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -409,6 +382,7 @@ export default function Terminal({ issues }: Props) {
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
       setLines([]);
+      setShowTranscript(false);
     }
   };
 
@@ -426,43 +400,40 @@ export default function Terminal({ issues }: Props) {
         <span className="size-2.5 rounded-full bg-red/80" />
         <span className="size-2.5 rounded-full bg-amber/80" />
         <span className="size-2.5 rounded-full bg-green/80" />
-        <span className="ml-2 font-mono text-xs text-faint">fabian — zsh</span>
+        <span className="ml-2 font-mono text-xs text-faint">
+          fabian@hoeltke.com <span className="text-line-bright">:</span> ~/digest
+        </span>
       </div>
 
       {/* output */}
       <div
         ref={scrollRef}
-        className="h-72 overflow-y-auto px-4 py-3 font-mono text-base leading-6 sm:h-80 sm:text-sm"
+        className="max-h-[34rem] min-h-72 overflow-y-auto px-4 py-3 font-mono text-base leading-6 sm:min-h-80 sm:text-sm"
         aria-live="polite"
       >
+        {showTranscript && children}
+
         {lines.map((l) => (
           <div key={l.id} className="break-words whitespace-pre-wrap">
             {l.node}
           </div>
         ))}
 
-        {booted && (
-          <div className="flex items-center gap-2">
-            {prompt}
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              className="min-w-0 flex-1 bg-transparent text-ink caret-[var(--prompt)] outline-none"
-              spellCheck={false}
-              autoComplete="off"
-              autoCapitalize="off"
-              aria-label="Terminal input"
-              enterKeyHint="send"
-            />
-          </div>
-        )}
-        {!booted && (
-          <div>
-            <span className="cursor-block" />
-          </div>
-        )}
+        <div className="mt-1 flex items-center gap-2">
+          {prompt}
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            className="min-w-0 flex-1 bg-transparent text-ink caret-[var(--prompt)] outline-none"
+            spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="off"
+            aria-label="Terminal input"
+            enterKeyHint="send"
+          />
+        </div>
       </div>
 
       {/* suggested commands — main door on mobile, shortcut on desktop */}
