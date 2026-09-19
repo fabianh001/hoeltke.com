@@ -230,3 +230,13 @@ body > footer {
 .prose-digest a:hover {
   text-decoration-color: var(--accent);
 }
+
+/* Keyboard focus. Two places set `outline: none` on their own (the terminal
+   input and the subscribe field) and nothing replaced it, so every link and
+   button shipped the browser default on pure black. Themed from the palette,
+   and only for keyboard users — :focus-visible never fires on mouse clicks. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible:not(.outline-none) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

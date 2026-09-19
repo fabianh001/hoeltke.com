@@ -45,6 +45,7 @@ export default function Terminal({ issues, children }: Props) {
   // The transcript ships server-rendered, so the terminal is live on arrival.
   // `clear` and Ctrl-L drop it the same way they drop typed output.
   const [showTranscript, setShowTranscript] = useState(true);
+  const [focused, setFocused] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -421,11 +422,18 @@ export default function Terminal({ issues, children }: Props) {
 
         <div className="mt-1 flex items-center gap-2">
           {prompt}
+          {/* The caret only exists once the field has focus, and touch devices
+              never get it (focus would pop the keyboard on load). Without this
+              block the frame reads as a finished transcript rather than a live
+              prompt, which is exactly what the page is trying to say. */}
+          {!focused && !input && <span className="cursor-block" aria-hidden="true" />}
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             className="min-w-0 flex-1 bg-transparent text-ink caret-[var(--prompt)] outline-none"
             spellCheck={false}
             autoComplete="off"
