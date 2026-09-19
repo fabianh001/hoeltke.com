@@ -54,7 +54,7 @@ export function TerminalSubscribe({ onDone }: Props) {
             setValue(e.target.value);
             setError(false);
           }}
-          className="border-0 bg-transparent text-ink outline-none"
+          className="border-0 bg-transparent text-ink caret-[var(--prompt)]"
           style={{ width: '16rem' }}
         />
       </form>

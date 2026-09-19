@@ -38,8 +38,8 @@ const newestMeta = newest && {
   <section class="pt-4 sm:pt-10">
     <h1 class="font-mono text-2xl font-bold tracking-tight text-ink sm:text-3xl">AI Weekly</h1>
     <p class="mt-2 max-w-2xl font-sans text-base leading-relaxed text-muted sm:mt-3 sm:text-lg">
-      The week in AI, written by a pipeline every Friday. No humans in the loop, every source
-      linked.
+      A weekly digest of what actually happened in AI, written by a pipeline every Friday. No
+      humans in the loop — every source linked, so you can check the work.
     </p>
 
     <div class="mt-5 sm:mt-7">
@@ -64,9 +64,7 @@ const newestMeta = newest && {
                   {newest.data.title}
                 </a>
               </h2>
-              <p class="mt-2 line-clamp-3 max-w-[68ch] leading-relaxed text-muted sm:line-clamp-none">
-                {newest.data.description}
-              </p>
+              <p class="mt-2 max-w-[68ch] leading-relaxed text-muted">{newest.data.description}</p>
               <p class="mt-1">
                 <a
                   href={newestMeta.href}
@@ -82,12 +80,16 @@ const newestMeta = newest && {
         <p class="mt-2">
           <span class="text-prompt">$</span> <span class="text-ink">subscribe</span>
         </p>
-        <p class="mt-1 text-muted">one issue every Friday.</p>
+        <p class="mt-1 text-muted">one issue every Friday. unsubscribe anytime.</p>
         {/* gstack-shortcut(dec-1a98e3e1): this is the page's conversion point and
             nothing measures it — no baseline, no post-ship signal on subscribes.
             Upgrade when a before/after comparison is needed, or a second landing
             change is proposed. */}
-        <div class="mt-2.5">
+        {/* The shared form sizes its input at min-w-[220px], which wraps the button
+            onto a second row inside the terminal's ~318px column and pushes it below
+            the mobile fold. Neutralized from here so the header popover keeps its
+            own sizing. */}
+        <div class="mt-2.5 [&_input[type=email]]:min-w-0">
           <SubscribeForm variant="inline" />
         </div>
       </Terminal>
