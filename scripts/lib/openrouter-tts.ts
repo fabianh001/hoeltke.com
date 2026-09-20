@@ -1,5 +1,6 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 export interface TtsOptions {
   apiKey?: string;
@@ -10,10 +11,18 @@ export interface TtsOptions {
   outputFilePath?: string;
 }
 
-const DEFAULT_TTS_MODEL = process.env.TTS_MODEL || 'google/gemini-3.1-flash-tts-preview';
-const DEFAULT_TTS_VOICE = process.env.TTS_VOICE || 'Orus';
-const DEFAULT_TTS_BITRATE = process.env.TTS_BITRATE || '64k';
 const OPENROUTER_TTS_ENDPOINT = 'https://openrouter.ai/api/v1/audio/speech';
+const DEFAULT_TTS_MODEL = 'google/gemini-3.1-flash-tts-preview';
+const DEFAULT_TTS_VOICE = 'Orus';
+const DEFAULT_TTS_BITRATE = '64k';
+const BITRATE_PATTERN = /^[1-9]\d{0,3}k$/i;
+
+export function validateBitrate(bitrate: string): string {
+  if (!BITRATE_PATTERN.test(bitrate)) {
+    throw new Error(`Invalid TTS bitrate "${bitrate}". Expected a value such as 64k or 128k.`);
+  }
+  return bitrate;
+}
 
 /**
  * Wraps raw PCM audio in a valid RIFF WAV header (24kHz 16-bit mono default for Gemini).
@@ -63,8 +72,8 @@ export async function synthesizeSpeech(
     throw new Error('OPENROUTER_API_KEY is not set');
   }
 
-  const model = options.model || DEFAULT_TTS_MODEL;
-  const voice = options.voice || DEFAULT_TTS_VOICE;
+  const model = options.model || process.env.TTS_MODEL || DEFAULT_TTS_MODEL;
+  const voice = options.voice || process.env.TTS_VOICE || DEFAULT_TTS_VOICE;
   const isGemini = model.toLowerCase().includes('gemini');
   const isDeepgram = model.toLowerCase().includes('deepgram');
   const responseFormat = options.responseFormat || (isGemini ? 'pcm' : 'mp3');
@@ -129,17 +138,33 @@ export async function synthesizeSpeech(
   if (options.outputFilePath) {
     mkdirSync(dirname(options.outputFilePath), { recursive: true });
     if (options.outputFilePath.endsWith('.mp3')) {
-      const bitrate = options.bitrate || DEFAULT_TTS_BITRATE;
+      const bitrate = validateBitrate(options.bitrate || process.env.TTS_BITRATE || DEFAULT_TTS_BITRATE);
+      const temporaryPath = `${options.outputFilePath}.tmp-${process.pid}-${Date.now()}.mp3`;
       try {
-        const { execSync } = await import('node:child_process');
-        const inputFmt = responseFormat === 'pcm' ? '-f wav ' : '';
-        execSync(`ffmpeg -y ${inputFmt}-i - -codec:a libmp3lame -b:a ${bitrate} -ac 1 "${options.outputFilePath}"`, {
+        const inputArgs = responseFormat === 'pcm' ? ['-f', 'wav'] : [];
+        const result = spawnSync('ffmpeg', [
+          '-y',
+          ...inputArgs,
+          '-i', '-',
+          '-codec:a', 'libmp3lame',
+          '-b:a', bitrate,
+          '-ac', '1',
+          temporaryPath,
+        ], {
           input: finalBuffer,
-          stdio: ['pipe', 'ignore', 'ignore'],
+          stdio: ['pipe', 'ignore', 'pipe'],
         });
+        if (result.error) throw result.error;
+        if (result.status !== 0) {
+          throw new Error(result.stderr?.toString().trim() || `ffmpeg exited with status ${result.status}`);
+        }
+        renameSync(temporaryPath, options.outputFilePath);
         return finalBuffer;
       } catch (err) {
-        console.warn('ffmpeg compression to mp3 failed, writing buffer directly:', err);
+        try {
+          unlinkSync(temporaryPath);
+        } catch {}
+        throw new Error(`ffmpeg compression to MP3 failed: ${(err as Error).message}`, { cause: err });
       }
     }
     writeFileSync(options.outputFilePath, finalBuffer);

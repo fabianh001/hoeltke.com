@@ -27,6 +27,13 @@ interface ProcessOptions {
   bitrate?: string;
 }
 
+export function parseConcurrency(value: string): number {
+  if (!/^[1-9]\d*$/.test(value)) {
+    throw new Error(`Invalid TTS concurrency "${value}". Expected a positive integer.`);
+  }
+  return Number.parseInt(value, 10);
+}
+
 export async function processDigestTts({
   slug,
   dryRun,
@@ -137,9 +144,9 @@ async function main() {
   }
 
   const concurrencyIdx = args.indexOf('--concurrency') !== -1 ? args.indexOf('--concurrency') : args.indexOf('-c');
-  const concurrency = concurrencyIdx !== -1 && args[concurrencyIdx + 1]
-    ? Math.max(1, parseInt(args[concurrencyIdx + 1], 10))
-    : Math.max(1, parseInt(process.env.TTS_CONCURRENCY || '3', 10));
+  const concurrency = concurrencyIdx !== -1
+    ? parseConcurrency(args[concurrencyIdx + 1] ?? '')
+    : parseConcurrency(process.env.TTS_CONCURRENCY || '3');
 
   console.log(
     `Found ${slugsToProcess.length} digest(s) to process (concurrency: ${concurrency}): ${slugsToProcess.join(', ')}`,

@@ -3,6 +3,12 @@ import { join } from 'node:path';
 import type { RSSFeedItem } from '@astrojs/rss';
 import { renderDigestHtml } from './render-markdown';
 
+export interface AudioEnclosureMetadata {
+  url: string;
+  length: number;
+  type: 'audio/mpeg' | 'audio/wav';
+}
+
 /** Minimal shape we need from a digest collection entry. */
 export interface DigestEntry {
   id: string;
@@ -12,7 +18,7 @@ export interface DigestEntry {
     description: string;
     date: Date;
     issue?: number;
-    audio?: string;
+    audio?: AudioEnclosureMetadata;
   };
 }
 
@@ -24,11 +30,11 @@ export function getAudioEnclosure(
   const baseAudioDir = audioDir ?? join(process.cwd(), 'public/audio/digest');
   const normalizedSite = site.replace(/\/$/, '');
 
-  let audioUrl = entry.data.audio;
-  let fileSizeBytes = 0;
-  let mimeType = 'audio/mpeg';
+  let audioUrl: string | undefined;
+  let fileSizeBytes: number | undefined;
+  let mimeType: AudioEnclosureMetadata['type'] | undefined;
 
-  if (!audioUrl) {
+  if (!entry.data.audio) {
     const mp3File = join(baseAudioDir, `${entry.id}.mp3`);
     const wavFile = join(baseAudioDir, `${entry.id}.wav`);
 
@@ -46,20 +52,10 @@ export function getAudioEnclosure(
       mimeType = 'audio/wav';
     }
   } else {
-    if (audioUrl.endsWith('.wav')) mimeType = 'audio/wav';
-    if (!/^https?:\/\//i.test(audioUrl)) {
-      const cleanPath = audioUrl.replace(/^\/+/, '');
-      const localFile = join(process.cwd(), 'public', cleanPath);
-      if (existsSync(localFile)) {
-        try {
-          fileSizeBytes = statSync(localFile).size;
-        } catch {}
-      }
-      audioUrl = `${normalizedSite}/${cleanPath}`;
-    }
+    ({ url: audioUrl, length: fileSizeBytes, type: mimeType } = entry.data.audio);
   }
 
-  if (!audioUrl) return undefined;
+  if (!audioUrl || !fileSizeBytes || !mimeType) return undefined;
 
   return {
     url: audioUrl,

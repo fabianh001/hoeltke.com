@@ -38,6 +38,11 @@ interface Loaded {
     description: string;
     date: string;
     issue: number;
+    audio?: {
+      url: string;
+      length: number;
+      type: 'audio/mpeg' | 'audio/wav';
+    };
     tags?: string[];
     sources?: { title: string; url: string }[];
   };
@@ -87,7 +92,7 @@ async function main() {
     issue: issue.data.issue,
     date: new Date(issue.data.date),
     slug: issue.slug,
-    audio: issue.data.audio,
+    audio: issue.data.audio?.url,
     tags: issue.data.tags,
     sources: issue.data.sources,
   });

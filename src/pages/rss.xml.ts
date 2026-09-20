@@ -17,7 +17,7 @@ export async function GET(context: APIContext) {
     customData: [
       '<language>en</language>',
       '<itunes:author>Fabian Höltke</itunes:author>',
-      `<itunes:image href="${new URL('/og/default.png', context.site).toString()}" />`,
+      `<itunes:image href="${new URL('/podcast-cover.png', context.site).toString()}" />`,
       '<itunes:category text="Technology"><itunes:category text="Artificial Intelligence"/></itunes:category>',
       '<itunes:explicit>false</itunes:explicit>',
     ].join(''),

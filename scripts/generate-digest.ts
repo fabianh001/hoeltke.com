@@ -367,16 +367,12 @@ async function main() {
 
   if (process.env.OPENROUTER_API_KEY) {
     console.log(`\n🎙 Generating audio edition for ${slug} …`);
-    try {
-      await processDigestTts({
-        slug,
-        dryRun: false,
-        force: true,
-        useAiScript: true,
-      });
-    } catch (err) {
-      console.warn(`⚠ TTS generation failed: ${(err as Error).message}`);
-    }
+    await processDigestTts({
+      slug,
+      dryRun: false,
+      force: true,
+      useAiScript: true,
+    });
   }
 }
 

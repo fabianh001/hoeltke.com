@@ -26,4 +26,34 @@ describe('AudioPlayer', () => {
     fireEvent.click(screen.getByRole('button', { name: /Playback speed: 1.25x/i }));
     expect(screen.getByRole('button', { name: /Playback speed: 1.5x/i })).toBeDefined();
   });
+
+  it('supports keyboard and pointer seeking', () => {
+    const { container } = render(
+      <AudioPlayer src="/audio/digest/2026-34.mp3" title="AI Weekly #11" issue={11} />,
+    );
+    const audio = container.querySelector('audio') as HTMLAudioElement;
+    Object.defineProperty(audio, 'duration', { configurable: true, value: 120 });
+    Object.defineProperty(audio, 'currentTime', { configurable: true, value: 10, writable: true });
+    fireEvent.loadedMetadata(audio);
+
+    const scrubber = screen.getByRole('slider', { name: /Audio scrubber/i });
+    expect(scrubber.getAttribute('tabindex')).toBe('0');
+
+    fireEvent.keyDown(scrubber, { key: 'ArrowRight' });
+    expect(audio.currentTime).toBe(15);
+    fireEvent.keyDown(scrubber, { key: 'End' });
+    expect(audio.currentTime).toBe(120);
+
+    Object.defineProperties(scrubber, {
+      setPointerCapture: { configurable: true, value: vi.fn() },
+      hasPointerCapture: { configurable: true, value: vi.fn(() => true) },
+      releasePointerCapture: { configurable: true, value: vi.fn() },
+      getBoundingClientRect: {
+        configurable: true,
+        value: () => ({ left: 0, width: 100, top: 0, right: 100, bottom: 8, height: 8, x: 0, y: 0, toJSON() {} }),
+      },
+    });
+    fireEvent.pointerDown(scrubber, { clientX: 50, pointerId: 1 });
+    expect(audio.currentTime).toBe(60);
+  });
 });

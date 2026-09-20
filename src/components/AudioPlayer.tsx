@@ -115,10 +115,10 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
 
 
   const handleSeek = useCallback(
-    (e: React.MouseEvent<HTMLDivElement> | MouseEvent) => {
+    (clientX: number) => {
       if (!progressBarRef.current || !audioRef.current || !duration) return;
       const rect = progressBarRef.current.getBoundingClientRect();
-      const clickPos = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const clickPos = Math.max(0, Math.min(clientX - rect.left, rect.width));
       const percentage = clickPos / rect.width;
       const newTime = percentage * duration;
       audioRef.current.currentTime = newTime;
@@ -127,22 +127,50 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
     [duration],
   );
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
     setIsSeeking(true);
-    handleSeek(e);
+    handleSeek(e.clientX);
+  };
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      handleSeek(moveEvent);
-    };
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isSeeking) handleSeek(e.clientX);
+  };
 
-    const onMouseUp = () => {
-      setIsSeeking(false);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
+  const finishPointerSeek = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isSeeking) handleSeek(e.clientX);
+    setIsSeeking(false);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+  };
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
+  const handleScrubberKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !duration) return;
+
+    let newTime: number | undefined;
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        newTime = Math.max(0, audioRef.current.currentTime - 5);
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        newTime = Math.min(duration, audioRef.current.currentTime + 5);
+        break;
+      case 'Home':
+        newTime = 0;
+        break;
+      case 'End':
+        newTime = duration;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -267,10 +295,16 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
 
           <div
             ref={progressBarRef}
-            onMouseDown={handleMouseDown}
-            className="relative h-1.5 sm:h-2 flex-1 bg-line rounded-full cursor-pointer group/bar select-none overflow-hidden"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={finishPointerSeek}
+            onPointerCancel={finishPointerSeek}
+            onKeyDown={handleScrubberKeyDown}
+            tabIndex={0}
+            className="relative h-1.5 sm:h-2 flex-1 bg-line rounded-full cursor-pointer group/bar select-none touch-none overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             role="slider"
             aria-label="Audio scrubber"
+            aria-disabled={duration === 0}
             aria-valuemin={0}
             aria-valuemax={Math.round(duration)}
             aria-valuenow={Math.round(currentTime)}

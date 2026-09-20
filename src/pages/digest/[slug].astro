@@ -19,7 +19,7 @@ const dateStr = date.toISOString().slice(0, 10);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
 const audioPath =
-  entry.data.audio ||
+  entry.data.audio?.url ||
   (existsSync(join(process.cwd(), 'public/audio/digest', `${entry.id}.mp3`))
     ? `/audio/digest/${entry.id}.mp3`
     : existsSync(join(process.cwd(), 'public/audio/digest', `${entry.id}.wav`))

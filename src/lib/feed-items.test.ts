@@ -53,7 +53,11 @@ test('attaches audio enclosure when entry specifies audio or file exists', () =>
         title: 'AI Weekly #12',
         description: 'models',
         date: new Date('2026-08-28'),
-        audio: 'https://cdn.example.com/audio/2026-35.mp3',
+        audio: {
+          url: 'https://cdn.example.com/audio/2026-35.wav?signature=abc',
+          length: 123456,
+          type: 'audio/wav',
+        },
       },
     },
   ];
@@ -61,9 +65,9 @@ test('attaches audio enclosure when entry specifies audio or file exists', () =>
   const items = buildFeedItems(entriesWithAudio as any, SITE);
   // 2026-35 has explicit audio URL
   expect(items[0].enclosure).toEqual({
-    url: 'https://cdn.example.com/audio/2026-35.mp3',
-    length: 0,
-    type: 'audio/mpeg',
+    url: 'https://cdn.example.com/audio/2026-35.wav?signature=abc',
+    length: 123456,
+    type: 'audio/wav',
   });
 
   // 2026-34 has public/audio/digest/2026-34.mp3 on disk
