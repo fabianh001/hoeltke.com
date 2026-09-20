@@ -15,6 +15,11 @@ import { z } from 'zod';
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { processDigestTts } from './generate-digest-tts.js';
+
+try {
+  process.loadEnvFile?.();
+} catch { }
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIGEST_DIR = join(ROOT, 'src/content/digest');
@@ -359,6 +364,16 @@ async function main() {
 
   writeFileSync(path, renderMarkdown(digest, issue, now));
   console.log(`✓ wrote ${path} (${digest.stories.length} stories)`);
+
+  if (process.env.OPENROUTER_API_KEY) {
+    console.log(`\n🎙 Generating audio edition for ${slug} …`);
+    await processDigestTts({
+      slug,
+      dryRun: false,
+      force: true,
+      useAiScript: true,
+    });
+  }
 }
 
 main().catch((err) => {

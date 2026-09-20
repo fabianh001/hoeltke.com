@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderEmailShell, MONO } from './email-shell';
 import { themeTokens } from './theme-tokens';
 import { renderDigestHtml } from './render-markdown';
@@ -8,6 +10,8 @@ export interface IssueEmailInput {
   body: string; // markdown
   issue: number;
   date: Date;
+  slug?: string;
+  audio?: string;
   tags?: string[];
   sources?: { title: string; url: string }[];
 }
@@ -73,11 +77,37 @@ export function buildIssueEmail(
   </div>`
     : '';
 
+  let audioUrl = input.audio;
+  const slug = input.slug ?? (input.issue ? `2026-${String(input.issue).padStart(2, '0')}` : '');
+  const webUrl = slug ? `${site.replace(/\/$/, '')}/digest/${slug}` : site;
+
+  if (!audioUrl && slug) {
+    const localMp3 = join(process.cwd(), 'public/audio/digest', `${slug}.mp3`);
+    if (existsSync(localMp3)) {
+      audioUrl = `${site.replace(/\/$/, '')}/audio/digest/${slug}.mp3`;
+    }
+  } else if (audioUrl && !/^https?:\/\//i.test(audioUrl)) {
+    const cleanPath = audioUrl.replace(/^\/+/, '');
+    audioUrl = `${site.replace(/\/$/, '')}/${cleanPath}`;
+  }
+
+  const audioHtml = audioUrl
+    ? `
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;">
+    <tr>
+      <td align="center" style="border-radius:6px; background:${t.green};">
+        <a href="${escapeAttr(webUrl)}" target="_blank" class="play-btn" style="font-family:${MONO}; font-size:13px; font-weight:600; color:#000001; text-decoration:none; padding:9px 18px; display:inline-block; border-radius:6px;">&#9654; Listen</a>
+      </td>
+    </tr>
+  </table>`
+    : '';
+
   const contentHtml = `
   <p class="brand"><span class="g">$</span> <b>hoeltke.com</b> ~ cat ai-weekly/${num}.md</p>
   <div class="meta"><span class="g">issue #${num}</span> &nbsp; ${dateStr}${tagsHtml}</div>
   <h1 class="title">${escapeHtml(input.title)}</h1>
   <p class="desc">${escapeHtml(input.description)}</p>
+  ${audioHtml}
   <div class="rule"></div>
   <div class="issue-content">${content}</div>${sourcesHtml}`;
 

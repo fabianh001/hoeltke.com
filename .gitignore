@@ -25,6 +25,7 @@ pnpm-debug.log*
 
 # AI Weekly local preview (npm run digest -- --preview)
 src/content/digest/preview.md
+preview-email.html
 
 # goaccess reports
 report.html
@@ -34,3 +35,9 @@ server/confirm-email.json
 
 # superpowers scratch + local process-doc archive (never commit)
 .superpowers/
+
+# impeccable design scratch / local artifacts
+.impeccable/
+
+# local tool versions
+mise.toml

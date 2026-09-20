@@ -1,6 +1,9 @@
 ---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import AudioPlayer from '../../components/AudioPlayer';
 import ShareRow from '../../components/ShareRow.astro';
 import SubscribeForm from '../../components/SubscribeForm.astro';
 
@@ -14,6 +17,14 @@ const { Content } = await render(entry);
 const { title, description, date, issue, tags, sources } = entry.data;
 const dateStr = date.toISOString().slice(0, 10);
 const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const audioPath =
+  entry.data.audio?.url ||
+  (existsSync(join(process.cwd(), 'public/audio/digest', `${entry.id}.mp3`))
+    ? `/audio/digest/${entry.id}.mp3`
+    : existsSync(join(process.cwd(), 'public/audio/digest', `${entry.id}.wav`))
+      ? `/audio/digest/${entry.id}.wav`
+      : null);
 
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -45,6 +56,17 @@ const articleSchema = {
       <h1 class="mt-3 font-mono text-3xl font-bold tracking-tight text-balance">{title}</h1>
       <p class="mt-3 max-w-2xl text-lg leading-relaxed text-muted">{description}</p>
     </header>
+
+    {
+      audioPath && (
+        <AudioPlayer
+          client:load
+          src={audioPath}
+          title={title}
+          issue={issue}
+        />
+      )
+    }
 
     <div class="prose prose-digest mt-8 max-w-none prose-headings:font-mono prose-headings:tracking-tight">
       <Content />

@@ -49,8 +49,8 @@ jobs:
         run: |
           git config user.name "ai-weekly-bot"
           git config user.email "actions@github.com"
-          git add src/content/digest
-          slug="$(git diff --cached --name-only | xargs -n1 basename | sed 's/\.md$//' | head -1)"
+          git add src/content/digest public/audio/digest
+          slug="$(git diff --cached --name-only | grep 'src/content/digest' | xargs -n1 basename | sed 's/\.md$//' | head -1)"
           git commit -m "digest: publish issue $slug"
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
