@@ -26,6 +26,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install --yes ffmpeg
+
       - name: Generate this week's issue
         run: npm run digest
         env:
