@@ -11,7 +11,7 @@
  * Env: RESEND_API_KEY, RESEND_SEGMENT_ID; optional RESEND_REPLY_TO
  * (unset → replies go to the from address).
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
@@ -86,14 +86,19 @@ async function main() {
     body: issue.body,
     issue: issue.data.issue,
     date: new Date(issue.data.date),
+    slug: issue.slug,
+    audio: issue.data.audio,
     tags: issue.data.tags,
     sources: issue.data.sources,
   });
   const name = `ai-weekly-${issue.slug}`;
 
   if (dryRun) {
+    const previewPath = join(ROOT, 'preview-email.html');
+    writeFileSync(previewPath, html);
     const verb = draft ? 'create a draft broadcast for' : 'send';
     console.log(`[dry-run] would ${verb} "${subject}" as ${name} (${html.length} bytes of HTML)`);
+    console.log(`✓ wrote rendered preview to ${previewPath}`);
     return;
   }
 
