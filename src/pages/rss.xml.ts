@@ -11,6 +11,15 @@ export async function GET(context: APIContext) {
       'A weekly, auto-generated digest of what actually happened in AI. Curated and summarized by a pipeline, published every Friday.',
     site: context.site!,
     items: buildFeedItems(entries, context.site!.toString()),
-    customData: '<language>en</language>',
+    xmlns: {
+      itunes: 'http://www.itunes.com/dtds/podcast-1.0.dtd',
+    },
+    customData: [
+      '<language>en</language>',
+      '<itunes:author>Fabian Höltke</itunes:author>',
+      `<itunes:image href="${new URL('/og/default.png', context.site).toString()}" />`,
+      '<itunes:category text="Technology"><itunes:category text="Artificial Intelligence"/></itunes:category>',
+      '<itunes:explicit>false</itunes:explicit>',
+    ].join(''),
   });
 }

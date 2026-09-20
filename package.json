@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "digest": "tsx scripts/generate-digest.ts",
+    "digest:tts": "tsx scripts/generate-digest-tts.ts",
     "send-newsletter": "tsx scripts/send-newsletter.ts",
     "build:confirm-email": "tsx scripts/build-confirm-email.ts",
     "test": "vitest run",
