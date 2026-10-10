@@ -12,6 +12,12 @@ export interface TerminalIssue {
 
 interface Props {
   issues: TerminalIssue[];
+  /**
+   * The welcome transcript that Astro emits into the island's slot. It ships
+   * in the HTML, so the introduction is readable without JavaScript. The
+   * island hydrates over it rather than painting it; `clear` drops it.
+   */
+  children?: ReactNode;
 }
 
 type Line = { id: number; node: ReactNode };
@@ -29,24 +35,19 @@ const CHUCK_JOKES = [
 
 const SUGGESTED = ['help', 'latest', 'whoami', 'subscribe'];
 
-const BOOT_LINES = [
-  '▸ booting hoeltke.com … ok',
-  '▸ ingesting feeds   … ok',
-  '▸ summarizing week  … 200',
-];
-
 let lineId = 0;
 const mkLine = (node: ReactNode): Line => ({ id: ++lineId, node });
 
-export default function Terminal({ issues }: Props) {
+export default function Terminal({ issues, children }: Props) {
   const [lines, setLines] = useState<Line[]>([]);
   const [input, setInput] = useState('');
-  const [booted, setBooted] = useState(false);
+  // The transcript ships server-rendered, so the terminal is live on arrival.
+  // `clear` and Ctrl-L drop it the same way they drop typed output.
+  const [showTranscript, setShowTranscript] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const bootStarted = useRef(false);
 
   const append = useCallback((...nodes: ReactNode[]) => {
     setLines((prev) => [...prev, ...nodes.map(mkLine)]);
@@ -72,6 +73,8 @@ export default function Terminal({ issues }: Props) {
           run: () => [
             <span className="text-muted">available commands:</span>,
             ...[
+              ['ls', 'look around'],
+              ['cd <path>', 'open a directory'],
               ['latest', 'open the newest AI Weekly issue'],
               ['issues', 'list recent issues'],
               ['subscribe', 'subscribe by email (or grab the RSS feed)'],
@@ -85,7 +88,7 @@ export default function Terminal({ issues }: Props) {
                 <span className="text-muted">{desc}</span>
               </span>
             )),
-            <span className="text-faint">…and a few that aren't listed. explore.</span>,
+            <span className="text-muted">Type a few letters, then press Tab to discover more commands.</span>,
           ],
         },
         latest: {
@@ -299,6 +302,7 @@ export default function Terminal({ issues }: Props) {
       const result = entry.run(arg);
       if (result === 'clear') {
         setLines([]);
+        setShowTranscript(false);
         return;
       }
       append(...result);
@@ -306,51 +310,24 @@ export default function Terminal({ issues }: Props) {
     [append, commands]
   );
 
-  // boot sequence
+  // Follow new command output, leaving the welcome in place on initial load.
+  // Narrow/touch layouts scroll the page; desktop follows the inner transcript.
   useEffect(() => {
-    if (bootStarted.current) return;
-    bootStarted.current = true;
-
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const finishBoot = () => {
-      append(
-        <span>
-          {prompt} <span className="text-ink">latest</span>
-        </span>,
-        ...(latest
-          ? [
-              <span className="text-muted">newest issue:</span>,
-              renderIssueLink(latest),
-              <span className="text-faint">type 'help' to look around.</span>,
-            ]
-          : [<span className="text-faint">type 'help' to look around.</span>])
-      );
-      setBooted(true);
-    };
-
-    if (reduced) {
-      append(...BOOT_LINES.map((l) => <span className="text-faint">{l}</span>));
-      finishBoot();
-      return;
+    if (lines.length === 0) return;
+    if (matchMedia('(max-width: 760px), (pointer: coarse)').matches) {
+      inputRef.current?.scrollIntoView({ block: 'nearest' });
+    } else {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
     }
-
-    BOOT_LINES.forEach((l, i) => {
-      setTimeout(() => append(<span className="text-faint">{l}</span>), 350 * (i + 1));
-    });
-    setTimeout(finishBoot, 350 * (BOOT_LINES.length + 1));
-  }, []);
-
-  // keep scrolled to bottom
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [lines]);
 
-  // focus the input once it's mounted, so typing works immediately on load
+  // Focus the input so typing works immediately, without scrolling the page:
+  // the terminal sits in the first viewport and a focus scroll would jump it.
   useEffect(() => {
-    if (booted && !matchMedia('(pointer: coarse)').matches) {
-      inputRef.current?.focus();
+    if (!matchMedia('(pointer: coarse)').matches) {
+      inputRef.current?.focus({ preventScroll: true });
     }
-  }, [booted]);
+  }, []);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -369,6 +346,8 @@ export default function Terminal({ issues }: Props) {
       setHistoryIdx(next);
       setInput(next >= 0 ? history[next] : '');
     } else if (e.key === 'Tab') {
+      // Empty prompts and reverse navigation use the browser's focus order.
+      if (!input.trim() || e.shiftKey) return;
       e.preventDefault();
       const lower = input.toLowerCase();
       const complete = (
@@ -409,6 +388,7 @@ export default function Terminal({ issues }: Props) {
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
       setLines([]);
+      setShowTranscript(false);
     }
   };
 
@@ -426,43 +406,48 @@ export default function Terminal({ issues }: Props) {
         <span className="size-2.5 rounded-full bg-red/80" />
         <span className="size-2.5 rounded-full bg-amber/80" />
         <span className="size-2.5 rounded-full bg-green/80" />
-        <span className="ml-2 font-mono text-xs text-faint">fabian — zsh</span>
+        <span className="ml-2 font-mono text-xs text-faint">
+          fabian@hoeltke.com <span className="text-line-bright">:</span> ~/digest
+        </span>
       </div>
 
       {/* output */}
       <div
         ref={scrollRef}
-        className="h-72 overflow-y-auto px-4 py-3 font-mono text-base leading-6 sm:h-80 sm:text-sm"
+        className="max-h-[34rem] min-h-72 overflow-y-auto px-4 py-3 font-mono text-base leading-6 sm:min-h-80 sm:text-sm"
         aria-live="polite"
       >
+        {showTranscript && children}
+
         {lines.map((l) => (
           <div key={l.id} className="break-words whitespace-pre-wrap">
             {l.node}
           </div>
         ))}
 
-        {booted && (
-          <div className="flex items-center gap-2">
-            {prompt}
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              className="min-w-0 flex-1 bg-transparent text-ink caret-[var(--prompt)] outline-none"
-              spellCheck={false}
-              autoComplete="off"
-              autoCapitalize="off"
-              aria-label="Terminal input"
-              enterKeyHint="send"
-            />
-          </div>
-        )}
-        {!booted && (
-          <div>
-            <span className="cursor-block" />
-          </div>
-        )}
+        <div className="mt-1 flex items-center gap-2">
+          {prompt}
+          {/* While the line is empty the authored block IS the caret, focused or
+              not: the browser's own caret is a default that belongs to no design
+              system, and on touch there is no caret at all because focusing here
+              would pop the keyboard on load. Typing hands over to the real one. */}
+          {!input && <span className="cursor-block" aria-hidden="true" />}
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            className={`min-w-0 flex-1 bg-transparent text-ink outline-none ${
+              input ? 'caret-[var(--prompt)]' : 'caret-transparent'
+            }`}
+            spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="off"
+            aria-label="Terminal input"
+            data-terminal-input
+            enterKeyHint="send"
+          />
+        </div>
       </div>
 
       {/* suggested commands — main door on mobile, shortcut on desktop */}

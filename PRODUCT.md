@@ -8,56 +8,151 @@ web
 
 ## Users
 
-Primary users are AI practitioners, software engineers, and technical researchers looking for a condensed, high-signal summary of what actually happened in AI over the past week without hype, fluff, or marketing spin. Secondary visitors are developers curious about the autonomous architecture or Fabian Hoeltke's work.
+Two audiences, served in this order:
+
+1. **AI practitioners skimming the week** — engineers, researchers, and people who
+   work adjacent to AI, landing with a few minutes and a question: *did anything
+   actually happen this week?* They read one issue, and the good outcome is they
+   subscribe so Friday comes to them instead.
+2. **Hiring managers, recruiters, and peers evaluating Fabian** — they arrive from a
+   profile link or a shared issue. They are not here to read the news; they are
+   reading the artifact. The working pipeline is the portfolio piece.
+
+The site is **digest-first**: the reader's experience is designed for audience 1, and
+audience 2 is served as a consequence of that work being visibly well made. When the
+two conflict, the reader wins.
 
 ## Product Purpose
 
-Automatically curate, summarize, and ship a weekly AI digest (**AI Weekly**) every Friday at 07:00 UTC across web, email newsletter, RSS, and TTS audio. Success is a reader staying informed on meaningful AI technical progress in under 5 minutes, backed by zero-maintenance autonomous publishing.
+hoeltke.com is a personal site that publishes **AI Weekly**: a digest of the week's AI
+news, selected and summarized without a human in the loop, and distributed on the web,
+by email, over RSS, and as AI-narrated audio.
+
+Success over the next 12 months is **subscriber growth**. The email list is the
+scoreboard. Design work is measured against two questions: does a first-time reader
+finish an issue, and do they subscribe.
 
 ## Positioning
 
-A zero-human-in-the-loop autonomous publication built with strict factual grounding: the pipeline refuses to publish any story citing a URL not in its collected source corpus. Unlike manual curated lists or noisy AI summaries, it is 100% transparent, source-validated, and operates completely hands-off.
+The mechanism is the position: the digest is written by a pipeline, on a schedule,
+with no editorial pass. A neighboring newsletter cannot truthfully say the same. Two
+consequences are load-bearing and must survive any redesign:
+
+- **It is labeled.** Every issue says it is auto-curated and AI-summarized. The
+  automation is disclosed, never laundered as human editorial judgment.
+- **It is checkable.** Every story links its sources, and the generator refuses to
+  publish a story that cites a URL it was not given.
+
+The site is also its own proof: it is built by the person it is about, and it runs
+itself. That claim is only worth making while it is true.
 
 ## Operating Context
 
-- Read weekly on web (desktop & mobile browsers) or delivered directly to inboxes via Resend newsletter broadcasts.
-- Listened to via embedded TTS audio players for on-the-go consumption.
-- Discovered and navigated on desktop via an interactive retro terminal interface (`help`, `digest`, `about`, `subscribe`).
-- Syndicated via RSS reader feeds.
+- **Publishing cadence:** every Friday, 07:00 UTC, via GitHub Actions cron
+  (`weekly-digest.yml`). The run generates the issue, commits it, deploys the site,
+  and emails subscribers in the same pass.
+- **Review gate:** repo variable `NEWSLETTER_REQUIRE_APPROVAL=true` routes the weekly
+  issue into a PR for a copy edit before merge; unset, it publishes and sends
+  unattended. Both modes are supported states, not a transition.
+- **Reading surfaces:** the issue is read on the web (`/digest/<slug>/`), in an HTML
+  email built from the site's own tokens, and in an RSS reader. The same issue must
+  hold up in all three.
+- **Entry points:** direct visit, a shared issue link, RSS, the email itself, and
+  profile links from GitHub and LinkedIn.
+- **Deployment:** Astro static build → rsync → Caddy on a VPS. A zero-dependency Node
+  service (`server/subscribe.mjs`) behind Caddy handles HMAC double opt-in and adds
+  confirmed contacts to Resend.
 
 ## Capabilities and Constraints
 
-- **Autonomous Pipeline**: Scheduled weekly cron (GitHub Actions) collects feeds, filters/summarizes via LLM structured outputs (OpenRouter / Claude), verifies citations, and commits markdown issues directly.
-- **Delivery Channels**: Static Astro web pages, email broadcasts (Resend API), RSS XML feed (`/rss.xml`), and TTS audio generation.
-- **Subscription Management**: Zero-dependency Node service with HMAC double opt-in verification running behind a VPS reverse proxy.
-- **Performance & Tech Constraints**: Static HTML generation via Astro with minimal client-side React islands (`Terminal`, `AudioPlayer`), styled with Tailwind CSS v4. No heavy client runtimes or intrusive analytics.
-- **Styling Paradigm**: Dark-mode, terminal/CRT aesthetic with monospace typography (`JetBrains Mono`, `Inter`), prompt glyphs, and subtle glow accents.
+**Ships today**
+
+- Blog homepage with a recent-post index and a featured latest issue. Persistent
+  Home / Terminal navigation leads to the interactive shell at `/terminal/` (the
+  terminal React island), with its command set, tab completion, and recent issues.
+- Digest index and issue pages generated from the `digest` content collection
+  (`title`, `description`, `date`, `issue`, `tags`, `sources`).
+- Email subscribe with HMAC double opt-in, a confirmation email, and a
+  `/subscribed` landing page.
+- RSS feed with podcast audio enclosures, sitemap, `llms.txt`, and generated OG images (`astro-og-canvas`).
+- AI-narrated audio editions with an embedded AudioPlayer React island; optional issue metadata supplies audio URL, content type, and byte length.
+- `/travel` — a noindex easter egg recovered from the 2019 version of the site,
+  reachable from the terminal rather than the nav.
+- Repetition guard: the generator reads the last 4 issues and drops items whose URLs
+  were already cited (`LOOKBACK_ISSUES`).
+
+**Constraints**
+
+- Astro static output with React islands for the terminal and audio player.
+  Keeping client JS proportionate is a standing preference, not yet a hard budget.
+- No CMS and no database. Issues are markdown files in the repo; subscribers live in
+  Resend.
+- Content is machine-generated. Design cannot assume an editor will fix awkward
+  copy, tune a headline, or supply an image per story.
+- Issue length, tag count, and source count vary run to run. Every layout must
+  survive a thin issue and a fat one.
+- Email rendering is a real target: the newsletter is built from the site's tokens
+  and inlined with `juice`, so token changes propagate into an environment with far
+  less CSS support than the browser.
+
+**Explicitly undecided**
+
+- No accessibility standard has been committed to (see below).
+- No analytics or measurement of the subscribe funnel has been established, despite
+  subscriber growth being the stated goal.
 
 ## Brand Commitments
 
-- **Name**: hoeltke.com / AI Weekly.
-- **Voice**: Direct, technical, cynical of hype, high-signal, transparent.
-- **Authorship**: Publication-first. AI Weekly is the headline product; Fabian Hoeltke's personal branding remains understated, quiet, and secondary.
-- **Identity**: Terminal/hacker aesthetic with green/amber accents, scanlines, and CLI affordances, balanced with clean typographic hierarchy for long-form reading.
+- **Name and voice:** "hoeltke.com" and "AI Weekly". The voice is lowercase,
+  terse, technical, and dry — shell-flavored without being a costume. Present in
+  shipped copy (`# whoami`, `psst — the terminal knows more than this page does`).
+- **Honesty about automation:** the auto-curated / AI-summarized label and linked
+  sources are product commitments, not styling. They survive any redesign.
+- **The identity is Fabian's own.** Name, GitHub and LinkedIn links, the Datadog
+  affiliation, and the `Person` schema are factual and must stay accurate.
+
+**Current redesign commitment:** Fabian selected claude.dev's publication layout
+and two-route Home / Terminal navigation, explicitly retaining the current dark
+black/purple/green palette. The blog is the default entry point; the terminal is
+for exploring the person behind it. The reading index uses thin ruled rows rather
+than a terminal transcript or card stack.
 
 ## Evidence on Hand
 
-- Published weekly issues in `src/content/digest/` (e.g., `2026-34.md` and archive).
-- Active source curation list in `scripts/sources.json`.
-- Production deployment at [hoeltke.com](https://hoeltke.com).
-- Automated CI workflows in `.github/workflows/`.
+- 19 published issues in `src/content/digest/` (2026-24 through 2026-41), plus a
+  gitignored preview slot — real content to design against, including the thin and
+  awkward ones.
+- Real photography in `src/assets/travel/` (7 images, Australia 2019).
+- Generated OG images via `astro-og-canvas` (`src/pages/og/`).
+- A working, documented pipeline: `scripts/generate-digest.ts`,
+  `scripts/sources.json`, `server/subscribe.mjs`, `docs/server-setup.md`, and the
+  three GitHub Actions workflows.
+- Test coverage for the subscribe form, terminal subscribe, and email shell.
+
+**Absences future work must not fabricate:** there are no subscriber counts, open
+rates, testimonials, press mentions, customers, or endorsements. There is no
+pricing — everything is free. Do not invent social proof, and do not state a list
+size until Fabian supplies a real number.
 
 ## Product Principles
 
-1. **Publication-First, Quiet Author**: The value is the digest and the pipeline's output; personal branding provides credibility and context without overshadowing the publication.
-2. **Strict Pipeline Honesty**: Every issue is explicitly labeled as auto-curated and AI-summarized. Citations are strictly validated against input feeds; hallucinations or uncited claims halt publishing.
-3. **High Signal, Zero Noise**: Ruthlessly filter out marketing fluff, buzzword PR, and repetitive news in favor of foundational research, tooling, and genuine technical shifts.
-4. **Keyboard & Terminal Ethos**: Interactive surfaces honor terminal paradigms (scanlines, prompt commands, monospaced clarity) while preserving effortless legibility for standard web reading.
-5. **Lightweight & Blazing Fast**: Fast static delivery, minimal JavaScript overhead, and immediate content availability across all platforms.
+1. **The reader is the customer; the résumé is the receipt.** Every design decision
+   is argued from "does this help someone finish the issue and subscribe," never
+   from "does this look impressive to a hiring manager."
+2. **Disclose the machine, then earn trust anyway.** The automation is stated plainly
+   and the sources are one click away. Credibility comes from checkability, not from
+   sounding human.
+3. **Design for content nobody edited.** Layouts, hierarchy, and components must hold
+   up against whatever the model produced this week — short, long, lopsided, or off.
+4. **One issue, three surfaces.** Web, email, and RSS are not tiers. A change that
+   improves the page and breaks the email is not finished.
+5. **It has to keep running.** Anything that requires weekly human attention to stay
+   good is the wrong answer for this product.
 
 ## Accessibility & Inclusion
 
-- Semantic HTML structure with single `h1` per page and valid landmark roles.
-- High-contrast text against dark backgrounds adhering to WCAG AA/AAA.
-- Full keyboard operability for interactive components (terminal navigation, audio player controls, subscription forms).
-- Screen-reader friendly alternatives to ASCII / terminal decorative art and clear audio player ARIA states.
+No standard has been committed to and no specific user need has been established.
+Recorded as open: given that the incumbent world is pure black with neon accents and
+a mono-first type stack, contrast, focus visibility, and reduced-motion handling are
+the likely first questions whenever the visual system is next touched — but nothing
+here is a confirmed requirement yet.

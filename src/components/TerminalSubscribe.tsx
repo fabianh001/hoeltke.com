@@ -43,19 +43,21 @@ export function TerminalSubscribe({ onDone }: Props) {
 
   return (
     <span>
-      <form onSubmit={onSubmit}>
-        <span className="text-faint">enter email › </span>
+      <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-x-1 gap-y-2">
+        <span className="text-muted">enter email › </span>
         <input
           autoFocus
           name="email"
+          aria-label="Email address"
+          inputMode="email"
+          autoComplete="email"
           placeholder="you@example.com"
           value={value}
           onChange={(e) => {
             setValue(e.target.value);
             setError(false);
           }}
-          className="border-0 bg-transparent text-ink outline-none"
-          style={{ width: '16rem' }}
+          className="w-64 min-w-0 max-w-full flex-1 border-0 bg-transparent text-ink placeholder:text-muted caret-[var(--prompt)]"
         />
       </form>
       {error && (

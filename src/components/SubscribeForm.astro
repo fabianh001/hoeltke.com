@@ -22,8 +22,9 @@ const { variant = 'card' } = Astro.props;
       name="email"
       required
       autocomplete="email"
+      aria-label="Email address"
       placeholder="you@example.com"
-      class="min-w-[220px] flex-1 rounded-md border border-line-bright bg-black px-3 py-2 font-mono text-sm text-ink outline-none focus:border-accent"
+      class="min-w-[220px] flex-1 rounded-md border border-line-bright bg-black px-3 py-2 font-mono text-sm text-ink placeholder:text-muted outline-none focus:border-accent"
     />
     <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
     <button
