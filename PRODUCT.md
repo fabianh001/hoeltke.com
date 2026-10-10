@@ -26,7 +26,7 @@ two conflict, the reader wins.
 
 hoeltke.com is a personal site that publishes **AI Weekly**: a digest of the week's AI
 news, selected and summarized without a human in the loop, and distributed on the web,
-by email, and over RSS.
+by email, over RSS, and as AI-narrated audio.
 
 Success over the next 12 months is **subscriber growth**. The email list is the
 scoreboard. Design work is measured against two questions: does a first-time reader
@@ -69,12 +69,13 @@ itself. That claim is only worth making while it is true.
 
 - Blog homepage with a recent-post index and a featured latest issue. Persistent
   Home / Terminal navigation leads to the interactive shell at `/terminal/` (the
-  one React island), with its command set, tab completion, and recent issues.
+  terminal React island), with its command set, tab completion, and recent issues.
 - Digest index and issue pages generated from the `digest` content collection
   (`title`, `description`, `date`, `issue`, `tags`, `sources`).
 - Email subscribe with HMAC double opt-in, a confirmation email, and a
   `/subscribed` landing page.
-- RSS feed, sitemap, `llms.txt`, and generated OG images (`astro-og-canvas`).
+- RSS feed with podcast audio enclosures, sitemap, `llms.txt`, and generated OG images (`astro-og-canvas`).
+- AI-narrated audio editions with an embedded AudioPlayer React island; optional issue metadata supplies MP3 URL, duration, and byte length.
 - `/travel` — a noindex easter egg recovered from the 2019 version of the site,
   reachable from the terminal rather than the nav.
 - Repetition guard: the generator reads the last 4 issues and drops items whose URLs
@@ -82,7 +83,7 @@ itself. That claim is only worth making while it is true.
 
 **Constraints**
 
-- Astro static output with React islands; the terminal is the only island today.
+- Astro static output with React islands for the terminal and audio player.
   Keeping client JS proportionate is a standing preference, not yet a hard budget.
 - No CMS and no database. Issues are markdown files in the repo; subscribers live in
   Resend.
@@ -118,7 +119,7 @@ than a terminal transcript or card stack.
 
 ## Evidence on Hand
 
-- 15 published issues in `src/content/digest/` (2026-24 through 2026-37), plus a
+- 19 published issues in `src/content/digest/` (2026-24 through 2026-41), plus a
   gitignored preview slot — real content to design against, including the thin and
   awkward ones.
 - Real photography in `src/assets/travel/` (7 images, Australia 2019).

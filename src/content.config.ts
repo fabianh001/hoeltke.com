@@ -9,6 +9,13 @@ const digest = defineCollection({
     date: z.coerce.date(),
     issue: z.number(),
     tags: z.array(z.string()).default([]),
+    audio: z
+      .object({
+        url: z.string().url(),
+        length: z.number().int().positive(),
+        type: z.enum(['audio/mpeg', 'audio/wav']),
+      })
+      .optional(),
     sources: z
       .array(z.object({ title: z.string(), url: z.string().url() }))
       .default([]),
