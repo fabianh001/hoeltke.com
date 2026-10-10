@@ -1,9 +1,6 @@
 name: Newsletter
 
-# Emails an issue to subscribers. Three ways in:
-#   push        — a digest landed on main (merging a review PR)
-#   workflow_call — weekly-digest.yml published straight to main
-#   workflow_dispatch — manual (re-)send; blank slug means the newest issue
+# Merge is editorial approval. Generate and publish audio before deploying and sending.
 on:
   push:
     branches: [main]
@@ -13,6 +10,10 @@ on:
       slug:
         type: string
         required: true
+      revision:
+        description: 'Approved content commit (required for bot-published issues)'
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
       slug:
@@ -20,58 +21,172 @@ on:
         type: string
         required: false
 
+permissions:
+  contents: read
+
 concurrency:
   group: newsletter
   cancel-in-progress: false
+  queue: max
 
 jobs:
-  send:
+  prepare:
+    name: Generate and publish audio
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      slug: ${{ steps.pick.outputs.slug }}
+      source_revision: ${{ steps.source.outputs.revision }}
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: main
-          # full history: the push trigger diffs against the previous main tip
+          ref: ${{ inputs.revision || github.sha }}
           fetch-depth: 0
+
+      - name: Pin the approved copy
+        id: source
+        run: echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
       - run: npm ci
 
-      # An explicit slug wins. Otherwise take the digest file this push added:
-      # "newest issue" would send the wrong one when a review PR is merged after
-      # a later issue has already gone out.
-      - name: Pick the issue
+      - name: Pick the approved issue
         id: pick
         env:
           INPUT_SLUG: ${{ inputs.slug }}
           BEFORE: ${{ github.event.before }}
-          SHA: ${{ github.sha }}
-        run: |
-          slug="$INPUT_SLUG"
-          if [ -z "$slug" ] && [ "$GITHUB_EVENT_NAME" = 'push' ]; then
-            slug="$(git diff --name-only "$BEFORE" "$SHA" -- src/content/digest \
-              | xargs -n1 basename \
-              | sed 's/\.md$//' \
-              | grep -v '^preview$' \
-              | head -1)"
-          fi
-          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          SOURCE_SHA: ${{ steps.source.outputs.revision }}
+        run: npx tsx scripts/prepare-newsletter.ts
 
-      # Idempotent: skips if a non-draft broadcast for this issue already exists.
-      - name: Email the issue to subscribers
+      - name: Restore previously published audio
+        if: steps.pick.outputs.slug != ''
         env:
           SLUG: ${{ steps.pick.outputs.slug }}
+        run: bash scripts/publish-digest-audio.sh restore "$SLUG"
+
+      - uses: actions/cache/restore@v4
+        if: steps.pick.outputs.slug != ''
+        id: audio_cache
+        with:
+          path: |
+            public/audio/digest/${{ steps.pick.outputs.slug }}.mp3
+            public/audio/digest/${{ steps.pick.outputs.slug }}.json
+          key: digest-audio-v1-${{ steps.pick.outputs.slug }}-${{ hashFiles(format('src/content/digest/{0}.md', steps.pick.outputs.slug)) }}
+
+      - name: Install the audio encoder
+        if: steps.pick.outputs.slug != ''
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Generate audio from the approved copy
+        if: steps.pick.outputs.slug != ''
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DIGEST_SPEECH_MODEL: ${{ vars.DIGEST_SPEECH_MODEL }}
+          TTS_MODEL: ${{ vars.TTS_MODEL }}
+          TTS_VOICE: ${{ vars.TTS_VOICE }}
+          TTS_BITRATE: ${{ vars.TTS_BITRATE }}
+        run: npm run digest:tts -- --slug "$SLUG"
+
+      # Save immediately: publication/deployment failures must not incur another TTS call.
+      - uses: actions/cache/save@v4
+        if: steps.pick.outputs.slug != '' && steps.audio_cache.outputs.cache-hit != 'true'
+        with:
+          path: |
+            public/audio/digest/${{ steps.pick.outputs.slug }}.mp3
+            public/audio/digest/${{ steps.pick.outputs.slug }}.json
+          key: ${{ steps.audio_cache.outputs.cache-primary-key }}
+
+      - name: Persist audio for future site deployments
+        if: steps.pick.outputs.slug != ''
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+        run: bash scripts/publish-digest-audio.sh publish "$SLUG"
+
+      - uses: actions/upload-artifact@v4
+        if: steps.pick.outputs.slug != ''
+        with:
+          name: approved-audio
+          path: |
+            public/audio/digest/${{ steps.pick.outputs.slug }}.mp3
+            public/audio/digest/${{ steps.pick.outputs.slug }}.json
+          if-no-files-found: error
+          overwrite: true
+
+  deploy:
+    name: Publish the site and audio
+    needs: prepare
+    if: needs.prepare.outputs.slug != ''
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
+  send:
+    name: Verify audio and send
+    needs: [prepare, deploy]
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.email.outputs.status }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.source_revision }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: approved-audio
+          path: public/audio/digest
+
+      - name: Confirm the approved copy is still current
+        env:
+          SLUG: ${{ needs.prepare.outputs.slug }}
+        run: bash scripts/publish-digest-audio.sh check "$SLUG"
+
+      - name: Verify published audio and email subscribers
+        id: email
+        env:
+          SLUG: ${{ needs.prepare.outputs.slug }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_SEGMENT_ID: ${{ secrets.RESEND_SEGMENT_ID }}
-          # optional reply-to mailbox; kept in repo settings so no personal address lives in the repo
           RESEND_REPLY_TO: ${{ vars.RESEND_REPLY_TO }}
+        run: npm run send-newsletter -- --slug "$SLUG"
+
+  summary:
+    name: Sendout status
+    needs: [prepare, deploy, send]
+    if: always() && needs.prepare.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report sendout status
+        env:
+          SLUG: ${{ needs.prepare.outputs.slug }}
+          PREPARE: ${{ needs.prepare.result }}
+          DEPLOY: ${{ needs.deploy.result }}
+          SEND: ${{ needs.send.result }}
+          SEND_STATUS: ${{ needs.send.outputs.status }}
         run: |
-          if [ -n "$SLUG" ]; then
-            npm run send-newsletter -- --slug "$SLUG"
+          if [ "$SEND" = success ]; then
+            if [ "$SEND_STATUS" = skipped ]; then
+              echo "Already sent: $SLUG — duplicate send skipped." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Sent: $SLUG. [Listen](https://hoeltke.com/audio/digest/$SLUG.mp3)" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          elif [ "$PREPARE" = success ] && [ -z "$SLUG" ]; then
+            echo 'No newsletter issue to send.' >> "$GITHUB_STEP_SUMMARY"
           else
-            npm run send-newsletter
+            if [ "$PREPARE" != success ]; then reason='audio generation or publication failed';
+            elif [ "$DEPLOY" != success ]; then reason='site deployment failed';
+            else reason='audio verification or email sending failed'; fi
+            echo "Sendout held: $SLUG — $reason." >> "$GITHUB_STEP_SUMMARY"
+            echo 'Use Re-run failed jobs to retry this approved revision. Completed audio is reused and already-sent issues are skipped.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'If the copy changed on main, start a new Newsletter run on main with the issue slug.' >> "$GITHUB_STEP_SUMMARY"
           fi

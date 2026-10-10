@@ -11,10 +11,12 @@
  * Env: RESEND_API_KEY, RESEND_SEGMENT_ID; optional RESEND_REPLY_TO
  * (unset → replies go to the from address).
  */
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, appendFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
+import { verifyIssueAudio } from './lib/newsletter-release.js';
+import { alreadySent } from './lib/newsletter-broadcast.js';
 import { buildIssueEmail } from '../src/lib/issue-email';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,18 +73,6 @@ function headers(key: string) {
   return { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
 }
 
-/**
- * True if a broadcast for this issue already went out (idempotent re-runs).
- * Drafts (e.g. tests) never block a later real send. Best-effort: a query
- * error must not block sending.
- */
-async function alreadySent(name: string, key: string): Promise<boolean> {
-  const res = await fetch(`${API}/broadcasts?limit=100`, { headers: headers(key) });
-  if (!res.ok) return false;
-  const data = (await res.json()) as { data?: { name: string; status: string }[] };
-  return (data.data ?? []).some((b) => b.name === name && b.status !== 'draft');
-}
-
 async function main() {
   const issue = pickIssue();
   const { subject, html } = buildIssueEmail({
@@ -114,7 +104,14 @@ async function main() {
 
   if (!draft && (await alreadySent(name, key))) {
     console.log(`✓ "${subject}" was already sent — skipping.`);
+    if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, 'status=skipped\n');
     return;
+  }
+
+  if (!draft) {
+    const audioUrl = await verifyIssueAudio(issue.slug, DIGEST_DIR, join(ROOT, 'public/audio/digest'));
+    console.log(`✓ Audio ready: ${audioUrl}`);
+    if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Audio ready: [Listen](${audioUrl})\n`);
   }
 
   const res = await fetch(`${API}/broadcasts`, {
@@ -131,6 +128,7 @@ async function main() {
     }),
   });
   if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
+  if (!draft && process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, 'status=sent\n');
   console.log(draft ? `✓ created draft broadcast "${subject}".` : `✓ sent "${subject}" to subscribers.`);
 }
 

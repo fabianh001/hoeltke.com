@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -7,6 +7,7 @@ import {
   generateSpokenScriptDeterministic,
   parseDigestMarkdown,
 } from './lib/digest-tts-script.js';
+import { readAudioManifest, sha256, validateNewsletterSlug } from './lib/newsletter-release.js';
 import { synthesizeSpeech } from './lib/openrouter-tts.js';
 
 try {
@@ -25,6 +26,8 @@ interface ProcessOptions {
   useAiScript: boolean;
   client?: OpenAI;
   bitrate?: string;
+  digestDir?: string;
+  audioDir?: string;
 }
 
 export function parseConcurrency(value: string): number {
@@ -41,19 +44,28 @@ export async function processDigestTts({
   useAiScript,
   client,
   bitrate,
+  digestDir = DIGEST_DIR,
+  audioDir = AUDIO_DIR,
 }: ProcessOptions): Promise<string> {
-  const mdPath = join(DIGEST_DIR, `${slug}.md`);
+  validateNewsletterSlug(slug);
+  const mdPath = join(digestDir, `${slug}.md`);
   if (!existsSync(mdPath)) {
     throw new Error(`Digest file not found: ${mdPath}`);
   }
 
-  const audioPath = join(AUDIO_DIR, `${slug}.mp3`);
-  if (existsSync(audioPath) && !force && !dryRun) {
-    console.log(`⚡ Audio already exists for ${slug}, skipping (use --force to overwrite)`);
-    return audioPath;
+  const audioPath = join(audioDir, `${slug}.mp3`);
+  const manifestPath = join(audioDir, `${slug}.json`);
+  const mdContent = readFileSync(mdPath, 'utf8');
+  const sourceHash = sha256(mdContent);
+  const manifest = readAudioManifest(manifestPath);
+  if (existsSync(audioPath) && !force && !dryRun && manifest?.sourceHash === sourceHash) {
+    const bytes = readFileSync(audioPath);
+    if (bytes.length && sha256(bytes) === manifest.audioHash) {
+      console.log(`✓ Audio matches the reviewed copy for ${slug}, reusing it`);
+      return audioPath;
+    }
   }
 
-  const mdContent = readFileSync(mdPath, 'utf8');
   const parsed = parseDigestMarkdown(mdContent);
 
   const aiClient =
@@ -94,6 +106,9 @@ export async function processDigestTts({
     bitrate,
   });
 
+  const bytes = readFileSync(audioPath);
+  if (!bytes.length) throw new Error(`Generated audio is empty for ${slug}`);
+  writeFileSync(manifestPath, JSON.stringify({ sourceHash, audioHash: sha256(bytes) }, null, 2) + '\n');
   console.log(`✓ Generated audio: ${audioPath}`);
   return audioPath;
 }
@@ -110,10 +125,6 @@ async function main() {
 
   const bitrateIdx = args.indexOf('--bitrate');
   const bitrate = bitrateIdx !== -1 && args[bitrateIdx + 1] ? args[bitrateIdx + 1] : undefined;
-
-  if (!dryRun && !process.env.OPENROUTER_API_KEY) {
-    throw new Error('OPENROUTER_API_KEY environment variable is required');
-  }
 
   const client = process.env.OPENROUTER_API_KEY
     ? new OpenAI({
