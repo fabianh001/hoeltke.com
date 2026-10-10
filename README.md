@@ -67,4 +67,6 @@ Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good
 
 Repetition guard: the generator reads the last 4 issues, drops any collected item whose URL was already cited, and hands the model the past headlines with an instruction to skip already-covered stories unless there is a genuinely new development (`LOOKBACK_ISSUES` in `scripts/generate-digest.ts`).
 
+Editorial voice: the generation prompt follows [the recurring manual edits](docs/newsletter-voice.md): direct story summaries, no HN popularity claims or newsletter backreferences, concise attribution, and practical implications without overstatement. HN scores rank candidates but are omitted from the model input; past headlines are private deduplication context. The model performs a final copy edit before returning the issue.
+
 Server + DNS setup: [`docs/server-setup.md`](docs/server-setup.md).

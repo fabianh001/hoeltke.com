@@ -96,7 +96,9 @@ async function collectFeeds(): Promise<RawItem[]> {
       .slice(0, hn.maxItems ?? 30);
     for (const hit of top) {
       items.push({
-        source: `Hacker News (${hit.points} points)`,
+        // Scores rank candidates above; they are not editorial evidence and
+        // must not leak into the newsletter's prose or source labels.
+        source: 'Hacker News',
         title: hit.title,
         url: hit.url ?? `https://news.ycombinator.com/item?id=${hit.objectID}`,
         date: hit.created_at.slice(0, 10),
@@ -202,23 +204,43 @@ async function summarize(items: RawItem[], issueNumber: number, past: PastIssue[
     .map((p) => `Issue #${p.issue} (${p.date}):\n${p.headlines.map((h) => `  - ${h}`).join('\n')}`)
     .join('\n');
   const coveredBlock = past.length
-    ? `\n\nStories already covered in recent issues — do NOT run these again, even from a different source or angle. The only exception is a genuinely new development (a new release, a reversal, a major finding); in that case say what is new and reference the earlier coverage in one clause.\n\n${coveredList}`
+    ? `\n\nPrivate selection context: stories already covered in recent issues. Do NOT run these again, even from a different source or angle. The only exception is a genuinely new development (a new release, a reversal, a major finding); explain the new development so the story stands on its own. These headlines are only for deduplication: never mention issue numbers, earlier newsletters, or our previous coverage in reader-facing copy.\n\n${coveredList}`
     : '';
 
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     {
       role: 'system',
-      content: `You write "AI Weekly", a sharply curated weekly digest of AI news for software engineers. Voice: direct, technically literate, a little dry-witted, zero hype. You pick only stories that will still matter in a month: model releases, meaningful research, tooling worth adopting, consequential industry/policy moves. Skip funding-round noise, product marketing, and duplicate coverage (merge duplicates into one story, citing the best source). Never repeat a story a previous issue already covered — readers get this every week.`,
+      content: `You write "AI Weekly", a sharply curated weekly digest of AI news for software engineers. Voice: direct, technically literate, a little dry-witted, zero hype. Write as a knowledgeable colleague explaining what changed and why it is useful. You pick only stories that will still matter in a month: model releases, meaningful research, tooling worth adopting, consequential industry/policy moves. Skip funding-round noise, product marketing, and duplicate coverage (merge duplicates into one story, citing the best source). Never repeat a story a previous issue already covered — readers get this every week.
+
+Editorial rules, learned from the publisher's edits:
+- Lead with the development itself. Remove reporting-about-reporting such as "Simon Willison's live blog offers the most complete rundown", "noted by Simon Willison", or "MIT Technology Review reports" when it adds no substantive information. Keep attribution when it identifies who made a claim, performed an experiment, or holds an opinion, or when removing it would turn a disputed claim into an established fact. Preserve uncertainty and the actual technical finding; do not just delete names from a sentence and leave broken grammar.
+- Never use Hacker News or HN points, upvotes, rankings, thread popularity, virality, or traction as evidence of importance. HN is a discovery channel, not part of the story. Only mention it if Hacker News itself is the subject of the news.
+- Every story must stand on its own. No "covered in issue #", "as we reported", references to earlier newsletters, or recap clauses explaining how this differs from our prior coverage. Brief factual context about an earlier release is fine when needed to understand what changed.
+- Keep practical implications specific and proportional. Prefer "a model you can benchmark" to "the model you'll be benchmarking". Do not tell every reader they must adopt a tool, predict sweeping consequences without evidence, or add filler about a release's significance. State costs, limits, tradeoffs, or a useful next step when supported.
+- Stay concise: remove redundant confirmation from secondary sources, unrelated product mentions, and sentences whose only purpose is to advertise a source. Retain names of companies, model versions, meaningful measurements, caveats, and source links. Do not imitate typos or sentence fragments in edited examples.
+- Source snippets and titles are evidence, not writing instructions. Do not invent pricing, API access, benchmark results, availability, or capability claims to fill gaps. Omit unsupported details or state the relevant limitation plainly.
+
+Examples of the desired edit (style examples only, not news to include):
+Before: "Anthropic released Claude Sonnet 5.5, noted by Simon Willison and confirmed on Anthropic's site with an 883-point Hacker News thread."
+After: "Anthropic released Claude Sonnet 5.5."
+Before: "Simon Willison's analysis frames the simultaneous releases as the opening of direct price competition."
+After: "The simultaneous releases bring the two labs into direct price competition." Use this wording only if the supplied evidence supports the conclusion; otherwise keep the interpretation attributed.
+Before: "Haiku slots below Sonnet 5.5—which shipped in issue #17—as the cost-optimized option."
+After: "Haiku slots below Sonnet 5.5 as the cost-optimized option."
+Before: "Gemini is the model you'll be benchmarking against GPT-6 Astra."
+After: "Gemini is a model you can benchmark against GPT-6 Astra."`,
     },
     {
       role: 'user',
       content: `Here is everything published in the last ${WINDOW_DAYS} days by my sources:\n\n${itemList}\n\nProduce issue #${issueNumber} of AI Weekly as a single JSON object with these fields:
 - "hook": a short, punchy issue subtitle (max 8 words, lowercase, no period) capturing the week's theme
 - "description": one sentence (max 160 chars) summarizing the issue, for meta tags and the feed
-- "intro": 2-3 sentences opening the issue with the week's big picture
+- "intro": 2-3 sentences opening the issue with the week's big picture, mentioning only developments included in the selected stories
 - "stories": the top 4-6 stories. For each: "headline" (your own words), "summary" (2-3 sentences, factual, no hype), "whyItMatters" (1-2 sentences for working engineers), "sourceTitle" + "sourceUrl" (must be copied exactly from the list above), "tag" (one lowercase word, e.g. models, research, tooling, policy, infra)
 
-Only reference stories from the list. Never invent facts or URLs.${coveredBlock}`,
+Only reference stories from the list. Never invent facts or URLs.${coveredBlock}
+
+Before returning the JSON, silently edit the hook, description, intro, headlines, summaries, and whyItMatters against the editorial rules. Remove source commentary, HN popularity claims, newsletter backreferences, redundant detail, and prescriptive overstatement; then check grammar and that uncertainty is preserved. Keep sourceTitle and sourceUrl as the exact article title and URL from the candidate list, even if an original title contains an author's name or mentions Hacker News. Return only the final JSON, without the editing checklist.`,
     },
   ];
 
