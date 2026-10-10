@@ -13,9 +13,8 @@ export interface TerminalIssue {
 interface Props {
   issues: TerminalIssue[];
   /**
-   * The server-rendered transcript: the boot lines and `cat digest/latest`
-   * output that Astro emits into the island's slot. It ships in the HTML, so
-   * the newest issue is readable at first paint and without JavaScript. The
+   * The welcome transcript that Astro emits into the island's slot. It ships
+   * in the HTML, so the introduction is readable without JavaScript. The
    * island hydrates over it rather than painting it; `clear` drops it.
    */
   children?: ReactNode;
@@ -311,9 +310,8 @@ export default function Terminal({ issues, children }: Props) {
     [append, commands]
   );
 
-  // Follow typed output only. The server-rendered transcript is the top of the
-  // scroll region and must stay where it is on load — auto-scrolling on mount
-  // would push the newest issue out of the frame before it is read.
+  // Follow new command output, leaving the welcome in place on initial load.
+  // Narrow/touch layouts scroll the page; desktop follows the inner transcript.
   useEffect(() => {
     if (lines.length === 0) return;
     if (matchMedia('(max-width: 760px), (pointer: coarse)').matches) {

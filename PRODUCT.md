@@ -75,7 +75,7 @@ itself. That claim is only worth making while it is true.
 - Email subscribe with HMAC double opt-in, a confirmation email, and a
   `/subscribed` landing page.
 - RSS feed with podcast audio enclosures, sitemap, `llms.txt`, and generated OG images (`astro-og-canvas`).
-- AI-narrated audio editions with an embedded AudioPlayer React island; optional issue metadata supplies MP3 URL, duration, and byte length.
+- AI-narrated audio editions with an embedded AudioPlayer React island; optional issue metadata supplies audio URL, content type, and byte length.
 - `/travel` — a noindex easter egg recovered from the 2019 version of the site,
   reachable from the terminal rather than the nav.
 - Repetition guard: the generator reads the last 4 issues and drops items whose URLs
