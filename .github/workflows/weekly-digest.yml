@@ -16,6 +16,7 @@ jobs:
     outputs:
       slug: ${{ steps.publish.outputs.slug }}
       published: ${{ steps.publish.outputs.published }}
+      revision: ${{ steps.publish.outputs.revision }}
     steps:
       - uses: actions/checkout@v5
 
@@ -42,8 +43,8 @@ jobs:
 
       # Human in the loop: with NEWSLETTER_REQUIRE_APPROVAL=true the issue goes
       # to a branch and opens a review PR, and nothing else happens — merging it
-      # deploys the site and emails subscribers. Anything else (including unset)
-      # publishes straight to main, as before.
+      # generates audio, deploys the site, and emails subscribers. Anything else
+      # (including unset) publishes straight to main, as before.
       - name: Publish
         id: publish
         env:
@@ -52,10 +53,11 @@ jobs:
         run: |
           git config user.name "ai-weekly-bot"
           git config user.email "actions@github.com"
-          git add src/content/digest public/audio/digest
+          git add src/content/digest
           slug="$(git diff --cached --name-only | grep 'src/content/digest' | xargs -n1 basename | sed 's/\.md$//' | head -1)"
           git commit -m "digest: publish issue $slug"
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           if [ "$REQUIRE_APPROVAL" = 'true' ]; then
             branch="digest/$slug"
@@ -63,7 +65,7 @@ jobs:
             if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
               gh pr create --head "$branch" --base main \
                 --title "digest: issue $slug" \
-                --body 'Auto-generated issue awaiting review. Edit the copy here if you want, then merge — merging deploys the site and emails subscribers.'
+                --body 'Auto-generated issue awaiting review. Edit the copy in this PR, then merge to approve the final text. Merging generates audio from the approved copy, publishes the site and audio, and sends only when audio is ready. If generation or publication fails, the sendout is held; retry the Newsletter workflow.'
             fi
             echo 'published=false' >> "$GITHUB_OUTPUT"
           else
@@ -71,19 +73,13 @@ jobs:
             echo 'published=true' >> "$GITHUB_OUTPUT"
           fi
 
-  # Pushes made with GITHUB_TOKEN don't trigger the push workflows, so publishing
-  # straight to main has to call deploy and the newsletter explicitly. In review
-  # mode merging the PR is a human push, which triggers both on its own.
-  deploy:
-    needs: generate
-    if: needs.generate.outputs.published == 'true'
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit
-
+  # Bot pushes do not trigger push workflows. Call the same audio → deploy → send
+  # pipeline explicitly, using the generated commit rather than the initial run SHA.
   send:
     needs: generate
     if: needs.generate.outputs.published == 'true'
     uses: ./.github/workflows/newsletter.yml
     with:
       slug: ${{ needs.generate.outputs.slug }}
+      revision: ${{ needs.generate.outputs.revision }}
     secrets: inherit
