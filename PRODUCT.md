@@ -67,8 +67,9 @@ itself. That claim is only worth making while it is true.
 
 **Ships today**
 
-- Interactive terminal homepage (the one React island) with a command set, tab
-  completion, and the latest issues addressable from it.
+- Blog homepage with a recent-post index and a featured latest issue. Persistent
+  Home / Terminal navigation leads to the interactive shell at `/terminal/` (the
+  one React island), with its command set, tab completion, and recent issues.
 - Digest index and issue pages generated from the `digest` content collection
   (`title`, `description`, `date`, `issue`, `tags`, `sources`).
 - Email subscribe with HMAC double opt-in, a confirmation email, and a
@@ -109,10 +110,11 @@ itself. That claim is only worth making while it is true.
 - **The identity is Fabian's own.** Name, GitHub and LinkedIn links, the Datadog
   affiliation, and the `Person` schema are factual and must stay accurate.
 
-**Nothing visual is locked.** Fabian confirmed that the terminal homepage, the
-black/neon-purple/green palette, JetBrains Mono, and the CRT glow are all fair game
-for a later redesign. They are the incumbent system and current design authority —
-not a constraint on what the site could become.
+**Current redesign commitment:** Fabian selected claude.dev's publication layout
+and two-route Home / Terminal navigation, explicitly retaining the current dark
+black/purple/green palette. The blog is the default entry point; the terminal is
+for exploring the person behind it. The reading index uses thin ruled rows rather
+than a terminal transcript or card stack.
 
 ## Evidence on Hand
 

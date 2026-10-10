@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Terminal from '../components/Terminal';
+
+const issues = (await getCollection('digest'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 8)
+  .map((entry) => ({
+    issue: entry.data.issue,
+    title: entry.data.title,
+    description: entry.data.description,
+    date: entry.data.date.toISOString().slice(0, 10),
+    slug: `/digest/${entry.id}/`,
+  }));
+---
+
+<Base title="Terminal — meet Fabian Hoeltke" description="Get to know Fabian Hoeltke through an interactive terminal. Explore his work, read AI Weekly, and discover the available commands." wide dotGrid>
+  <div class="blog-layout terminal-layout">
+    <header class="blog-intro">
+      <h1>Terminal</h1>
+      <p class="blog-description">Go on, poke around.</p>
+      <p class="blog-disclosure">Not everything here is listed. A little curiosity goes a long way.</p>
+    </header>
+    <section class="terminal-content" aria-label="Interactive terminal">
+      <Terminal client:load issues={issues}>
+        <p><span class="text-prompt">$</span> whoami</p>
+        <div class="terminal-welcome">
+          <p>Fabian Hoeltke — frontend × design × AI</p>
+          <p class="text-muted">AI Engineer @ Datadog</p>
+        </div>
+      </Terminal>
+      <p class="terminal-shortcuts"><kbd>Esc</kbd>, then <kbd>H</kbd> / <kbd>T</kbd> to switch views.</p>
+    </section>
+  </div>
+</Base>

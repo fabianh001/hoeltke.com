@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'digest'>;
+  featured?: boolean;
+}
+
+const { entry, featured = false } = Astro.props;
+const { title, description, date, sources } = entry.data;
+const dateLabel = date.toLocaleDateString('en-US', {
+  month: 'short', day: '2-digit', year: 'numeric', timeZone: 'UTC',
+});
+const minutes = Math.max(2, Math.round((entry.body ?? '').split(/\s+/).length / 220));
+---
+
+<li class:list={['post-row', featured && 'post-row-featured']}>
+  <a href={`/digest/${entry.id}/`}>
+    <div class="post-date">
+      {featured && <span class="latest-label">Latest issue</span>}
+      <time datetime={date.toISOString()}>{dateLabel}</time>
+    </div>
+    <div class="post-copy">
+      <h2>{title}</h2>
+      {featured && <p class="post-description">{description}</p>}
+      {featured && <p class="post-byline">AI Weekly · {sources.length} sources linked</p>}
+    </div>
+    <span class="post-time">{minutes} <span class="sr-only">minutes to read</span><span aria-hidden="true">min read</span></span>
+  </a>
+</li>

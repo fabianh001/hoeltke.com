@@ -1,0 +1,453 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T20:31:18.013930+00:00",
+  "title": "Design System: hoeltke.com \u2014 AI Weekly",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Void",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#000000",
+          "#050505",
+          "#0d0d0d",
+          "#1a1a1a",
+          "#2e2e2e",
+          "#4d4d4d",
+          "#8a8a8a",
+          "#e8e8e8"
+        ]
+      },
+      "term-bg": {
+        "role": "neutral",
+        "displayName": "Plate Black",
+        "canonical": "#050507",
+        "tonalRamp": [
+          "#020203",
+          "#050507",
+          "#0b0b10",
+          "#16161d",
+          "#26262f",
+          "#41414e",
+          "#7b7b8a",
+          "#e2e2e8"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel Graphite",
+        "canonical": "#0a0a0d",
+        "tonalRamp": [
+          "#040405",
+          "#0a0a0d",
+          "#111117",
+          "#1c1c24",
+          "#2c2c37",
+          "#484857",
+          "#828292",
+          "#e4e4ea"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#222228",
+        "tonalRamp": [
+          "#0a0a0c",
+          "#131317",
+          "#1b1b20",
+          "#222228",
+          "#333340",
+          "#4e4e5e",
+          "#87879a",
+          "#e6e6ec"
+        ]
+      },
+      "line-bright": {
+        "role": "neutral",
+        "displayName": "Hairline Bright",
+        "canonical": "#3a3a42",
+        "tonalRamp": [
+          "#0d0d10",
+          "#17171b",
+          "#232329",
+          "#2e2e36",
+          "#3a3a42",
+          "#585863",
+          "#909099",
+          "#e9e9ed"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#1f1f1f",
+          "#3d3d3d",
+          "#5c5c5c",
+          "#7a7a7a",
+          "#999999",
+          "#bfbfbf",
+          "#e0e0e0",
+          "#ffffff"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#9a9aa2",
+        "tonalRamp": [
+          "#17171a",
+          "#2a2a2f",
+          "#3e3e45",
+          "#55555d",
+          "#6e6e77",
+          "#87878f",
+          "#9a9aa2",
+          "#d5d5da"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint",
+        "canonical": "#5f5f67",
+        "tonalRamp": [
+          "#131315",
+          "#212125",
+          "#313137",
+          "#42424a",
+          "#5f5f67",
+          "#82828c",
+          "#adadb5",
+          "#e2e2e6"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Electric Violet",
+        "canonical": "#9050ff",
+        "tonalRamp": [
+          "#160033",
+          "#26005c",
+          "#390d87",
+          "#5426b0",
+          "#6f39d6",
+          "#9050ff",
+          "#b387ff",
+          "#e4d6ff"
+        ]
+      },
+      "accent-vivid": {
+        "role": "primary",
+        "displayName": "Voltage Purple",
+        "canonical": "#7700ff",
+        "tonalRamp": [
+          "#120027",
+          "#1f0045",
+          "#2f0068",
+          "#45008f",
+          "#5c00c4",
+          "#7700ff",
+          "#a95cff",
+          "#ded0ff"
+        ]
+      },
+      "prompt": {
+        "role": "secondary",
+        "displayName": "Phosphor Green",
+        "canonical": "#3ef78f",
+        "tonalRamp": [
+          "#032614",
+          "#054023",
+          "#075c33",
+          "#0a7b45",
+          "#0f9c59",
+          "#1fc272",
+          "#3ef78f",
+          "#c6fde0"
+        ]
+      },
+      "blue": {
+        "role": "tertiary",
+        "displayName": "Signal Blue",
+        "canonical": "#0164ff",
+        "tonalRamp": [
+          "#001433",
+          "#002456",
+          "#00377f",
+          "#004baa",
+          "#0157d4",
+          "#0164ff",
+          "#5f9bff",
+          "#d3e3ff"
+        ]
+      },
+      "amber": {
+        "role": "tertiary",
+        "displayName": "Terminal Amber",
+        "canonical": "#d9a43b",
+        "tonalRamp": [
+          "#2a1d05",
+          "#46310b",
+          "#634612",
+          "#835e1a",
+          "#a57724",
+          "#c6922f",
+          "#d9a43b",
+          "#f5e2b6"
+        ]
+      },
+      "red": {
+        "role": "tertiary",
+        "displayName": "Alert Red",
+        "canonical": "#d33043",
+        "tonalRamp": [
+          "#2d060c",
+          "#4b0c16",
+          "#6b1421",
+          "#8d1c2d",
+          "#af243a",
+          "#d33043",
+          "#e5707d",
+          "#fad6da"
+        ]
+      },
+      "glow": {
+        "role": "primary",
+        "displayName": "CRT Bloom",
+        "canonical": "rgba(119, 0, 255, 0.35)",
+        "tonalRamp": [
+          "rgba(119,0,255,0.08)",
+          "rgba(119,0,255,0.14)",
+          "rgba(119,0,255,0.2)",
+          "rgba(119,0,255,0.28)",
+          "rgba(119,0,255,0.35)",
+          "rgba(119,0,255,0.45)",
+          "rgba(119,0,255,0.6)",
+          "rgba(119,0,255,0.8)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Publication introduction headings."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Retained article headings."
+      },
+      "featured-title": {
+        "displayName": "Featured Title",
+        "purpose": "Lead publication row title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Standard publication row title."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Publication introduction copy."
+      },
+      "description": {
+        "displayName": "Description",
+        "purpose": "Summaries and disclosures."
+      },
+      "terminal": {
+        "displayName": "Terminal",
+        "purpose": "Terminal transcript."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Structured metadata."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Navigation and email fields."
+      }
+    },
+    "shadows": [
+      {
+        "name": "about-bloom",
+        "value": "0 0 40px var(--glow)",
+        "purpose": "Retained about transcript only."
+      },
+      {
+        "name": "legacy-card-hover",
+        "value": "0 0 24px var(--glow)",
+        "purpose": "Retained DigestCard hover only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "publication-transition",
+        "value": "150ms ease-out",
+        "purpose": "Color, background, and border states."
+      },
+      {
+        "name": "cursor-blink",
+        "value": "1.1s steps(1) infinite",
+        "purpose": "Terminal block caret; disabled for reduced motion."
+      },
+      {
+        "name": "status-pulse",
+        "value": "2.4s ease-out infinite",
+        "purpose": "Footer status; disabled for reduced motion."
+      },
+      {
+        "name": "legacy-rise",
+        "value": "550ms cubic-bezier(0.21, 0.6, 0.35, 1)",
+        "purpose": "Retained rise/fade, disabled for reduced motion."
+      },
+      {
+        "name": "navigation-label-scramble",
+        "value": "420ms requestAnimationFrame sequence",
+        "purpose": "Left-to-right label resolution on mouseenter or focus; cancelled/restored on mouseleave or blur; skipped for reduced motion. Stable accessible names remain outside animated visual spans."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "terminal-source-sm",
+        "value": "640px"
+      },
+      {
+        "name": "publication-stack",
+        "value": "760px"
+      },
+      {
+        "name": "post-row-reflow",
+        "value": "1050px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Subscribe button",
+      "kind": "button",
+      "refersTo": "button-subscribe",
+      "description": "Green publication subscription control.",
+      "html": "<button class=\"ds-subscribe\">subscribe \u2192</button>",
+      "css": ".ds-subscribe{font-family:var(--font-mono);background:var(--green);color:var(--bg);border:0;border-radius:6px;padding:8px 16px;min-height:44px;font-size:14px;font-weight:600;cursor:pointer}.ds-subscribe:hover{opacity:.9}.ds-subscribe:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}"
+    },
+    {
+      "name": "Header Subscribe",
+      "kind": "button",
+      "refersTo": "button-header",
+      "description": "Panel-colored header action.",
+      "html": "<button class=\"ds-header-subscribe\">Subscribe</button>",
+      "css": ".ds-header-subscribe{font-family:var(--font-mono);background:var(--panel);color:var(--text);border:1px solid var(--line-bright);border-radius:4px;padding:8px 16px;min-height:44px;font-size:14px;cursor:pointer;transition:color 150ms ease-out,border-color 150ms ease-out}.ds-header-subscribe:hover{border-color:var(--accent);color:var(--accent)}.ds-header-subscribe:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}"
+    },
+    {
+      "name": "Email field",
+      "kind": "input",
+      "refersTo": "input-email",
+      "description": "Responsive publication field with border focus.",
+      "html": "<input class=\"ds-email\" type=\"email\" aria-label=\"Email address\" placeholder=\"you@example.com\">",
+      "css": ".ds-email{font-family:var(--font-mono);min-width:0;max-width:100%;min-height:44px;border:1px solid var(--line-bright);border-radius:6px;background:var(--bg);color:var(--text);padding:8px 12px;font-size:14px;outline:none}.ds-email::placeholder{color:var(--muted)}.ds-email:hover{border-color:var(--line-bright)}.ds-email:focus-visible{border-color:var(--accent)}"
+    },
+    {
+      "name": "Home / Terminal routes",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Native anchors with active underline, purple shortcut/label hover and focus, guarded H/T navigation, and a 420ms reduced-motion-aware label scramble in site-navigation.ts. This HTML/CSS preview represents stable labels; the runtime behavior is documented in DESIGN.md.",
+      "html": "<nav class=\"ds-routes\" aria-label=\"Main navigation\"><a href=\"/\" data-shortcut=\"h\" aria-label=\"Home\" aria-keyshortcuts=\"H\" aria-current=\"page\"><span aria-hidden=\"true\" class=\"ds-tab-key\">[H]</span><span aria-hidden=\"true\" class=\"ds-tab-label\">Home</span></a><a href=\"/terminal/\" data-shortcut=\"t\" aria-label=\"Terminal\" aria-keyshortcuts=\"T\"><span aria-hidden=\"true\" class=\"ds-tab-key\">[T]</span><span aria-hidden=\"true\" class=\"ds-tab-label\">Terminal</span></a></nav>",
+      "css": ".ds-routes{display:flex;gap:32px;font-family:var(--font-mono);font-size:14px}.ds-routes a{display:inline-flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid transparent;color:var(--muted);text-decoration:none;transition:color 150ms ease-out,border-color 150ms ease-out}.ds-tab-key{font-size:12px;color:var(--muted);transition:color 150ms ease-out}.ds-tab-label{white-space:pre}.ds-routes a[aria-current=\"page\"]{color:var(--text);border-bottom-color:var(--accent)}.ds-routes a:hover,.ds-routes a:focus-visible,.ds-routes a:hover .ds-tab-key,.ds-routes a:focus-visible .ds-tab-key{color:var(--accent)}.ds-routes a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}@media(prefers-reduced-motion:reduce){.ds-routes a,.ds-tab-key{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Publication row",
+      "kind": "custom",
+      "refersTo": "post-row",
+      "description": "Dated ruled link with sans reading title.",
+      "html": "<div class=\"ds-row\"><a href=\"/digest/\"><time>Sep 11, 2026</time><h2>The week in AI</h2><span>5 min read</span></a></div>",
+      "css": ".ds-row{border-bottom:1px solid var(--line)}.ds-row a{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,2.6667fr) auto;gap:24px;align-items:baseline;padding:22px 0;color:var(--text);text-decoration:none;transition:background-color 150ms ease-out,color 150ms ease-out}.ds-row time,.ds-row span{font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--muted);font-variant-numeric:tabular-nums}.ds-row span{white-space:nowrap}.ds-row h2{font-family:var(--font-sans);font-size:18px;font-weight:450;line-height:1.5;letter-spacing:-.015em;overflow-wrap:anywhere;margin:0}.ds-row a:hover{background:var(--panel)}.ds-row a:hover h2{color:var(--accent)}.ds-row a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}@media(max-width:1050px){.ds-row a{grid-template-columns:1fr auto;gap:8px 20px}.ds-row h2{grid-column:1/-1;grid-row:2}}@media(max-width:760px){.ds-row a{padding:20px 0}.ds-row h2{line-height:1.45}.ds-row time,.ds-row span{font-size:11px}}"
+    },
+    {
+      "name": "Command control",
+      "kind": "button",
+      "refersTo": "button-command",
+      "description": "Terminal command suggestion with touch height.",
+      "html": "<button class=\"ds-command\">help</button>",
+      "css": ".ds-command{font-family:var(--font-mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;min-height:44px;padding:2px 14px;background:transparent;cursor:pointer;transition:color 150ms,border-color 150ms}.ds-command:hover{color:var(--accent);border-color:var(--line-bright)}.ds-command:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}"
+    },
+    {
+      "name": "Legacy tag",
+      "kind": "chip",
+      "refersTo": "tag-chip-legacy",
+      "description": "Retained article tag: faint text is pre-existing contrast drift, not a new-surface text rule.",
+      "html": "<span class=\"ds-tag\">research</span>",
+      "css": ".ds-tag{display:inline-block;font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:2px 6px;color:var(--faint)}"
+    },
+    {
+      "name": "Legacy digest card",
+      "kind": "card",
+      "refersTo": "digest-card-legacy",
+      "description": "Retained component; current publication indexes use rows.",
+      "html": "<a class=\"ds-card\" href=\"/digest/\"><h3>The week in AI</h3><p>Research, releases, and linked sources.</p></a>",
+      "css": ".ds-card{display:block;border:1px solid var(--line);border-top-color:var(--green);border-radius:12px;background:color-mix(in srgb,var(--panel) 70%,transparent);backdrop-filter:blur(8px);padding:20px;text-decoration:none;color:var(--text);transition:all 300ms}.ds-card h3{font-family:var(--font-mono);font-size:18px;font-weight:600;letter-spacing:-.025em;line-height:28px;margin:0}.ds-card p{font-family:var(--font-sans);font-size:14px;line-height:1.625;color:var(--muted);margin:6px 0 0}.ds-card:hover{transform:translateY(-2px);border-color:var(--line-bright);box-shadow:0 0 24px var(--glow)}.ds-card:hover h3{color:var(--accent)}.ds-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}@media(prefers-reduced-motion:reduce){.ds-card{transition:none}.ds-card:hover{transform:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dark Publication",
+    "overview": "A restrained publication on pure black, with bright ink, muted metadata, thin rules, and purple interaction. The retained black/purple/green palette is a confirmed identity commitment. Monospace identifies the site and orients the reader; sans titles and summaries make the writing approachable.\n\nThe terminal keeps the same identity with command output and CRT chrome. Older reading, about, and travel surfaces retain rounded containers and some glow; those are scoped incumbent treatments, not a requirement for every new surface. The publication index uses flat ruled rows and the default shell has no dotted background.",
+    "keyCharacteristics": [
+      "Pure black ground, white ink, and muted gray metadata.",
+      "Purple interaction and green prompts, status, and subscription confirmation.",
+      "JetBrains Mono wayfinding paired with Inter publication titles and prose.",
+      "Thin rules, generous desktop gutters, and a stacked mobile reading order.",
+      "A real terminal with restrained chrome; retained legacy containers stay scoped."
+    ],
+    "rules": [
+      {
+        "name": "The Faint Floor Rule",
+        "body": "Informational dates, counts, tags, and instructions use muted or brighter text; inherited faint informational text is not a rule to extend.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Type Roles Rule",
+        "body": "Use mono for identity, navigation, metadata, and terminal output; use Inter for publication row titles and explanatory prose. Existing mono article headings remain valid in their reading context.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Separate publication content with a one-pixel neutral rule and tonal hover before adding depth effects.",
+        "section": "elevation & depth"
+      },
+      {
+        "name": "Single mobile scroll",
+        "body": "On the terminal route, widths up to 760px and coarse pointers let the transcript expand without an internal scroll area. The document owns vertical scrolling; new output brings the prompt into view. Desktop fine-pointer layouts retain the 34rem bounded transcript.",
+        "section": "layout"
+      },
+      {
+        "name": "Terminal-only spotlight",
+        "body": "Only /terminal/ enables the 28px dot grid and a cursor-follow reveal with a 140px radius. Other pages keep plain backgrounds. The spotlight sits behind content with pointer-events none, and is hidden for no-hover devices and reduced motion.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Do retain the confirmed black, purple, and green palette across web and newsletter surfaces.",
+      "Do pair mono identity and metadata with Inter publication titles and prose.",
+      "Do preserve thin rules, responsive reading order, and visible Home / Terminal routes.",
+      "Do use muted or brighter text for information and preserve keyboard focus treatment.",
+      "Do keep publication content server-rendered and terminal welcome content present before hydration.",
+      "Do respect reduced motion and allow form fields and long titles to shrink or wrap."
+    ],
+    "donts": [
+      "Don't add the dot grid, card stack, or decorative bloom to the publication index.",
+      "Don't extend inherited faint informational text or uppercase tracked eyebrows into new surfaces.",
+      "Don't apply CRT scanlines outside terminal surfaces.",
+      "Don't remove visible focus feedback or trap native keyboard navigation.",
+      "Don't replace textual shell identity with emoji or glyph interface icons."
+    ]
+  },
+  "tokens": {
+    "shadows": [
+      {
+        "name": "terminal-float",
+        "value": "0 18px 48px rgba(0, 0, 0, 0.65), 0 0 36px rgba(119, 0, 255, 0.14)",
+        "purpose": "Terminal-route window only: a soft downward shadow with restrained purple ambient depth against the grid."
+      }
+    ]
+  }
+}

@@ -74,6 +74,8 @@ export default function Terminal({ issues, children }: Props) {
           run: () => [
             <span className="text-muted">available commands:</span>,
             ...[
+              ['ls', 'look around'],
+              ['cd <path>', 'open a directory'],
               ['latest', 'open the newest AI Weekly issue'],
               ['issues', 'list recent issues'],
               ['subscribe', 'subscribe by email (or grab the RSS feed)'],
@@ -87,7 +89,7 @@ export default function Terminal({ issues, children }: Props) {
                 <span className="text-muted">{desc}</span>
               </span>
             )),
-            <span className="text-faint">…and a few that aren't listed. explore.</span>,
+            <span className="text-muted">Type a few letters, then press Tab to discover more commands.</span>,
           ],
         },
         latest: {
@@ -314,7 +316,11 @@ export default function Terminal({ issues, children }: Props) {
   // would push the newest issue out of the frame before it is read.
   useEffect(() => {
     if (lines.length === 0) return;
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    if (matchMedia('(max-width: 760px), (pointer: coarse)').matches) {
+      inputRef.current?.scrollIntoView({ block: 'nearest' });
+    } else {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    }
   }, [lines]);
 
   // Focus the input so typing works immediately, without scrolling the page:
@@ -342,6 +348,8 @@ export default function Terminal({ issues, children }: Props) {
       setHistoryIdx(next);
       setInput(next >= 0 ? history[next] : '');
     } else if (e.key === 'Tab') {
+      // Empty prompts and reverse navigation use the browser's focus order.
+      if (!input.trim() || e.shiftKey) return;
       e.preventDefault();
       const lower = input.toLowerCase();
       const complete = (
@@ -438,6 +446,7 @@ export default function Terminal({ issues, children }: Props) {
             autoComplete="off"
             autoCapitalize="off"
             aria-label="Terminal input"
+            data-terminal-input
             enterKeyHint="send"
           />
         </div>
