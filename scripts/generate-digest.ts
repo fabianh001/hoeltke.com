@@ -278,7 +278,7 @@ function renderMarkdown(digest: z.infer<typeof DigestSchema>, issue: number, dat
   const tags = [...new Set(digest.stories.map((s) => s.tag))];
   const frontmatter = [
     '---',
-    `title: ${yamlEscape(`AI Weekly #${issue} — ${digest.hook}`)}`,
+    `title: ${yamlEscape(digest.hook)}`,
     `description: ${yamlEscape(digest.description)}`,
     `date: ${date.toISOString().slice(0, 10)}`,
     `issue: ${issue}`,
