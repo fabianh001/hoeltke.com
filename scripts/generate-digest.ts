@@ -232,7 +232,7 @@ After: "Gemini is a model you can benchmark against GPT-6 Astra."`,
     {
       role: 'user',
       content: `Here is everything published in the last ${WINDOW_DAYS} days by my sources:\n\n${itemList}\n\nProduce issue #${issueNumber} of AI Weekly as a single JSON object with these fields:
-- "hook": a short, punchy issue subtitle (max 8 words, lowercase, no period) capturing the week's theme
+- "hook": a short, punchy issue title (max 8 words, sentence case, no period) capturing the week's theme. Capitalize the first word and preserve the correct capitalization of proper names and acronyms, such as OpenAI and GPT-6. Do not include an "AI Weekly" prefix or issue number.
 - "description": one sentence (max 160 chars) summarizing the issue, for meta tags and the feed
 - "intro": 2-3 sentences opening the issue with the week's big picture, mentioning only developments included in the selected stories
 - "stories": the top 4-6 stories. For each: "headline" (your own words), "summary" (2-3 sentences, factual, no hype), "whyItMatters" (1-2 sentences for working engineers), "sourceTitle" + "sourceUrl" (must be copied exactly from the list above), "tag" (one lowercase word, e.g. models, research, tooling, policy, infra)
