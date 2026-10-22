@@ -6,7 +6,7 @@
  * src/content/digest/. Fails loudly on any problem — a broken issue must never
  * be committed.
  *
- * Usage: ANTHROPIC_API_KEY=... npm run digest
+ * Usage: OPENROUTER_API_KEY=... npm run digest
  */
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
@@ -34,7 +34,7 @@ const MAX_OUTPUT_TOKENS = 8000;
 // so a URL blocklist alone isn't enough — the model needs the headlines too.
 const LOOKBACK_ISSUES = 4;
 // Any OpenRouter model slug. Override per-run with DIGEST_MODEL=… to A/B providers.
-const DIGEST_MODEL = process.env.DIGEST_MODEL || 'anthropic/claude-sonnet-4-6';
+const DIGEST_MODEL = process.env.DIGEST_MODEL || 'deepseek/deepseek-v4.1-flash-1017';
 
 interface RawItem {
   source: string;
