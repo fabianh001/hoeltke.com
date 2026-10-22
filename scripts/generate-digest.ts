@@ -13,8 +13,11 @@ import { zodResponseFormat } from 'openai/helpers/zod';
 import Parser from 'rss-parser';
 import { z } from 'zod';
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import matter from 'gray-matter';
+import { collectHackerNews, excludePreviouslyCited, normalizeStoryUrl, orderStoriesByTraction, rankCandidates, type DigestCandidate, type RankedCandidate } from './lib/digest-traction.js';
+import { logNewsletterGuidelines, NEWSLETTER_MAX_STORIES, NEWSLETTER_MAX_WORDS, NEWSLETTER_WORDS_PER_MINUTE } from '../src/lib/newsletter-guidelines.js';
 
 try {
   process.loadEnvFile?.();
@@ -36,14 +39,6 @@ const LOOKBACK_ISSUES = 4;
 // Any OpenRouter model slug. Override per-run with DIGEST_MODEL=… to A/B providers.
 const DIGEST_MODEL = process.env.DIGEST_MODEL || 'deepseek/deepseek-v4.1-flash-1017';
 
-interface RawItem {
-  source: string;
-  title: string;
-  url: string;
-  date: string;
-  snippet: string;
-}
-
 const stripHtml = (s: string) =>
   s
     .replace(/<[^>]+>/g, ' ')
@@ -51,17 +46,18 @@ const stripHtml = (s: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-async function collectFeeds(): Promise<RawItem[]> {
+async function collectFeeds(): Promise<RankedCandidate[]> {
   const config = JSON.parse(readFileSync(join(ROOT, 'scripts/sources.json'), 'utf8'));
-  const cutoff = Date.now() - WINDOW_DAYS * 24 * 3600 * 1000;
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - WINDOW_DAYS * 24 * 3600 * 1000);
   const parser = new Parser({ timeout: 20_000 });
-  const items: RawItem[] = [];
+  const items: DigestCandidate[] = [];
 
   for (const feed of config.feeds) {
     try {
       const result = await parser.parseURL(feed.url);
       const fresh = (result.items ?? [])
-        .filter((i) => i.isoDate && new Date(i.isoDate).getTime() > cutoff)
+        .filter((i) => i.isoDate && new Date(i.isoDate) >= cutoff && new Date(i.isoDate) <= now)
         .slice(0, MAX_ITEMS_PER_SOURCE);
       for (const i of fresh) {
         items.push({
@@ -78,38 +74,22 @@ async function collectFeeds(): Promise<RawItem[]> {
     }
   }
 
-  // Hacker News via Algolia: the week's top stories by points. No keyword filter —
-  // major launches ("Claude Fable 5", model/company names) rarely contain the word
-  // "AI", so a query=AI prefilter silently drops the biggest stories. Instead we
-  // hand the curator the top-voted stories and let it pick the AI-relevant ones.
+  // No keyword prefilter: major AI launches often don't contain the word "AI".
+  // Enrich matching feed articles before limiting HN-only discoveries, retaining
+  // primary source titles, URLs, and snippets alongside private ranking evidence.
   try {
-    const since = Math.floor(cutoff / 1000);
-    const hn = config.hackerNews;
-    const url = `https://hn.algolia.com/api/v1/search?tags=story&numericFilters=points>${hn.minPoints},created_at_i>${since}&hitsPerPage=50`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = (await res.json()) as { hits: any[] };
-    const top = data.hits
-      .filter((h) => h.title)
-      .sort((a, b) => b.points - a.points)
-      .slice(0, hn.maxItems ?? 30);
-    for (const hit of top) {
-      items.push({
-        // Scores rank candidates above; they are not editorial evidence and
-        // must not leak into the newsletter's prose or source labels.
-        source: 'Hacker News',
-        title: hit.title,
-        url: hit.url ?? `https://news.ycombinator.com/item?id=${hit.objectID}`,
-        date: hit.created_at.slice(0, 10),
-        snippet: '',
-      });
-    }
-    console.log(`✓ Hacker News: ${top.length} items`);
+    const hnItems = await collectHackerNews(config.hackerNews, cutoff, now);
+    const feedUrls = new Set(items.map(item => normalizeStoryUrl(item.url)));
+    let hnOnlyCount = 0;
+    const ranked = rankCandidates([...items, ...hnItems]).filter(item =>
+      feedUrls.has(normalizeStoryUrl(item.url)) || hnOnlyCount++ < (config.hackerNews.maxItems ?? 30));
+    console.log(`✓ Hacker News: ${hnItems.length} submissions measured; ${ranked.filter(item => item.hn?.length).length} candidates with traction`);
+    return ranked;
   } catch (err) {
-    console.warn(`⚠ Hacker News failed: ${(err as Error).message}`);
+    console.warn(`⚠ Hacker News failed: ${(err as Error).message}. Traction unavailable; falling back to editorial selection from feeds.`);
   }
 
-  return items;
+  return rankCandidates(items);
 }
 
 interface PastIssue {
@@ -143,6 +123,9 @@ const StorySchema = z.object({
   whyItMatters: z.string(),
   sourceTitle: z.string(),
   sourceUrl: z.string(),
+  // Private grouping evidence, omitted from the rendered issue. This lets a
+  // primary announcement inherit traction from coverage of the same development.
+  relatedSourceUrls: z.array(z.string()),
   tag: z.string(),
 });
 
@@ -189,7 +172,7 @@ async function complete(
   return content;
 }
 
-async function summarize(items: RawItem[], issueNumber: number, past: PastIssue[]) {
+export async function summarize(items: RankedCandidate[], issueNumber: number, past: PastIssue[]) {
   const client = new OpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
     apiKey: process.env.OPENROUTER_API_KEY,
@@ -197,7 +180,12 @@ async function summarize(items: RawItem[], issueNumber: number, past: PastIssue[
     defaultHeaders: { 'HTTP-Referer': 'https://hoeltke.com', 'X-Title': 'AI Weekly' },
   });
   const itemList = items
-    .map((i) => `- [${i.source}] ${i.title} (${i.date})\n  ${i.url}\n  ${i.snippet}`)
+    .map((i, index) => {
+      const traction = i.hn?.length
+        ? `score ${i.tractionScore}; HN threads: ${i.hn.map(t => `${t.points} points, ${t.comments} comments`).join('; ')}`
+        : 'unmeasured: no matching HN submission in the collected sample; this is not evidence of zero interest';
+      return `- [${i.source}] ${i.title} (${i.date})\n  ${i.url}\n  Private selection metadata: candidate rank ${index + 1}; ${traction}\n  ${i.snippet}`;
+    })
     .join('\n');
   const coveredList = past
     .map((p) => `Issue #${p.issue} (${p.date}):\n${p.headlines.map((h) => `  - ${h}`).join('\n')}`)
@@ -213,7 +201,7 @@ async function summarize(items: RawItem[], issueNumber: number, past: PastIssue[
 
 Editorial rules, learned from the publisher's edits:
 - Lead with the development itself. Remove reporting-about-reporting such as "Simon Willison's live blog offers the most complete rundown", "noted by Simon Willison", or "MIT Technology Review reports" when it adds no substantive information. Keep attribution when it identifies who made a claim, performed an experiment, or holds an opinion, or when removing it would turn a disputed claim into an established fact. Preserve uncertainty and the actual technical finding; do not just delete names from a sentence and leave broken grammar.
-- Never use Hacker News or HN points, upvotes, rankings, thread popularity, virality, or traction as evidence of importance. HN is a discovery channel, not part of the story. Only mention it if Hacker News itself is the subject of the news.
+- Use the private traction metadata for selection and ordering only. Never use Hacker News or HN points, upvotes, rankings, thread popularity, virality, or traction as evidence in reader-facing prose. HN is a discovery and selection channel, not part of the story. Only mention it if Hacker News itself is the subject of the news.
 - Every story must stand on its own. No "covered in issue #", "as we reported", references to earlier newsletters, or recap clauses explaining how this differs from our prior coverage. Brief factual context about an earlier release is fine when needed to understand what changed.
 - Keep practical implications specific and proportional. Prefer "a model you can benchmark" to "the model you'll be benchmarking". Do not tell every reader they must adopt a tool, predict sweeping consequences without evidence, or add filler about a release's significance. State costs, limits, tradeoffs, or a useful next step when supported.
 - Stay concise: remove redundant confirmation from secondary sources, unrelated product mentions, and sentences whose only purpose is to advertise a source. Retain names of companies, model versions, meaningful measurements, caveats, and source links. Do not imitate typos or sentence fragments in edited examples.
@@ -234,8 +222,16 @@ After: "Gemini is a model you can benchmark against GPT-6 Astra."`,
       content: `Here is everything published in the last ${WINDOW_DAYS} days by my sources:\n\n${itemList}\n\nProduce issue #${issueNumber} of AI Weekly as a single JSON object with these fields:
 - "hook": a short, punchy issue title (max 8 words, sentence case, no period) capturing the week's theme. Capitalize the first word and preserve the correct capitalization of proper names and acronyms, such as OpenAI and GPT-6. Do not include an "AI Weekly" prefix or issue number.
 - "description": one sentence (max 160 chars) summarizing the issue, for meta tags and the feed
-- "intro": 2-3 sentences opening the issue with the week's big picture, mentioning only developments included in the selected stories
-- "stories": the top 4-6 stories. For each: "headline" (your own words), "summary" (2-3 sentences, factual, no hype), "whyItMatters" (1-2 sentences for working engineers), "sourceTitle" + "sourceUrl" (must be copied exactly from the list above), "tag" (one lowercase word, e.g. models, research, tooling, policy, infra)
+- "intro": 1-2 short sentences opening the issue with the week's big picture, mentioning only developments included in the selected stories
+- "stories": at most ${NEWSLETTER_MAX_STORIES} distinct stories; fewer when there are fewer qualifying developments. For each: "headline" (your own words), "summary" (2-3 short factual sentences explaining what changed, no hype), "whyItMatters" (1-2 concrete sentences for working engineers), "sourceTitle" + "sourceUrl" (must be copied exactly from the list above), "relatedSourceUrls" (other candidate URLs about the SAME development, or []), "tag" (one lowercase word, e.g. models, research, tooling, policy, infra)
+
+Selection and order:
+1. Apply an AI relevance filter: keep consequential model releases, AI research, AI tooling, and AI industry/policy developments useful to software engineers. Skip general technology news, marketing, funding noise, and already-covered developments.
+2. Merge articles about the same development into one story. Cite the best primary source, and list matching coverage in relatedSourceUrls so its traction is retained. Never borrow a related URL from an unrelated development. A group's score is its highest candidate score; do not sum duplicate coverage or threads.
+3. Select the highest-scoring eligible developments and present them in descending traction order. Score = HN points + 0.25 × min(HN comments, HN points), using the strongest matching thread. These are current totals on submissions created in the last ${WINDOW_DAYS} days, not reconstructed weekly vote gains. Popularity determines which eligible stories make the issue, not factual claims about their merit. Unmeasured stories come after measured stories; fill remaining places with useful unmeasured developments. When no traction is available, use editorial judgment.
+
+Reading budget:
+Write for a maximum four-minute read at ${NEWSLETTER_WORDS_PER_MINUTE} words/minute (${NEWSLETTER_MAX_WORDS} visible editorial words). Target 600–700 words total, including the title, description, intro, headlines, summaries, why-it-matters labels, inline source titles, and the repeated source list. With five stories, aim for about 80–100 words per story and a 30–40-word intro, leaving room for headings and citations. Don't pad a quiet week to reach the target. Shorten repetition before removing caveats or technical details. These are automatic drafting instructions; the publisher can manually exceed either guideline.
 
 Only reference stories from the list. Never invent facts or URLs.${coveredBlock}
 
@@ -248,7 +244,19 @@ Before returning the JSON, silently edit the hook, description, intro, headlines
   if (!parsed.success) {
     throw new Error(`model output did not match the digest schema: ${parsed.error.message}`);
   }
-  return parsed.data;
+  const digest = parsed.data;
+  if (!digest.stories.length) throw new Error('model returned no qualifying stories — aborting');
+  const byUrl = new Map(items.map(item => [item.url, item]));
+  for (const story of digest.stories) {
+    const item = byUrl.get(story.sourceUrl);
+    if (!item) throw new Error(`story "${story.headline}" cites unknown URL: ${story.sourceUrl}`);
+    if (story.sourceTitle !== item.title) {
+      console.warn(`⚠ "${story.headline}": sourceTitle "${story.sourceTitle}" → "${item.title}"`);
+      story.sourceTitle = item.title;
+    }
+  }
+  digest.stories = orderStoriesByTraction(digest.stories, items);
+  return digest;
 }
 
 function nextIssueNumber(): number {
@@ -274,7 +282,7 @@ function isoWeekSlug(date: Date): string {
 
 const yamlEscape = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
-function renderMarkdown(digest: z.infer<typeof DigestSchema>, issue: number, date: Date): string {
+export function renderMarkdown(digest: z.infer<typeof DigestSchema>, issue: number, date: Date): string {
   const tags = [...new Set(digest.stories.map((s) => s.tag))];
   const frontmatter = [
     '---',
@@ -326,20 +334,19 @@ async function main() {
 
   console.log('collecting sources …');
   const past = loadPastIssues();
-  const citedBefore = new Set(past.flatMap((p) => p.urls));
   const collected = await collectFeeds();
   // Hard rule: anything a recent issue already linked never reaches the curator.
-  const items = collected.filter((i) => !citedBefore.has(i.url));
+  const items = excludePreviouslyCited(collected, past.flatMap(p => p.urls));
   const dropped = collected.length - items.length;
   if (dropped) console.log(`↷ dropped ${dropped} item(s) already cited in issues #${past.map((p) => p.issue).join(', #')}`);
-  if (items.length < 5) {
-    throw new Error(`only ${items.length} items collected — refusing to generate a thin issue`);
+  if (!items.length) {
+    throw new Error('no fresh items collected — refusing to generate an empty issue');
   }
   console.log(`${items.length} items total`);
 
   if (dryRun) {
     console.log('\n--dry-run: skipping the model call. collected items:');
-    for (const i of items) console.log(`  [${i.source}] ${i.title}`);
+    for (const i of items) console.log(`  [${i.source}; ${i.hn?.length ? `traction ${i.tractionScore}` : 'unmeasured'}] ${i.title}`);
     return;
   }
 
@@ -347,29 +354,12 @@ async function main() {
   console.log(`summarizing issue #${issue} with ${DIGEST_MODEL} …`);
   const digest = await summarize(items, issue, past);
 
-  if (digest.stories.length < 3) {
-    throw new Error(`model returned only ${digest.stories.length} stories — aborting`);
-  }
-  // every story must link back to a collected item — no invented URLs. The
-  // sourceTitle is taken from that item too: models sometimes copy the feed
-  // name ("OpenAI News") instead of the article title, and the item is the
-  // source of truth anyway.
-  const byUrl = new Map(items.map((i) => [i.url, i]));
-  for (const story of digest.stories) {
-    const item = byUrl.get(story.sourceUrl);
-    if (!item) {
-      throw new Error(`story "${story.headline}" cites unknown URL: ${story.sourceUrl}`);
-    }
-    if (story.sourceTitle !== item.title) {
-      console.warn(`⚠ "${story.headline}": sourceTitle "${story.sourceTitle}" → "${item.title}"`);
-      story.sourceTitle = item.title;
-    }
-  }
-
   const now = new Date();
+  const markdown = renderMarkdown(digest, issue, now);
+  const copy = matter(markdown);
+  logNewsletterGuidelines({ title: copy.data.title, description: copy.data.description, body: copy.content, sources: copy.data.sources });
 
   if (preview) {
-    const markdown = renderMarkdown(digest, issue, now);
     console.log(`\n--preview: rendered issue #${issue}:\n`);
     console.log(markdown);
     writeFileSync(PREVIEW_PATH, markdown);
@@ -383,11 +373,13 @@ async function main() {
     throw new Error(`${slug}.md already exists — pass --slug <name> to write a different file`);
   }
 
-  writeFileSync(path, renderMarkdown(digest, issue, now));
+  writeFileSync(path, markdown);
   console.log(`✓ wrote ${path} (${digest.stories.length} stories)`);
 }
 
-main().catch((err) => {
-  console.error(`✗ digest generation failed: ${err.message}`);
-  process.exit(1);
-});
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(`✗ digest generation failed: ${err.message}`);
+    process.exitCode = 1;
+  });
+}

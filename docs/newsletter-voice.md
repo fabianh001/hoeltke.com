@@ -36,10 +36,51 @@ removed WeatherNext 3. These isolated removals do not establish a ban on local
 inference, weather, or research stories. Continue selecting meaningful stories
 for software engineers, and ensure the intro only previews selected stories.
 
-HN scores still rank candidates during collection, but the model receives only
-the discovery-channel name. Past headlines still support deduplication, but the
-prompt treats them as private selection context. Article titles and URLs remain
-exact citations; editorial rules apply to authored prose, not original titles.
+## Structure and selection
+
+Automatic drafts cover at most five distinct developments, ordered by weekly
+traction after filtering for AI relevance and recent coverage. A short intro
+sets the context; each story contains a headline, what changed, why it matters,
+and a source link. Fewer stories are fine in a quiet week; don't pad the issue.
+
+The reading budget is four minutes at 200 words/minute: 800 visible editorial
+words, with a 600–700-word drafting target. The advisory count includes the title,
+description, intro, headlines, body, inline citation labels, and repeated source
+titles in the source list. Markdown syntax and hidden link destinations don't
+count. This estimates the editorial copy, excluding fixed site/email chrome.
+Generation and email preparation log counts and warn about overages; they never
+reject or truncate copy for exceeding these guidelines. Manual edits can exceed
+either guideline, and publishing and sending remain possible.
+
+HN submissions from the last seven days supply the initial traction signal:
+`points + 0.25 × min(comments, points)`. Comments add at most 25% to the vote
+score. Collection paginates the available Algolia search sample (up to 1,000
+submissions, above the configured minimum score) before ranking candidates.
+These are scores observed at collection time on submissions created in the
+window, not historical vote gains within the window.
+
+Normalize tracking parameters to match feed articles with HN submissions,
+while keeping original article URLs and titles as citations. Preserve URL
+fragments: archive entries and hash-routed pages can identify separate stories
+on the same base URL. Alternate anchors can still be grouped by the curator. Use
+the strongest matching HN thread, rather than adding reposts together. The
+curator groups different articles about the same development using private
+`relatedSourceUrls`; a group's score is the highest of its article scores, so
+it can cite the primary announcement while inheriting its coverage's traction.
+Code orders the generated stories by those scores. AI relevance and grouping
+still depend on the curator's judgment.
+
+Measured developments take priority for selection. Articles without a matching
+HN submission in the collected sample are **unmeasured**, not proven unpopular;
+they fill remaining places after qualifying measured stories. If HN fails,
+log the failure and fall back to editorial selection from the feeds. The HN-only
+discovery cap and minimum points remain configurable in `scripts/sources.json`.
+
+Scores and grouping evidence remain private selection context and never render
+in the issue. Past headlines also remain private deduplication context. Article
+titles and URLs remain exact citations; editorial rules apply to authored prose,
+not original titles. Additional traction providers can be considered later;
+the current ranking uses HN only.
 
 The prompt includes before/after examples and a final silent editing pass.
 Preserve caveats and substantive attribution, and repair whole sentences when

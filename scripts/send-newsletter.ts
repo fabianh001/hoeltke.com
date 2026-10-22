@@ -18,6 +18,7 @@ import matter from 'gray-matter';
 import { verifyIssueAudio } from './lib/newsletter-release.js';
 import { alreadySent } from './lib/newsletter-broadcast.js';
 import { buildIssueEmail } from '../src/lib/issue-email';
+import { logNewsletterGuidelines } from '../src/lib/newsletter-guidelines';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIGEST_DIR = join(ROOT, 'src/content/digest');
@@ -75,6 +76,7 @@ function headers(key: string) {
 
 async function main() {
   const issue = pickIssue();
+  logNewsletterGuidelines({ ...issue.data, body: issue.body });
   const { subject, html } = buildIssueEmail({
     title: issue.data.title,
     description: issue.data.description,
