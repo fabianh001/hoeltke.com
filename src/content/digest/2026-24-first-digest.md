@@ -1,5 +1,5 @@
 ---
-title: 'agents misbehave, models land, policies bite'
+title: 'AI Weekly #1 — agents misbehave, models land, policies bite'
 description: 'Claude gets government-suspended, DiffusionGemma promises 4x speed, and multi-agent chaos becomes a funded research problem.'
 date: 2026-06-14
 issue: 1
