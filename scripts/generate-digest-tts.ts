@@ -17,7 +17,7 @@ try {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIGEST_DIR = join(ROOT, 'src/content/digest');
 const AUDIO_DIR = join(ROOT, 'public/audio/digest');
-const DIGEST_MODEL = process.env.DIGEST_SPEECH_MODEL || 'deepseek/deepseek-v4-flash-0731';
+const DIGEST_MODEL = process.env.DIGEST_SPEECH_MODEL || 'deepseek/deepseek-v4.1-flash-1017';
 
 interface ProcessOptions {
   slug: string;

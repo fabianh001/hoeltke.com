@@ -125,7 +125,7 @@ export async function generateSpokenScriptWithAi(
   client: OpenAI,
   parsed: ParsedDigest,
   slug: string,
-  model = 'anthropic/claude-sonnet-4-6',
+  model = 'deepseek/deepseek-v4.1-flash-1017',
 ): Promise<string> {
   const { data, intro, stories } = parsed;
 
