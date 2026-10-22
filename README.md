@@ -71,6 +71,22 @@ story links point to the original articles on anthropic.com.
 
 Repetition guard: the generator reads the last 4 issues, drops any collected item whose URL was already cited, and hands the model the past headlines with an instruction to skip already-covered stories unless there is a genuinely new development (`LOOKBACK_ISSUES` in `scripts/generate-digest.ts`).
 
+Drafting guidelines: at most **5 stories**, a short intro, and a four-minute
+reading budget (**800 words at 200 words/minute**, targeting 600–700 words).
+Each story explains what changed and why it matters, with a source link. The
+generator and email CLI log estimated reading time and story count, with
+**warnings only** for overages. Manual edits may exceed either guideline;
+saving, building, publishing, and sending aren't blocked by these limits.
+
+Selection and ordering use HN traction after an AI relevance filter:
+`points + 0.25 × min(comments, points)`. Scores are current totals for submissions
+created in the last seven days. Matching feed/HN URLs are merged; related
+coverage of one development inherits its strongest score while citing the best
+primary source. Unmeasured stories fill remaining places; an HN outage falls
+back to editorial selection. Scores stay out of reader-facing copy. `--dry-run`
+prints ranked candidates without calling the model. See
+[`docs/newsletter-voice.md`](docs/newsletter-voice.md) for scope and limitations.
+
 Server + DNS setup: [`docs/server-setup.md`](docs/server-setup.md).
 
 ### Newsletter approval and audio
