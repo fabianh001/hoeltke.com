@@ -15,12 +15,12 @@ export interface DigestCandidate {
 
 export type RankedCandidate = DigestCandidate & { tractionScore: number };
 
-/** Match feed and HN URLs without collapsing meaningful query parameters. */
+/** Match feed and HN URLs while preserving query parameters and content-bearing fragments. */
 export function normalizeStoryUrl(value: string): string {
   try {
     const url = new URL(value);
     url.protocol = 'https:';
-    url.hash = '';
+    // Fragments can identify separate archive entries or hash-routed pages.
     for (const key of [...url.searchParams.keys()]) {
       if (/^utm_/i.test(key) || /^(fbclid|gclid)$/i.test(key)) url.searchParams.delete(key);
     }
@@ -30,6 +30,12 @@ export function normalizeStoryUrl(value: string): string {
   } catch {
     return value;
   }
+}
+
+/** Apply the same story identity to recent citations and collected candidates. */
+export function excludePreviouslyCited(items: RankedCandidate[], citedUrls: string[]): RankedCandidate[] {
+  const cited = new Set(citedUrls.map(normalizeStoryUrl));
+  return items.filter(item => !cited.has(normalizeStoryUrl(item.url)));
 }
 
 const threadScore = ({ points, comments }: HnSignal) => points + 0.25 * Math.min(comments, points);

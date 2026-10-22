@@ -16,7 +16,7 @@ import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
-import { collectHackerNews, normalizeStoryUrl, orderStoriesByTraction, rankCandidates, type DigestCandidate, type RankedCandidate } from './lib/digest-traction.js';
+import { collectHackerNews, excludePreviouslyCited, normalizeStoryUrl, orderStoriesByTraction, rankCandidates, type DigestCandidate, type RankedCandidate } from './lib/digest-traction.js';
 import { logNewsletterGuidelines, NEWSLETTER_MAX_STORIES, NEWSLETTER_MAX_WORDS, NEWSLETTER_WORDS_PER_MINUTE } from '../src/lib/newsletter-guidelines.js';
 
 try {
@@ -334,10 +334,9 @@ async function main() {
 
   console.log('collecting sources …');
   const past = loadPastIssues();
-  const citedBefore = new Set(past.flatMap((p) => p.urls).map(normalizeStoryUrl));
   const collected = await collectFeeds();
   // Hard rule: anything a recent issue already linked never reaches the curator.
-  const items = collected.filter((i) => !citedBefore.has(normalizeStoryUrl(i.url)));
+  const items = excludePreviouslyCited(collected, past.flatMap(p => p.urls));
   const dropped = collected.length - items.length;
   if (dropped) console.log(`↷ dropped ${dropped} item(s) already cited in issues #${past.map((p) => p.issue).join(', #')}`);
   if (!items.length) {

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   collectHackerNews,
+  excludePreviouslyCited,
   normalizeStoryUrl,
   orderStoriesByTraction,
   rankCandidates,
@@ -27,9 +28,9 @@ describe('weekly traction ranking', () => {
   });
 
   it('merges tracking variants without losing the feed article or counting repeat threads twice', () => {
-    const original = candidate('https://example.com/release/');
-    const hn = candidate('http://example.com/release?utm_source=hn#discussion', 400, 80);
-    const ranked = rankCandidates([hn, original, hn, candidate('https://example.com/release', 200, 20)]);
+    const original = candidate('https://example.com/release/#announcement');
+    const hn = candidate('http://example.com/release?utm_source=hn#announcement', 400, 80);
+    const ranked = rankCandidates([hn, original, hn, candidate('https://example.com/release#announcement', 200, 20)]);
     expect(ranked).toHaveLength(1);
     expect(ranked[0]).toMatchObject({
       source: original.source, title: original.title, url: original.url,
@@ -41,6 +42,24 @@ describe('weekly traction ranking', () => {
   it('preserves meaningful query parameters when matching articles', () => {
     expect(normalizeStoryUrl('https://example.com/?id=1&utm_medium=rss')).toBe(normalizeStoryUrl('https://example.com?id=1'));
     expect(normalizeStoryUrl('https://example.com/?id=1')).not.toBe(normalizeStoryUrl('https://example.com/?id=2'));
+  });
+
+  it('keeps distinct archive announcements and their traction separate', () => {
+    const earlier = candidate('https://www.php.net/archive/2026.php#2026-10-20-1', 500, 100);
+    const fresh = candidate('https://www.php.net/archive/2026.php#2026-10-21-5', 200, 20);
+    expect(rankCandidates([earlier, fresh]).map(({ url, tractionScore }) => ({ url, tractionScore }))).toEqual([
+      { url: earlier.url, tractionScore: 525 },
+      { url: fresh.url, tractionScore: 205 },
+    ]);
+  });
+
+  it('keeps a fresh archive entry when a different entry was already cited', () => {
+    const earlier = candidate('https://www.php.net/archive/2026.php#2026-10-20-1', 500, 100);
+    const fresh = candidate('https://www.php.net/archive/2026.php#2026-10-21-5', 200, 20);
+    const remaining = excludePreviouslyCited(rankCandidates([earlier, fresh]), [
+      'https://www.php.net/archive/2026.php?utm_source=newsletter#2026-10-20-1',
+    ]);
+    expect(remaining).toEqual([expect.objectContaining({ url: fresh.url, tractionScore: 205 })]);
   });
 
   it('orders by traction, with unmeasured candidates last and stable ties', () => {

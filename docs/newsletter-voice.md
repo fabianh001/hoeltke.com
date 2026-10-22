@@ -59,8 +59,10 @@ submissions, above the configured minimum score) before ranking candidates.
 These are scores observed at collection time on submissions created in the
 window, not historical vote gains within the window.
 
-Normalize tracking parameters and URL fragments to match feed articles with HN
-submissions, while keeping original article URLs and titles as citations. Use
+Normalize tracking parameters to match feed articles with HN submissions,
+while keeping original article URLs and titles as citations. Preserve URL
+fragments: archive entries and hash-routed pages can identify separate stories
+on the same base URL. Alternate anchors can still be grouped by the curator. Use
 the strongest matching HN thread, rather than adding reposts together. The
 curator groups different articles about the same development using private
 `relatedSourceUrls`; a group's score is the highest of its article scores, so
