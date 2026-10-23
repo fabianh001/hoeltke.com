@@ -31,7 +31,8 @@ const PREVIEW_PATH = join(DIGEST_DIR, 'preview.md');
 const WINDOW_DAYS = 7;
 const MAX_ITEMS_PER_SOURCE = 12;
 const MAX_SNIPPET_CHARS = 700;
-const MAX_OUTPUT_TOKENS = 8000;
+// OpenRouter counts reasoning and the final JSON against this shared budget.
+const MAX_OUTPUT_TOKENS = 32_000;
 // How many past issues the curator sees so it doesn't re-run a story. Stories
 // resurface under new URLs (follow-ups, post-mortems, third-party write-ups),
 // so a URL blocklist alone isn't enough — the model needs the headlines too.
@@ -136,6 +137,34 @@ const DigestSchema = z.object({
   stories: z.array(StorySchema),
 });
 
+/** Keep response metadata when an accepted request produces no usable output. */
+function completionContent(res: OpenAI.Chat.ChatCompletion, format: string): string {
+  // OpenRouter adds provider/error fields to the OpenAI-compatible response.
+  // Provider failures can arrive in the body even with HTTP 200.
+  const response = res as OpenAI.Chat.ChatCompletion & {
+    _request_id?: string;
+    provider?: string;
+    error?: { code?: number | string; message?: string };
+  };
+  const choice = response.choices?.[0];
+  const content = choice?.message?.content;
+  if (!response.error && content?.trim()) return content;
+
+  // Whitelist diagnostics: never dump prompts, generated copy, raw provider
+  // payloads, or reasoning text into CI logs.
+  const details = {
+    id: response.id,
+    request_id: response._request_id,
+    model: response.model,
+    provider: response.provider,
+    finish_reason: choice?.finish_reason,
+    usage: response.usage,
+    error: response.error && { code: response.error.code, message: response.error.message },
+  };
+  const problem = response.error ? 'reported an upstream error' : 'had empty content';
+  throw new Error(`${format} response ${problem}: ${JSON.stringify(details)}`);
+}
+
 /**
  * Ask the model for the digest as JSON. Prefers strict json_schema (best
  * adherence on capable models — Claude, GPT, Gemini); falls back to the
@@ -146,16 +175,20 @@ async function complete(
   client: OpenAI,
   messages: OpenAI.Chat.ChatCompletionMessageParam[],
 ): Promise<string> {
-  const base = { model: DIGEST_MODEL, max_tokens: MAX_OUTPUT_TOKENS, messages };
+  const base = {
+    model: DIGEST_MODEL,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    messages,
+    // Keep DeepSeek's high reasoning effort explicit, with room for final JSON.
+    ...(DIGEST_MODEL.startsWith('deepseek/') ? { reasoning: { effort: 'high' as const } } : {}),
+  };
 
   try {
     const res = await client.chat.completions.create({
       ...base,
       response_format: zodResponseFormat(DigestSchema, 'digest'),
     });
-    const content = res.choices[0]?.message?.content;
-    if (content) return content;
-    throw new Error('json_schema response had empty content');
+    return completionContent(res, 'json_schema');
   } catch (err) {
     // Only fall back when the model rejects the schema param itself (400).
     // Auth / rate-limit / network errors should surface, not double-fire.
@@ -167,9 +200,7 @@ async function complete(
     ...base,
     response_format: { type: 'json_object' },
   });
-  const content = res.choices[0]?.message?.content;
-  if (!content) throw new Error('model returned empty content');
-  return content;
+  return completionContent(res, 'json_object');
 }
 
 export async function summarize(items: RankedCandidate[], issueNumber: number, past: PastIssue[]) {
