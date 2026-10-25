@@ -51,7 +51,9 @@ async function collectFeeds(): Promise<RankedCandidate[]> {
   const config = JSON.parse(readFileSync(join(ROOT, 'scripts/sources.json'), 'utf8'));
   const now = new Date();
   const cutoff = new Date(now.getTime() - WINDOW_DAYS * 24 * 3600 * 1000);
-  const parser = new Parser({ timeout: 20_000 });
+  // rss-parser leaves redirect bodies unread. Avoid reusing those connections,
+  // which can keep the CLI alive after the issue has already been written.
+  const parser = new Parser({ timeout: 20_000, requestOptions: { agent: false } });
   const items: DigestCandidate[] = [];
 
   for (const feed of config.feeds) {
