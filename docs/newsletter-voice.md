@@ -64,16 +64,35 @@ while keeping original article URLs and titles as citations. Preserve URL
 fragments: archive entries and hash-routed pages can identify separate stories
 on the same base URL. Alternate anchors can still be grouped by the curator. Use
 the strongest matching HN thread, rather than adding reposts together. The
-curator groups different articles about the same development using private
-`relatedSourceUrls`; a group's score is the highest of its article scores, so
-it can cite the primary announcement while inheriting its coverage's traction.
-Code orders the generated stories by those scores. AI relevance and grouping
-still depend on the curator's judgment.
+classifier groups different articles about the same development; a group's
+score is the highest of its article scores, so it can cite the primary
+announcement while inheriting its coverage's traction.
+
+Generation now makes two model calls. The first classifies **every** collected
+candidate into exactly one development group, chooses a primary source, and
+records an eligibility reason. Missing, unknown, or repeated candidate IDs are
+rejected. AI-assisted vulnerability discovery and exploit validation explicitly
+qualify, including advisories whose titles only name a non-AI product such as
+PHP. General security news still needs an evidenced AI connection.
+
+Code selects the five highest-scoring eligible groups before the second call.
+The writer only receives the selected groups and must return exactly one story
+per development ID. Code rejects omissions, duplicates, and substitutions,
+restores traction order, and attaches source titles and URLs from the selected
+candidates. This checks automatic generation only; manual Markdown edits and
+email preparation don't enforce that generated selection.
+
+Each group produces a `Selection audit:` JSON log entry containing its primary
+and related URLs, score, eligibility, reason, and status (`selected`, `excluded`,
+or `below-cutoff`). These logs explain why a collected story did or did not make
+an issue. AI relevance and grouping still depend on classifier judgment; the
+writer cannot override the resulting selection.
 
 Measured developments take priority for selection. Articles without a matching
 HN submission in the collected sample are **unmeasured**, not proven unpopular;
 they fill remaining places after qualifying measured stories. If HN fails,
-log the failure and fall back to editorial selection from the feeds. The HN-only
+log the failure and use classifier ordering to select among eligible feed groups
+whose scores are all zero. The HN-only
 discovery cap and minimum points remain configurable in `scripts/sources.json`.
 
 Scores and grouping evidence remain private selection context and never render

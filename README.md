@@ -82,8 +82,13 @@ Selection and ordering use HN traction after an AI relevance filter:
 `points + 0.25 × min(comments, points)`. Scores are current totals for submissions
 created in the last seven days. Matching feed/HN URLs are merged; related
 coverage of one development inherits its strongest score while citing the best
-primary source. Unmeasured stories fill remaining places; an HN outage falls
-back to editorial selection. Scores stay out of reader-facing copy. `--dry-run`
+primary source. A classification pass accounts for every candidate with an AI
+eligibility decision, group, and reason. Code selects the top five eligible
+groups; a separate writing pass must cover exactly those groups. `Selection
+audit:` logs explain inclusions, exclusions, and candidates below the cutoff.
+AI-assisted security research explicitly qualifies. Unmeasured stories fill
+remaining places; an HN outage uses the classifier's editorial ordering. Scores
+stay out of reader-facing copy. `--dry-run`
 prints ranked candidates without calling the model. See
 [`docs/newsletter-voice.md`](docs/newsletter-voice.md) for scope and limitations.
 
