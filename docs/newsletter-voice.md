@@ -17,6 +17,27 @@ implication where it adds value. Avoid defaulting to benchmarking or deployment
 advice. Specialist stories are welcome; explain their significance plainly
 without forcing a universal impact or inventing unsupported benefits.
 
+## Issue titles
+
+Choose the title after considering all selected stories. Capture the broader
+shared theme, direction, or tension and the issue's overall sentiment, grounded
+in what happened. For an issue with multiple developments, prefer a title that
+connects several stories over the headline of one company's release. Keep it
+concrete and accessible to everyone interested in AI; avoid product-name lists,
+vague slogans, clickbait, and forced optimism, pessimism, or contrasts. A narrow
+or single-story issue can use a focused title.
+
+Fabian replaced “DeepSeek open-sources its inference engine” with “AI opens up,
+trust gets tested” for the October 25 issue, which combined open models and
+infrastructure with security findings and hidden instructions aimed at AI
+systems. This illustrates the editorial approach, not a recurring title or
+formula. Derive each week's title from its own selected stories.
+
+Keep titles to eight words at most, in sentence case, preserving proper names
+and acronyms, with no final period, “AI Weekly” prefix, or issue number. The final
+editing pass checks that the title represents the issue as a whole and that its
+theme and sentiment are supported by the stories.
+
 ## Recurring edits
 
 - **Tell the story directly.** Week 39 replaced “Simon Willison's analysis
