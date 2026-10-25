@@ -112,7 +112,7 @@ export function buildIssueEmail(
   <div class="issue-content">${content}</div>${sourcesHtml}`;
 
   const footerHtml = `
-  <p class="signoff"><span class="g">●</span> auto-curated &amp; AI-summarized — no humans in the loop.</p>
+  <p class="signoff"><span class="g">●</span> The week’s top AI stories in a quick read. Catch up in one place, every Friday. Sources always linked.</p>
   <p class="unsub"><a href="{{{RESEND_UNSUBSCRIBE_URL}}}">unsubscribe</a> · sent by hoeltke.com</p>`;
 
   return {
