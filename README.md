@@ -73,8 +73,9 @@ Repetition guard: the generator reads the last 4 issues, drops any collected ite
 
 Drafting guidelines: at most **5 stories**, a short intro, and a four-minute
 reading budget (**800 words at 200 words/minute**, targeting 600–700 words).
-Each story explains what changed and why it matters, with a source link. The
-generator and email CLI log estimated reading time and story count, with
+Each story explains what changed and why it matters for everyone interested in
+AI, especially builders, with a source link. The generator and email CLI log
+estimated reading time and story count, with
 **warnings only** for overages. Manual edits may exceed either guideline;
 saving, building, publishing, and sending aren't blocked by these limits.
 

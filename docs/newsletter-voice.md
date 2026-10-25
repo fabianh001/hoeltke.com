@@ -4,6 +4,19 @@ Derived from Fabian's edits to the generated drafts for weeks 39–41 of 2026,
 with an earlier example from week 36. The generation instructions live in
 `scripts/generate-digest.ts`; this document records the evidence and scope.
 
+## Audience
+
+Write for everyone interested in AI, especially builders. Fabian broadened the
+audience from working software engineers: readers should understand why a
+development matters without writing code, running infrastructure, or working
+in AI. Preserve useful technical detail, explaining unfamiliar terms when needed.
+
+In **Why it matters**, lead with a concrete consequence: what changes in what
+people can do, access, afford, trust, or understand. Add a practical builder
+implication where it adds value. Avoid defaulting to benchmarking or deployment
+advice. Specialist stories are welcome; explain their significance plainly
+without forcing a universal impact or inventing unsupported benefits.
+
 ## Recurring edits
 
 - **Tell the story directly.** Week 39 replaced “Simon Willison's analysis
@@ -34,7 +47,8 @@ with an earlier example from week 36. The generation instructions live in
 Week 39 removed a Transformers/llama.cpp story and its intro mention; week 36
 removed WeatherNext 3. These isolated removals do not establish a ban on local
 inference, weather, or research stories. Continue selecting meaningful stories
-for software engineers, and ensure the intro only previews selected stories.
+for everyone interested in AI, especially builders, and ensure the intro only
+previews selected stories.
 
 ## Structure and selection
 

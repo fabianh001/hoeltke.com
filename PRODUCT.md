@@ -10,10 +10,10 @@ web
 
 Two audiences, served in this order:
 
-1. **AI practitioners skimming the week** — engineers, researchers, and people who
-   work adjacent to AI, landing with a few minutes and a question: *did anything
-   actually happen this week?* They read one issue, and the good outcome is they
-   subscribe so Friday comes to them instead.
+1. **Everyone interested in AI, especially builders** — curious readers, people
+   using AI, engineers, and researchers, landing with a few minutes and a question:
+   *did anything actually happen this week?* They read one issue, and the good
+   outcome is they subscribe so Friday comes to them instead.
 2. **Hiring managers, recruiters, and peers evaluating Fabian** — they arrive from a
    profile link or a shared issue. They are not here to read the news; they are
    reading the artifact. The working pipeline is the portfolio piece.
