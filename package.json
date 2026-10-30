@@ -32,13 +32,13 @@
     "astro-og-canvas": "^0.13.0",
     "gray-matter": "^4.0.3",
     "juice": "^12.1.1",
-    "markdown-it": "^14.3.1",
+    "markdown-it": "^14.3.3",
     "motion": "^12.40.0",
     "openai": "^6.42.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "rss-parser": "^3.13.0",
-    "sanitize-html": "^2.18.0",
+    "sanitize-html": "^2.18.1",
     "tailwindcss": "^4.3.0",
     "zod": "^4.4.3"
   },
@@ -50,7 +50,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "jsdom": "^27.0.1",
     "tsx": "^4.22.4",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "esbuild": "^0.28.1"
