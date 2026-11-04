@@ -3,15 +3,15 @@ import { renderEmailShell } from './email-shell';
 
 const base = { preheader: 'six stories that mattered', contentHtml: '<p class="x">hi</p>' };
 
-test('emits a complete dark document with color-scheme metas', () => {
+test('emits a complete light document with color-scheme metas', () => {
   const html = renderEmailShell(base);
   expect(html).toMatch(/^<!doctype html>/i);
-  expect(html).toContain('name="color-scheme" content="dark"');
-  expect(html).toContain('name="supported-color-schemes" content="dark"');
-  expect(html).toContain('bgcolor="#000001"'); // email-safe near-black, edge to edge
+  expect(html).toContain('name="color-scheme" content="light"');
+  expect(html).toContain('name="supported-color-schemes" content="light"');
+  expect(html).toContain('bgcolor="#fffffe"'); // email-safe near-white, edge to edge
 });
 
-test('floors the black band in px so no client background shows below the card', () => {
+test('floors the page background in px so no client background shows below the card', () => {
   const html = renderEmailShell(base);
   const wrap = html.match(/<td class="wrap"[^>]*>/)![0];
   expect(wrap).toContain('height: 1200px');
@@ -28,7 +28,7 @@ test('floors the black band in px so no client background shows below the card',
 test('keeps @font-face pointing at stable /fonts/ URLs after juice inlining', () => {
   const html = renderEmailShell(base);
   expect(html).toContain('https://hoeltke.com/fonts/jetbrains-mono-latin-wght-normal.woff2');
-  expect(html).toContain('https://hoeltke.com/fonts/inter-latin-wght-normal.woff2');
+  expect(html).toContain('https://hoeltke.com/fonts/openai-sans/OpenAISans-Regular.woff2');
   expect(html).toContain('@font-face'); // preserved in a retained <style>
 });
 
@@ -41,4 +41,11 @@ test('inlines extraCss onto content and renders preheader + footer', () => {
   expect(html).toMatch(/<p[^>]+#123456/);
   expect(html).toContain('six stories that mattered');
   expect(html).toContain('bye');
+});
+
+// The terminal is deliberately black even when the publication is light.
+test('keeps email cards light independently of the black terminal surface', () => {
+  const card = renderEmailShell(base).match(/<td class="card"[^>]*>/)![0];
+  expect(card).toContain('background: #fffffe');
+  expect(card).not.toContain('#050507');
 });

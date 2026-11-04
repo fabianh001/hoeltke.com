@@ -1,41 +1,117 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/jetbrains-mono';
-@import '@fontsource-variable/inter';
 
 @plugin "@tailwindcss/typography";
+
+@font-face {
+  font-family: 'OpenAI Sans';
+  src: url('/fonts/openai-sans/OpenAISans-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenAI Sans';
+  src: url('/fonts/openai-sans/OpenAISans-Medium.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenAI Sans';
+  src: url('/fonts/openai-sans/OpenAISans-Semibold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenAI Sans';
+  src: url('/fonts/openai-sans/OpenAISans-Bold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 
 /* ── Theme tokens ─────────────────────────────────────────────── */
 
 :root {
-  /* pure black with neon accents */
+  /* Approved white publication theme; green belongs to dollar prompts and status dots. */
+  --bg: #ffffff;
+  --bg-raised: #f7f7f7;
+  --panel: #f7f7f7;
+  --term-bg: #050507;
+  --terminal-ink: #f1f1f1;
+  --terminal-muted: #a0a0a8;
+  --terminal-faint: #9999a2;
+  --terminal-line: #29292f;
+  --terminal-line-bright: #55555e;
+  --terminal-error: #f08a86;
+  --terminal-warning: #d9a43b;
+  --line: #e5e5e5;
+  --line-bright: #a8a8a8;
+  --text: #181818;
+  --muted: #5d5d5d;
+  --faint: #666666;
+  --accent: #181818;
+  --accent-vivid: #333333;
+  --green: #181818;
+  --status-green: #01a240;
+  --blue: #181818;
+  --amber: #705a24;
+  --red: #a03b35;
+  --prompt: #01a240;
+  --dot: rgba(24, 24, 24, 0.16);
+  --glow: rgba(0, 0, 0, 0);
+  --terminal-shadow: 0 18px 48px rgba(24, 24, 24, 0.08);
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
   --bg: #000000;
   --bg-raised: #0a0a0d;
   --panel: #0a0a0d;
-  --term-bg: #050507;
   --line: #222228;
   --line-bright: #3a3a42;
   --text: #ffffff;
   --muted: #9a9aa2;
-  --faint: #5f5f67;
+  --faint: #888890;
   --accent: #9050ff;
   --accent-vivid: #7700ff;
   --green: #3ef78f;
   --blue: #0164ff;
   --amber: #d9a43b;
-  --red: #d33043;
-  --prompt: #3ef78f;
+  --red: #f08a86;
   --dot: rgba(255, 255, 255, 0.65);
-  --glow: rgba(119, 0, 255, 0.35);
+  --terminal-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
   color-scheme: dark;
 }
 
+/* A terminal is a dark reading surface in either page theme. */
 .term {
+  --bg: var(--term-bg);
+  --bg-raised: #151518;
+  --panel: #151518;
+  --text: var(--terminal-ink);
+  --muted: var(--terminal-muted);
+  --faint: var(--terminal-faint);
+  --line: var(--terminal-line);
+  --line-bright: var(--terminal-line-bright);
+  --accent: var(--terminal-ink);
+  --green: var(--terminal-ink);
+  --amber: var(--terminal-warning);
+  --red: var(--terminal-error);
+  --glow: rgba(0, 0, 0, 0);
   background-color: var(--term-bg);
+  color: var(--terminal-ink);
 }
 
 @theme inline {
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
-  --font-sans: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: 'OpenAI Sans', sans-serif;
+  --font-sans: 'OpenAI Sans', sans-serif;
 
   --color-blue: var(--blue);
 
@@ -49,6 +125,7 @@
   --color-faint: var(--faint);
   --color-accent: var(--accent);
   --color-green: var(--green);
+  --color-status-green: var(--status-green);
   --color-amber: var(--amber);
   --color-red: var(--red);
   --color-prompt: var(--prompt);
@@ -124,21 +201,9 @@ body > footer {
   overflow: hidden;
 }
 
-/* scanlines + vignette, terminal only */
+/* Keep the terminal containment without a dark CRT vignette on white. */
 .crt::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.02) 0px,
-      rgba(255, 255, 255, 0.02) 1px,
-      transparent 1px,
-      transparent 3px
-    ),
-    radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.25) 100%);
+  display: none;
 }
 
 
@@ -160,7 +225,7 @@ body > footer {
 @keyframes pulse-dot {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 60%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-green) 60%, transparent);
   }
   60% {
     box-shadow: 0 0 0 5px transparent;
@@ -591,9 +656,7 @@ body > footer {
 }
 
 .terminal-content .term {
-  box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.65),
-    0 0 36px rgba(119, 0, 255, 0.14);
+  box-shadow: var(--terminal-shadow);
   border-radius: 6px;
 }
 
@@ -779,3 +842,24 @@ body > footer {
     row-gap: 12px;
   }
 }
+
+/* Typography and control refinements preserve the publication's existing grid. */
+.header-subscribe { background: var(--text); color: var(--bg); border-color: var(--text); }
+.header-subscribe:hover { background: var(--accent-vivid); color: var(--bg); }
+.post-date, .post-time, .post-byline { font-size: 13px; }
+.post-description, .blog-disclosure { font-size: 16px; }
+.post-row a:hover h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.digest-article { max-width: 680px; margin-inline: auto; }
+.prose-digest { font-size: 18px; line-height: 1.75; }
+.prose-digest :where(h2, h3) { font-weight: 600; }
+.term, .term .font-mono, .term.font-mono { font-family: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace; }
+.term .cursor-block { background: var(--text); }
+
+:root[data-theme='dark'] .header-subscribe { background: var(--panel); color: var(--text); border-color: var(--line-bright); }
+:root[data-theme='dark'] .header-subscribe:hover { background: var(--panel); color: var(--accent); border-color: var(--accent); }
+.theme-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; }
+.theme-toggle[hidden] { display: none; }
+.theme-toggle-track { position: relative; display: inline-block; width: 32px; height: 18px; flex-shrink: 0; border-radius: 99px; background: var(--line-bright); transition: background-color 150ms ease-out; }
+.theme-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; transition: transform 150ms ease-out; }
+:root[data-theme='dark'] .theme-toggle-track { background: var(--accent); }
+:root[data-theme='dark'] .theme-toggle-thumb { transform: translateX(14px); }

@@ -8,7 +8,7 @@ export interface ShellInput {
   contentHtml: string;
   /** additional CSS rules for the content (inlined by juice) */
   extraCss?: string;
-  /** dark-styled footer line(s) appended inside the card */
+  /** styled footer line(s) appended inside the card */
   footerHtml?: string;
 }
 
@@ -16,10 +16,10 @@ const SITE = 'https://hoeltke.com';
 
 /** Email font stacks: self-hosted variable fonts load in Apple Mail; the rest fall back. */
 export const MONO = `'JetBrains Mono','SF Mono',Consolas,monospace`;
-export const SANS = `'Inter',-apple-system,'Segoe UI',sans-serif`;
+export const SANS = `'OpenAI Sans',-apple-system,'Segoe UI',sans-serif`;
 
 /**
- * Wrap card content in the full dark email document (spec: dark-always).
+ * Wrap card content in the full light email document.
  * We own the whole document — no provider wrapper exists. Styles are inlined
  * with juice because many clients strip <style>; juice keeps @font-face in a
  * retained <style> block for the clients that do load web fonts.
@@ -31,8 +31,8 @@ export function renderEmailShell({ preheader, contentHtml, extraCss = '', footer
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
-<meta name="supported-color-schemes" content="dark">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
 <style>
   @font-face {
     font-family: 'JetBrains Mono';
@@ -40,24 +40,24 @@ export function renderEmailShell({ preheader, contentHtml, extraCss = '', footer
     font-weight: 100 800; font-style: normal; font-display: swap;
   }
   @font-face {
-    font-family: 'Inter';
-    src: url('${SITE}/fonts/inter-latin-wght-normal.woff2') format('woff2');
-    font-weight: 100 900; font-style: normal; font-display: swap;
+    font-family: 'OpenAI Sans';
+    src: url('${SITE}/fonts/openai-sans/OpenAISans-Regular.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: swap;
   }
   html, body { margin:0; padding:0; width:100%; height:100%; background:${t.bg}; }
   .preheader { display:none; max-height:0; overflow:hidden; }
   /* On a table cell CSS height is a MINIMUM (content still grows it), so this
-     floors the black band instead of capping it. Deliberately px, never vh:
+     floors the page background instead of capping it. Deliberately px, never vh:
      clients render the message in a content-sized container, so 100vh resolves
      to the content height (or 0 in Apple Mail iOS) and floors nothing. Media
      queries on the pane height step the floor up when there is room for it. */
   .wrap { background:${t.bg}; padding:24px 12px; font-family:${SANS}; height:1200px; }
   @media only screen and (max-width:600px) { td.wrap { height:800px !important; } }
   @media only screen and (min-height:900px) { td.wrap { height:1600px !important; } }
-  .card { text-align:left; background:${t['term-bg']}; border:1px solid ${t.line}; border-radius:12px; padding:28px; font-family:${SANS}; }
+  .card { text-align:left; background:${t.bg}; border:1px solid ${t.line}; border-radius:12px; padding:28px; font-family:${SANS}; }
   .brand { font-family:${MONO}; font-size:14px; color:${t.faint}; margin:0 0 18px 0; }
   .brand b { color:${t.text}; }
-  .g { color:${t.green}; }
+  .g { color:${t['status-green']}; }
   .meta { font-family:${MONO}; font-size:12px; color:${t.faint}; }
   .rule { border-top:1px solid ${t.line}; margin:20px 0; }
   .signoff { font-family:${MONO}; font-size:12px; color:${t.faint}; margin-top:24px; }

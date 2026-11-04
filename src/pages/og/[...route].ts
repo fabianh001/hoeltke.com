@@ -23,30 +23,27 @@ export const { getStaticPaths, GET } = await OGImageRoute({
   getImageOptions: (_path, page) => ({
     title: `$ ${page.title}`,
     description: page.description,
-    bgGradient: [
-      [0, 0, 0],
-      [10, 10, 13],
-    ],
-    border: { color: [119, 0, 255], width: 14, side: 'inline-start' },
+    bgGradient: [[255, 255, 255]],
+    border: { color: [229, 229, 229], width: 1, side: 'inline-start' },
     padding: 72,
     font: {
       title: {
         size: 60,
         lineHeight: 1.25,
-        families: ['JetBrains Mono'],
+        families: ['OpenAI Sans'],
         weight: 'Bold',
-        color: [230, 230, 234],
+        color: [24, 24, 24],
       },
       description: {
         size: 30,
         lineHeight: 1.5,
-        families: ['JetBrains Mono'],
-        color: [156, 156, 165],
+        families: ['OpenAI Sans'],
+        color: [93, 93, 93],
       },
     },
     fonts: [
-      './src/assets/fonts/JetBrainsMono-Bold.ttf',
-      './src/assets/fonts/JetBrainsMono-Regular.ttf',
+      './public/fonts/openai-sans/OpenAISans-Bold.woff2',
+      './public/fonts/openai-sans/OpenAISans-Regular.woff2',
     ],
   }),
 });

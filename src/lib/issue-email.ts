@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { renderEmailShell, MONO } from './email-shell';
+import { renderEmailShell, MONO, SANS } from './email-shell';
 import { themeTokens } from './theme-tokens';
 import { renderDigestHtml } from './render-markdown';
 
@@ -27,7 +27,7 @@ function escapeAttr(s: string): string {
 }
 
 /**
- * Build the weekly issue as a complete dark email document. The
+ * Build the weekly issue as a complete light email document. The
  * {{{RESEND_UNSUBSCRIBE_URL}}} placeholder is substituted per-recipient by
  * Resend at broadcast time. Pure → unit-testable.
  */
@@ -47,14 +47,14 @@ export function buildIssueEmail(
      desc -> divider is pb-6 (24px); divider -> content is mt-8 (32px). */
   .tag { display:inline-block; font-family:${MONO}; font-size:12px; color:${t.faint};
          border:1px solid ${t.line}; border-radius:4px; padding:2px 6px; margin:0 0 4px 12px; }
-  h1.title { font-family:${MONO}; font-size:24px; line-height:1.2; letter-spacing:-0.01em; color:${t.text}; margin:12px 0 0; }
+  h1.title { font-family:${SANS}; font-size:24px; line-height:1.2; letter-spacing:-0.01em; color:${t.text}; margin:12px 0 0; }
   .desc { font-size:18px; line-height:1.5; color:${t.muted}; margin:12px 0 24px; }
   .rule { border-top:1px solid ${t.line}; margin:0 0 32px; }
-  .issue-content h2 { font-family:${MONO}; font-size:24px; line-height:32px; color:${t.text}; margin:48px 0 24px; }
-  .issue-content h3 { font-family:${MONO}; font-size:20px; line-height:32px; color:${t.text}; margin:32px 0 12px; }
+  .issue-content h2 { font-family:${SANS}; font-size:24px; line-height:32px; color:${t.text}; margin:48px 0 24px; }
+  .issue-content h3 { font-family:${SANS}; font-size:20px; line-height:32px; color:${t.text}; margin:32px 0 12px; }
   .issue-content p { font-size:16px; line-height:1.6; color:${t.text}; margin:0 0 20px; }
   .issue-content strong { color:${t.text}; }
-  .issue-content a { color:${t.accent}; text-decoration:none; }
+  .issue-content a { color:${t.accent}; text-decoration:underline; }
   .issue-content ul, .issue-content ol { padding-left:26px; color:${t.text}; margin:0 0 20px; }
   .issue-content li { font-size:16px; line-height:1.6; margin:0 0 8px; }
   .sources { margin:40px 0 0; border:1px solid ${t.line}; border-radius:12px; padding:20px; background:${t.panel}; }
@@ -62,7 +62,7 @@ export function buildIssueEmail(
                     text-transform:uppercase; color:${t.faint}; margin:0; }
   .sources ul { list-style:none; padding:0; margin:12px 0 0; }
   .sources li { font-family:${MONO}; font-size:14px; line-height:1.5; color:${t.faint}; margin:0 0 6px; }
-  .sources a { color:${t.accent}; text-decoration:none; }
+  .sources a { color:${t.accent}; text-decoration:underline; }
   .unsub { font-family:${MONO}; font-size:12px; color:${t.faint}; margin-top:8px; }
   .unsub a { color:${t.faint}; text-decoration:underline; }`;
 
@@ -96,7 +96,7 @@ export function buildIssueEmail(
   <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;">
     <tr>
       <td align="center" style="border-radius:6px; background:${t.green};">
-        <a href="${escapeAttr(webUrl)}" target="_blank" class="play-btn" style="font-family:${MONO}; font-size:13px; font-weight:600; color:#000001; text-decoration:none; padding:9px 18px; display:inline-block; border-radius:6px;">&#9654; Listen</a>
+        <a href="${escapeAttr(webUrl)}" target="_blank" class="play-btn" style="font-family:${MONO}; font-size:13px; font-weight:600; color:${t.bg}; text-decoration:none; padding:9px 18px; display:inline-block; border-radius:6px;">&#9654; Listen</a>
       </td>
     </tr>
   </table>`
@@ -104,7 +104,7 @@ export function buildIssueEmail(
 
   const contentHtml = `
   <p class="brand"><span class="g">$</span> <b>hoeltke.com</b> ~ cat ai-weekly/${num}.md</p>
-  <div class="meta"><span class="g">issue #${num}</span> &nbsp; ${dateStr}${tagsHtml}</div>
+  <div class="meta"><span>issue #${num}</span> &nbsp; ${dateStr}${tagsHtml}</div>
   <h1 class="title">${escapeHtml(input.title)}</h1>
   <p class="desc">${escapeHtml(input.description)}</p>
   ${audioHtml}
