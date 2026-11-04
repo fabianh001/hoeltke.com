@@ -1,83 +1,98 @@
 ---
 name: hoeltke.com — AI Weekly
-description: A dark publication with mono wayfinding, sans reading titles, and a working terminal.
+description: A white-default publication with a retained dark theme and a working black terminal.
 colors:
-  bg: "#000000"
+  bg: "#ffffff"
+  panel: "#f7f7f7"
+  line: "#e5e5e5"
+  line-bright: "#a8a8a8"
+  ink: "#181818"
+  muted: "#5d5d5d"
+  faint: "#666666"
+  accent-vivid: "#333333"
+  prompt: "#01a240"
+  error: "#a03b35"
+  warning: "#705a24"
   term-bg: "#050507"
-  panel: "#0a0a0d"
-  line: "#222228"
-  line-bright: "#3a3a42"
-  ink: "#ffffff"
-  muted: "#9a9aa2"
-  faint: "#5f5f67"
-  accent: "#9050ff"
-  accent-vivid: "#7700ff"
-  prompt: "#3ef78f"
-  blue: "#0164ff"
-  amber: "#d9a43b"
-  red: "#d33043"
-  glow: "rgba(119, 0, 255, 0.35)"
+  terminal-ink: "#f1f1f1"
+  terminal-muted: "#a0a0a8"
+  terminal-faint: "#9999a2"
+  terminal-line: "#29292f"
+  terminal-line-bright: "#55555e"
+  terminal-raised: "#151518"
+  terminal-error: "#f08a86"
+  terminal-warning: "#d9a43b"
+  dark-bg: "#000000"
+  dark-panel: "#0a0a0d"
+  dark-line: "#222228"
+  dark-line-bright: "#3a3a42"
+  dark-ink: "#ffffff"
+  dark-muted: "#9a9aa2"
+  dark-faint: "#888890"
+  dark-accent: "#9050ff"
+  dark-accent-vivid: "#7700ff"
+  dark-green: "#3ef78f"
+  dark-blue: "#0164ff"
 typography:
   display:
-    fontFamily: "JetBrains Mono Variable, ui-monospace, SF Mono, monospace"
+    fontFamily: "OpenAI Sans, sans-serif"
     fontSize: "32px"
     fontWeight: 400
     lineHeight: 1.15
     letterSpacing: "-0.035em"
   headline:
-    fontFamily: "JetBrains Mono Variable, ui-monospace, SF Mono, monospace"
-    fontSize: "30px"
-    fontWeight: 700
-    lineHeight: 1.2
+    fontFamily: "OpenAI Sans, sans-serif"
+    fontSize: "36px"
+    fontWeight: 600
+    lineHeight: "40px"
     letterSpacing: "-0.025em"
   featured-title:
-    fontFamily: "Inter Variable, system-ui, -apple-system, sans-serif"
+    fontFamily: "OpenAI Sans, sans-serif"
     fontSize: "23px"
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: "-0.015em"
   title:
-    fontFamily: "Inter Variable, system-ui, -apple-system, sans-serif"
+    fontFamily: "OpenAI Sans, sans-serif"
     fontSize: "18px"
     fontWeight: 450
     lineHeight: 1.5
     letterSpacing: "-0.015em"
   body:
-    fontFamily: "Inter Variable, system-ui, -apple-system, sans-serif"
+    fontFamily: "OpenAI Sans, sans-serif"
     fontSize: "18px"
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 1.75
   description:
-    fontFamily: "Inter Variable, system-ui, -apple-system, sans-serif"
-    fontSize: "14px"
+    fontFamily: "OpenAI Sans, sans-serif"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.7
+  label:
+    fontFamily: "OpenAI Sans, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.6
+  control:
+    fontFamily: "OpenAI Sans, sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: "20px"
   terminal:
     fontFamily: "JetBrains Mono Variable, ui-monospace, SF Mono, monospace"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: "24px"
-  label:
-    fontFamily: "JetBrains Mono Variable, ui-monospace, SF Mono, monospace"
-    fontSize: "12px"
-    fontWeight: 400
-    lineHeight: 1.6
-  control:
-    fontFamily: "JetBrains Mono Variable, ui-monospace, SF Mono, monospace"
-    fontSize: "14px"
-    fontWeight: 400
-    lineHeight: "20px"
 rounded:
-  hairline: "2px"
+  focus: "2px"
   chip: "4px"
   control: "6px"
   plate: "12px"
-  dot: "9999px"
 spacing:
   tight: "8px"
   snug: "12px"
-  gap: "24px"
   plate: "20px"
+  gap: "24px"
   room: "28px"
   gutter-wide: "36px"
   newsletter: "64px"
@@ -90,31 +105,25 @@ components:
     padding: "22px 0"
   post-row-hover:
     backgroundColor: "{colors.panel}"
-    textColor: "{colors.accent}"
+    textColor: "{colors.ink}"
   terminal-plate:
     backgroundColor: "{colors.term-bg}"
-    textColor: "{colors.ink}"
+    textColor: "{colors.terminal-ink}"
     typography: "{typography.terminal}"
     rounded: "{rounded.control}"
     padding: "24px"
   button-subscribe:
-    backgroundColor: "{colors.prompt}"
+    backgroundColor: "{colors.ink}"
     textColor: "{colors.bg}"
     rounded: "{rounded.control}"
     padding: "8px 16px"
     height: "44px"
   button-header:
-    backgroundColor: "{colors.panel}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.bg}"
     typography: "{typography.control}"
     rounded: "{rounded.chip}"
     padding: "8px 16px"
-    height: "44px"
-  button-command:
-    backgroundColor: "transparent"
-    textColor: "{colors.muted}"
-    rounded: "{rounded.control}"
-    padding: "2px 14px"
     height: "44px"
   input-email:
     backgroundColor: "{colors.bg}"
@@ -127,14 +136,13 @@ components:
     textColor: "{colors.muted}"
     typography: "{typography.control}"
     height: "44px"
-  nav-link-active:
-    textColor: "{colors.ink}"
-  tag-chip-legacy:
+  tag-chip:
     backgroundColor: "transparent"
+    textColor: "{colors.faint}"
     rounded: "{rounded.chip}"
     padding: "2px 6px"
-  digest-card-legacy:
-    backgroundColor: "color-mix(in srgb, #0a0a0d 70%, transparent)"
+  reading-panel:
+    backgroundColor: "color-mix(in srgb, #f7f7f7 50%, transparent)"
     textColor: "{colors.ink}"
     rounded: "{rounded.plate}"
     padding: "20px"
@@ -144,147 +152,143 @@ components:
 
 ## Overview
 
-**Creative North Star: "Dark Publication"**
+**Creative North Star: "Publication with a working terminal"**
 
-A restrained publication on pure black, with bright ink, muted metadata, thin rules, and purple interaction. The retained black/purple/green palette is a confirmed identity commitment. Monospace identifies the site and orients the reader; sans titles and summaries make the writing approachable.
+A restrained publication with white paper, dark ink, gray supporting text, thin rules, and a working black console. The white theme is the default even on a dark operating system. A footer switch retains the original black, purple, and neon-green theme as an explicit reader choice.
 
-The terminal keeps the same identity with command output and CRT chrome. Older reading, about, and travel surfaces retain rounded containers and some glow; those are scoped incumbent treatments, not a requirement for every new surface. The publication index uses flat ruled rows and the default shell has no dotted background.
+The publication remains digest-first. OpenAI Sans carries reading, identity, metadata, and controls; JetBrains Mono belongs to actual console surfaces. The existing introduction-and-post-index composition, Home / Terminal routes, content, and interactions survive the style rollout. Surface-specific composition is recorded in `.impeccable/surfaces/production-theme.md`.
 
 **Key Characteristics:**
-- Pure black ground, white ink, and muted gray metadata.
-- Purple interaction and green prompts, status, and subscription confirmation.
-- JetBrains Mono wayfinding paired with Inter publication titles and prose.
-- Thin rules, generous desktop gutters, and a stacked mobile reading order.
-- A real terminal with restrained chrome; retained legacy containers stay scoped.
+- White-default reading surfaces with restrained gray metadata and ink controls.
+- Green dollar prompts and pulsing status dots; adjacent status words remain gray.
+- An optional retained dark palette and an independently black terminal.
+- OpenAI Sans reading and navigation; JetBrains Mono console text.
+- Thin rules, wide desktop gutters, responsive stacking, and native route links.
 
 ## Colors
 
-The palette couples a neutral black foundation with electric violet and phosphor green. Frontmatter retains the source's existing color keys; prompt and green are source aliases for the same color.
+The default palette is neutral paper and ink with a narrowly placed green signal. Frontmatter records light primitives, independent console primitives, and the retained dark variants; `global.css` owns the theme assignment.
 
 ### Primary
-- **Electric Violet** (`{colors.accent}`): Active route underline, hover text, links, input focus, and keyboard outlines.
-- **Voltage Purple** (`{colors.accent-vivid}`): Retained colored card edges and the hue behind legacy glow.
+- **Prompt Green** (`{colors.prompt}`): Dollar prompts, favicon prompt, and status dots in the light theme. It is also the source's status-green value; it does not color surrounding status text or ordinary light-theme controls.
 
 ### Secondary
-- **Phosphor Green** (`{colors.prompt}`): Brand prompt, terminal commands and caret, operational status, subscription buttons, and success messages.
-
-### Tertiary
-- **Signal Blue** (`{colors.blue}`): Retained digest-card edge cycle.
-- **Terminal Amber** (`{colors.amber}`): Terminal chrome and playful command responses.
-- **Alert Red** (`{colors.red}`): Terminal errors and chrome.
+- **Electric Violet / Voltage Purple** (`{colors.dark-accent}`, `{colors.dark-accent-vivid}`): Retained dark-theme interaction, focus, and legacy colored edges.
+- **Phosphor Green / Signal Blue** (`{colors.dark-green}`, `{colors.dark-blue}`): Retained dark-theme actions and legacy edge vocabulary. This exception belongs to the explicitly retained dark theme.
 
 ### Neutral
-- **Void** (`{colors.bg}`): Page canvas and text on green buttons.
-- **Plate Black** (`{colors.term-bg}`): Terminal transcript surface.
-- **Panel Graphite** (`{colors.panel}`): Row hover, popover, and retained containers.
-- **Hairline / Hairline Bright** (`{colors.line}`, `{colors.line-bright}`): Dividers and control boundaries.
-- **Ink / Muted** (`{colors.ink}`, `{colors.muted}`): Primary reading and secondary information.
-- **Faint** (`{colors.faint}`): Retained decorative terminal material; existing informational uses are drift, not a recommended text role.
-- **Purple Glow** (`{colors.glow}`): Retained about/card lighting, absent from the publication index and overridden on the current terminal route.
+- **Paper / Panel** (`{colors.bg}`, `{colors.panel}`): Light page canvas and tonal containers.
+- **Ink / Muted / Faint** (`{colors.ink}`, `{colors.muted}`, `{colors.faint}`): Reading, supporting information, and quieter metadata. Light accent and ordinary green/blue utility roles resolve to ink.
+- **Hairline / Strong Boundary** (`{colors.line}`, `{colors.line-bright}`): Rules and control outlines.
+- **Void / Dark Graphite** (`{colors.dark-bg}`, `{colors.dark-panel}`): Retained dark page and panel grounds, with their dark ink, metadata, and boundary variants.
+- **Console Black and Console Ink** (`{colors.term-bg}`, `{colors.terminal-ink}`): Fixed console contrast in either page theme. Dedicated console muted, faint, boundary, raised, warning, and error tokens prevent page-theme leakage.
+- **Error / Warning** (`{colors.error}`, `{colors.warning}`): Semantic feedback in light reading surfaces; consoles and the dark theme use their own brighter variants.
 
 ### Named Rules
-**The Faint Floor Rule.** Informational dates, counts, tags, and instructions use muted or brighter text; inherited faint informational text is not a rule to extend.
+**The Green Signal Rule.** On the light website, green is reserved for dollar prompts and status dots; reading, controls, and adjacent status words use neutral ink or gray.
+
+**The Independent Console Rule.** Console backgrounds, text, errors, and boundaries stay on dedicated terminal tokens in either page theme; never use terminal black for an email reading card.
 
 ## Typography
 
-**Display Font:** JetBrains Mono Variable, with ui-monospace, SF Mono, monospace fallbacks.
-**Body Font:** Inter Variable, with system-ui, -apple-system, sans-serif fallbacks.
-**Label/Mono Font:** JetBrains Mono Variable.
+**Display Font:** OpenAI Sans, sans-serif.
+**Body Font:** OpenAI Sans, sans-serif.
+**Label/Mono Font:** OpenAI Sans for reading labels; JetBrains Mono Variable with ui-monospace, SF Mono, monospace fallbacks for actual consoles.
 
-Both faces are self-hosted through Fontsource. Mono supplies identity and structured metadata; Inter carries publication titles, descriptions, and article prose. There is no continuous or invented type scale: roles use the discrete sizes observed in the implementation.
+OpenAI Sans is self-hosted in regular, medium, semibold, and bold files. JetBrains Mono is self-hosted through Fontsource for the web console. The historical `font-mono` utility now resolves to OpenAI Sans on reading surfaces; the console explicitly overrides it. The observed title weight of 450 remains in source, although the supplied Sans files are static; it is not a new variable-font scale.
 
 ### Hierarchy
-- **Display:** Intro headings use the display token, reducing to 28px at the mobile layout breakpoint.
-- **Headline:** Existing article h1s retain the mono headline token; prose headings remain mono.
-- **Featured title:** The lead post uses the featured-title token, reducing to 21px on mobile.
-- **Title:** Standard row titles use the title token, with 1.45 line-height on mobile.
-- **Body:** Intro copy uses the body token, reducing to 17px on mobile; its measure is 30ch desktop and 35ch mobile.
-- **Description:** Post summaries and disclosure use the description token; mobile disclosure reduces to 13px.
-- **Terminal:** Transcript line-height stays 24px. Its source uses 16px below 640px and 14px above; the terminal-route mobile override also makes it 14px through 760px.
-- **Label:** Date and read-time metadata use the label token and tabular numerals, reducing to 11px on mobile. Bylines and footer are 11px.
-- **Controls:** Header navigation and email controls use the control token. Mobile tabs are 13px, and the header button is 12px.
+- **Display:** Introduction heading; 28px on narrow screens.
+- **Headline:** Digest article h1; 30px/36px below the small breakpoint.
+- **Featured title:** Lead post title; 21px at the mobile layout breakpoint.
+- **Title:** Standard post title; line-height reduces to 1.45 on mobile.
+- **Body:** Article prose uses the body token. Intro copy has 1.6 line-height and reduces to 17px on mobile, with a 30ch desktop and 35ch mobile measure.
+- **Description:** Post summaries and disclosure use the final 16px override across viewports. Author and newsletter supporting copy remain 14px.
+- **Label:** Dates, reading times, and bylines use the final 13px override and tabular numerals. Footer remains 11px; index headings and terminal shortcut hints remain 12px.
+- **Control:** Navigation and email controls use the control token; mobile route labels are 13px and the header action is 12px.
+- **Terminal:** Transcript uses the terminal token, including the terminal-route mobile override; command buttons remain 12px. The about transcript uses 14px with 28px line-height.
 
 ### Named Rules
-**The Two Type Roles Rule.** Use mono for identity, navigation, metadata, and terminal output; use Inter for publication row titles and explanatory prose. Existing mono article headings remain valid in their reading context.
+**The Reading and Console Rule.** Use OpenAI Sans for publication and shell UI; reserve JetBrains Mono for actual console material. Preserve email's existing mono brand/metadata fallback as an email-specific treatment.
 
 ## Layout
 
-The wide shell centers at 1440px with 36px side gutters; header and footer share that alignment. Reading pages retain a 48rem main container with 20px gutters and 80px bottom padding. The desktop header uses a 1fr / 2fr / 1fr grid and a 95px minimum height.
+The wide shell centers at 1440px with 36px side gutters; header, content, and footer share alignment. Reading pages retain a 48rem shell with 20px gutters and 80px bottom padding; the digest article itself is limited to 680px. The desktop header has a 1fr / 2fr / 1fr grid and a 95px minimum height.
 
-The publication and terminal routes pair an introduction with content in a 1 / 2.6667 grid separated by an 8.3333% gutter. Main content starts 72px below the header. Rows use date / title / reading-time columns, 24px gaps, 22px vertical padding, and 28px for the featured row. The newsletter follows after 64px with a ruled top edge.
+The existing home and terminal composition pairs an introduction with content in a 1 / 2.6667 grid, an 8.3333% gap, and 72px top padding. Ruled post rows use date / title / reading-time columns with 24px gaps and 22px vertical padding; featured rows use 28px. The newsletter follows after 64px with 28px top padding and a rule. These are retained surface geometry, not a mandate for unrelated future pages.
 
-At 1050px the introduction/content ratio becomes 1 / 2.5 with a 48px gap. Each post moves date and reading time above a full-width title. At 760px the outer gutters become 20px, the intro precedes content, the content gap and top padding become 36px, and rows use 20px vertical padding. The header becomes two rows with both route links visible and a 116px minimum height. The newsletter gap reduces to 44px.
+At 1050px the two-column ratio becomes 1 / 2.5 with a 48px gap; row metadata moves above the full-width title. At 760px gutters become 20px, the intro precedes content, top padding and content gap become 36px, and all post rows use 20px vertical padding. The header stacks into two rows with visible route links and a 116px minimum height. The newsletter margin reduces to 44px. Later typography overrides retain 13px metadata and 16px descriptions on mobile.
 
-The default layout has a plain background. Only /terminal/ opts into the 28px dot grid and cursor-follow spotlight, revealed within a 140px radius behind the pointer. The moving spotlight is hidden on touch/no-hover devices and for reduced motion; content stays above the effect and the overlay cannot intercept input. Fields and content columns permit shrinking; long post titles wrap anywhere. Interactive route links, header controls, publication subscribe controls, and terminal command buttons have a 44px minimum height.
+The default page background is plain. The terminal route opts into the 28px dot grid and pointer-follow spotlight with a 140px radius; the spotlight is hidden for no-hover devices and reduced motion and cannot intercept input. Shrinking fields and long wrapping titles preserve narrow layouts. Core shell, subscription, switch, and terminal command controls have a 44px minimum target height.
 
 ## Elevation & Depth
 
-The publication index is flat: one-pixel rules and a panel-toned hover convey hierarchy. The terminal window has a soft downward shadow and a restrained purple ambient halo, lifting it from its dot-grid background. The popover is a solid panel with a bright border and transparent backdrop. Existing about and legacy digest-card treatments still use zero-offset purple bloom; they are retained scope, not default publication depth.
+Publication content is flat: one-pixel neutral rules and panel-toned hover establish hierarchy. The terminal has a soft downward shadow, light on paper and stronger on dark, without the former purple halo. The popover is a solid panel with a bright border and transparent backdrop. Console glow resolves to transparent; CRT vignette is disabled. Legacy digest cards retain their scoped hover/lift implementation and do not define current index depth.
 
 ### Shadow Vocabulary
-- **About bloom:** `0 0 40px var(--glow)` on the about transcript.
-- **Legacy card hover bloom:** `0 0 24px var(--glow)` with a 2px lift, only in the retained DigestCard component.
-- **Terminal float:** `0 18px 48px rgba(0, 0, 0, 0.65), 0 0 36px rgba(119, 0, 255, 0.14)` replaces the inherited 50px bloom on /terminal/.
+- **Light terminal float:** `0 18px 48px rgba(24, 24, 24, 0.08)`.
+- **Dark terminal float:** `0 18px 48px rgba(0, 0, 0, 0.65)`.
 
 ### Named Rules
-**The Hairline Rule.** Separate publication content with a one-pixel neutral rule and tonal hover before adding depth effects.
+**The Hairline Rule.** Separate publication content with a one-pixel neutral rule and tonal hover before introducing depth effects.
 
 ## Shapes
 
-Publication rows have square edges. Header Subscribe uses the chip radius; the popover, terminal route, inputs, and command buttons use the control radius. Existing article callouts, sources, about transcript, travel tiles, and legacy cards retain the plate radius. Chrome/status dots are circular; keyboard outlines round at the hairline radius.
+Post rows are square and flat. Header Subscribe uses the chip radius; inputs, popover, command buttons, and the terminal route use the control radius. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
 
-The terminal block caret is 0.6em wide and 1.15em tall. CRT scanlines and a radial vignette remain scoped to the terminal's clipped surface.
+The console caret is a 0.6em by 1.15em block in console ink. Console chrome uses neutral dots. Rounded keyboard outlines follow the focus radius.
 
 ## Components
 
 ### Navigation
-Persistent Home / Terminal route anchors use mono, muted resting text, and ink plus a purple bottom rule for aria-current. Hover and visible keyboard focus turn both the label and its [H]/[T] shortcut purple over 150ms ease-out. The green prompt in the brand is textual shell identity. Mobile navigation remains visible on a second row. Route changes use native history and work without React or a client router.
-
-Hover or focus starts a bounded 420ms character scramble, resolving the label progressively from left to right. The decorative glyph set is #[]/:;=+*_; it is animated text, not an interface icon. Pointer leave or blur cancels the pending frame and restores the original label. Reduced motion keeps the label stable. Labels preserve whitespace, and aria-hidden visual spans pair with stable Home / Terminal aria-labels and H / T aria-keyshortcuts.
-
-Case-insensitive H and T shortcuts navigate to the native route targets. They do not run while editing input, textarea, select, contenteditable, textbox, or combobox content, or during Ctrl/Alt/Meta combinations, repeated keydown, composition, or an already prevented event. Escape from the main terminal prompt moves focus to the Terminal route link without scrolling; H or T can then switch views.
+Native Home / Terminal anchors use Sans, muted resting text, and ink with a themed bottom rule for the current route. Hover and focus use the theme accent; transitions are 150ms ease-out. Stable accessible labels accompany decorative shortcut labels. The bounded 420ms scramble resolves left to right, cancels on leave/blur, and is disabled for reduced motion. H / T shortcuts avoid editing controls, modifier combinations, repeats, and composition. Escape from the terminal prompt focuses the Terminal route link. Mobile routes remain visible on the second row.
 
 ### Post Rows
-Flat linked rows with muted date/read-time metadata and Inter titles. Hover fills the row with panel and turns its title purple over 150ms ease-out. Featured rows add a larger title, description, and source-count byline. Home and archive render directly through Astro; they are not React islands.
+Flat ruled links pair gray metadata with Sans titles. Hover adds panel fill, themed title color, and a one-pixel underline offset by 4px. Featured rows add a summary and source-count byline. Home and archive are server-rendered Astro surfaces.
 
 ### Buttons
-Subscription uses a green filled control with black mono semibold text and 90% hover opacity. Header Subscribe uses panel fill, a bright border, and accent text/border on hover over 150ms ease-out. Terminal command buttons are transparent, bordered mono controls; hover brightens the rule and turns text accent. All retain visible keyboard focus.
+Light subscription and header actions use ink fill and paper text. Subscription hover reduces opacity to 90%; header hover uses the deeper neutral. Dark subscription retains neon green with black text, and the dark header retains its graphite fill, bright boundary, and violet hover. Console command buttons stay transparent with console text and boundaries. Keyboard focus remains visible.
 
 ### Inputs / Fields
-Email fields use black fill, a bright one-pixel border, the control radius, 8px/12px padding, and mono control text. Focus shifts the border to purple. On publication and popover surfaces, min-width is zero and minimum height is 44px. The terminal email field is transparent and borderless, wraps within its form, and uses a green caret plus the global keyboard outline. Error output is red; confirmation is green.
+Email fields use the page canvas, bright one-pixel boundary, control radius, and 8px/12px padding; focus uses the current accent boundary. Publication and popover fields shrink and retain 44px minimum height. Terminal input and terminal subscription use the fixed console palette, with transparent fields and visible local focus feedback. Errors use the appropriate page or console error token.
+
+### Theme Switch
+The footer button has role switch, the stable label Dark mode, and aria-checked reflecting selection. Light is the deliberate default, independent of OS preference. A head bootstrap applies a saved dark choice before paint; localStorage key `hoeltke-theme` persists the preference and storage events synchronize tabs. The favicon changes with the selected theme. Storage failures remain usable in-session. The switch stays hidden without JavaScript; default reading and native routes remain usable.
 
 ### Terminal Plate
-The interactive terminal is a React island on its own route. It retains red/amber/green chrome dots, CRT treatment, and server-rendered welcome content through its slot. The route sets the surface radius to 6px and adds a soft floating shadow with a restrained purple halo. The transcript has a 420px minimum height and 24px padding, reducing to 340px and 18px on mobile; desktop fine-pointer layouts retain a 34rem maximum height and internal scrolling. At widths up to 760px or with a coarse pointer, the transcript expands without a maximum height, so the page is the only scroll surface. New command output scrolls the prompt into view on the page. Command controls remain 44px tall. Empty Tab and Shift+Tab preserve native focus escape; completion stays available for typed prefixes. Escape also leaves the prompt by focusing the Terminal navigation link. A muted mono hint below the contained plate explains Esc, then H or T; it uses 12px type, 1.7 line-height, and a 16px top margin.
+The real React terminal keeps server-rendered welcome content, commands, completion, and history. It is always console black with JetBrains Mono, dedicated console ink/muted/boundary/error tokens, neutral chrome dots, and green dollar prompts. The transcript has 420px minimum height and 24px padding, reducing to 340px and 18px on mobile. Fine-pointer desktop retains a 34rem internal scroll limit. At 760px or on coarse pointers it expands into document scrolling. Empty Tab/Shift+Tab preserve native escape; Escape focuses route navigation. The shortcut hint below the plate uses Sans, 12px/1.7, and a 16px top margin.
 
-Cursor blink uses 1.1s steps(1); the footer status pulse uses 2.4s ease-out. Reduced motion disables those animations and collapses transition/animation durations globally. Retained rise animation is 550ms with a 14px translation, used on legacy content only.
+Cursor blink remains 1.1s steps(1). The status dot keeps the original 2.4s ease-out pulse with a 5px transparent expansion; words beside it remain muted. Reduced motion disables both animations, legacy rise, and the moving spotlight, and collapses other transition durations. The retained legacy rise uses 550ms and 14px travel.
 
 ### Audio Player
-The existing article AudioPlayer remains a separate React island. Its compact panel retains the mono controls, green playback action, keyboard-operable scrubber, ten-second skip controls, speed selection, and loading/error states. This redesign preserves the audio source and controls from main.
+Article audio remains a separate React island with play/pause, keyboard-operable scrubber, ten-second skips, speed control, and loading/error states. It follows the page theme, using ink controls in light mode and the retained dark actions when selected.
 
 ### Cards / Containers
-Older article, travel, and about surfaces retain panel containers, one-pixel borders, plate radius, and 20–28px padding. The DigestCard source remains available with panel at 70%, backdrop blur, colored edge cycling, and 300ms hover/lift/glow, but the current home and archive use PostRow. These components do not justify turning new publication lists into card stacks.
+Reading sources and subscription panels retain neutral borders, softly rounded corners, panel tint, and 20–28px padding. Travel and about retain their existing geometry. Current home/archive lists use ruled PostRows. Existing DigestCard retains its scoped edge cycle and hover lift, but does not govern the current index.
 
 ### Chips
-Existing article tags are compact bordered chips with 2px/6px padding and the chip radius. Their faint inherited text is recorded as contrast drift rather than a reusable text-color decision.
+Article tags retain compact one-pixel boundaries, chip radius, 2px/6px padding, and theme-aware quiet text.
+
+### Email and Share Images
+Emails derive the default root colors through `themeTokens`, with near-white/near-black email-safe substitutions. Both wrapper and reading card use page background, never terminal background. Email Sans reading has robust fallbacks; existing mono brand and metadata remain email-specific. Share images use the default white, dark ink, gray description, and self-hosted OpenAI Sans regardless of a browser's saved theme.
 
 ### Focus Ring
-Links and controls use a 2px accent outline with a 2px offset on focus-visible, except inputs with their own explicit border focus treatment.
+Keyboard links and controls use a two-pixel theme-accent outline with a two-pixel offset; email fields use their explicit focus boundary. Console focus resolves against its own dark surface.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** retain the confirmed black, purple, and green palette across web and newsletter surfaces.
-- **Do** pair mono identity and metadata with Inter publication titles and prose.
-- **Do** preserve thin rules, responsive reading order, and visible Home / Terminal routes.
-- **Do** use muted or brighter text for information and preserve keyboard focus treatment.
-- **Do** keep publication content server-rendered and terminal welcome content present before hydration.
-- **Do** respect reduced motion and allow form fields and long titles to shrink or wrap.
+- **Do** start reading surfaces in white and preserve the reader's explicit dark-theme choice.
+- **Do** keep light-theme green on dollar prompts and status dots, with gray status words.
+- **Do** use OpenAI Sans for reading and navigation, and JetBrains Mono for console surfaces.
+- **Do** keep console tokens independent from the page theme and email card background.
+- **Do** preserve native routes, server-rendered content, visible focus, responsive wrapping, and reduced motion.
 
 ### Don't:
-- **Don't** add the dot grid, card stack, or decorative bloom to the publication index.
-- **Don't** extend inherited faint informational text or uppercase tracked eyebrows into new surfaces.
-- **Don't** apply CRT scanlines outside terminal surfaces.
-- **Don't** remove visible focus feedback or trap native keyboard navigation.
-- **Don't** replace textual shell identity with emoji or glyph interface icons.
+- **Don't** choose dark mode from the operating system or expose a nonfunctional no-JavaScript switch.
+- **Don't** spread dark-theme neon controls into the light theme.
+- **Don't** add the terminal dot grid or legacy card stack to the publication index.
+- **Don't** extend uppercase tracked eyebrows or glyph interface icons into new surfaces.
+- **Don't** trap keyboard navigation or remove working audio, subscription, terminal, and reading flows.
 
-Not canonized or repaired: inherited faint article/tag/terminal information, uppercase tracked source/subscription eyebrows, and glyph arrow/check/emoji decorations remain in shipped code; this documentation pass records their scope without promoting them into reusable rules or changing UI.
+Not canonized or repaired: the article source heading retains an uppercase tracked eyebrow; inherited arrow/check/emoji decorations remain in scoped copy, and the 450 title weight has no matching supplied static Sans face. These are pre-existing craft or implementation drift, not new reusable rules; this documentation pass does not change UI.
