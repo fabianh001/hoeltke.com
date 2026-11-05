@@ -57,7 +57,7 @@ export function TerminalSubscribe({ onDone }: Props) {
             setValue(e.target.value);
             setError(false);
           }}
-          className="w-64 min-w-0 max-w-full flex-1 border-0 bg-transparent text-ink placeholder:text-muted caret-[var(--prompt)]"
+          className="w-64 min-w-0 max-w-full flex-1 border-0 bg-transparent text-ink placeholder:text-muted caret-[var(--text)]"
         />
       </form>
       {error && (

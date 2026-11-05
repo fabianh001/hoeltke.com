@@ -9,7 +9,7 @@ const input = {
   date: new Date('2026-06-19'),
 };
 
-test('builds subject and dark inline-styled HTML for an issue', () => {
+test('builds subject and light inline-styled HTML for an issue', () => {
   const { subject, html } = buildIssueEmail(input);
   expect(subject).toBe('AI Weekly #2 — the week the agents grew up');
   expect(html).toContain('cat ai-weekly/02.md'); // brand line, zero-padded
@@ -18,11 +18,11 @@ test('builds subject and dark inline-styled HTML for an issue', () => {
   expect(html).toMatch(/<h2[^>]+style="/); // juice inlined the rules
 });
 
-test('is a full dark document with unsubscribe placeholder', () => {
+test('is a full light document with unsubscribe placeholder', () => {
   const { html } = buildIssueEmail(input);
   expect(html).toMatch(/^<!doctype html>/i);
   expect(html).toContain('{{{RESEND_UNSUBSCRIBE_URL}}}');
-  expect(html).toContain('bgcolor="#000001"');
+  expect(html).toContain('bgcolor="#fffffe"');
   expect(html).toContain('six stories that mattered'); // preheader
 });
 
@@ -81,4 +81,11 @@ test('renders green play button when audio or existing slug is present', () => {
   expect(html).not.toContain('min briefing');
   expect(html).not.toContain('(~');
   expect(html).toContain('https://hoeltke.com/digest/2026-37');
+});
+
+
+test('keeps the dark audio action readable in the light palette', () => {
+  const { html } = buildIssueEmail({ ...input, audio: '/audio/example.mp3' });
+  const action = html.match(/<a[^>]*class="play-btn"[^>]*>/)?.[0];
+  expect(action).toMatch(/color:\s*#fffffe/);
 });

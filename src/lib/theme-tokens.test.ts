@@ -3,16 +3,17 @@ import { themeTokens } from './theme-tokens';
 
 test('extracts hex tokens from global.css :root', () => {
   const t = themeTokens();
-  expect(t.line).toBe('#222228');
-  expect(t.accent).toBe('#9050ff');
-  expect(t.green).toBe('#3ef78f');
+  expect(t.line).toBe('#e5e5e5');
+  expect(t.accent).toBe('#181818');
+  expect(t.green).toBe('#181818');
   expect(t['term-bg']).toBe('#050507');
 });
 
-test('maps pure black/white to email-safe near-values', () => {
+test('exports the light palette with email-safe white', () => {
   const t = themeTokens();
-  expect(t.bg).toBe('#000001'); // site: #000000
-  expect(t.text).toBe('#fffffe'); // site: #ffffff
+  expect(t.bg).toBe('#fffffe');
+  expect(t.text).toBe('#181818');
+  expect(t['status-green']).toBe('#01a240');
 });
 
 test('skips non-hex tokens instead of mangling them', () => {

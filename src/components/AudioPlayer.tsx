@@ -181,7 +181,7 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
 
   return (
     <div
-      className="group my-4 rounded-xl border border-line bg-panel/75 px-3 py-2.5 sm:px-4 sm:py-2.5 font-mono shadow-xs backdrop-blur-xs transition-colors hover:border-line-bright"
+      className="group my-4 rounded-xl border border-line bg-panel/75 px-3 py-2.5 sm:px-4 sm:py-2.5 font-mono transition-colors hover:border-line-bright"
       role="region"
       aria-label={title ? `Audio player for ${title}` : 'Audio player'}
     >
@@ -241,7 +241,7 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
             type="button"
             onClick={togglePlay}
             disabled={hasError}
-            className="flex items-center justify-center h-8.5 w-8.5 sm:h-9.5 sm:w-9.5 rounded-full bg-green text-bg font-bold shadow-[0_0_14px_rgba(62,247,143,0.35)] hover:shadow-[0_0_22px_rgba(62,247,143,0.55)] hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-50 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-prompt focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            className="flex items-center justify-center h-8.5 w-8.5 sm:h-9.5 sm:w-9.5 rounded-full bg-green text-bg font-bold hover:opacity-90 transition-all cursor-pointer disabled:opacity-50 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-prompt focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             title={isPlaying ? 'Pause narration' : 'Play narration'}
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
@@ -328,7 +328,7 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
           <button
             type="button"
             onClick={cycleSpeed}
-            className="rounded border border-line px-1.5 py-0.5 text-muted hover:text-accent hover:border-accent transition-colors cursor-pointer text-[11px] min-w-8 text-center font-medium"
+            className="content-label border border-line px-1.5 py-0.5 text-muted hover:text-accent hover:border-accent transition-colors cursor-pointer text-[11px] min-w-8 text-center font-medium"
             title="Playback speed"
             aria-label={`Playback speed: ${playbackRate}x`}
           >

@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import StatusDot from '../components/StatusDot.astro';
 import SubscribeForm from '../components/SubscribeForm.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import { THEME_BOOTSTRAP } from '../lib/site-theme';
 
 interface Props {
   title: string;
@@ -55,7 +57,8 @@ const personSchema = {
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link id="site-favicon" rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline set:html={THEME_BOOTSTRAP}></script>
     <link rel="alternate" type="application/rss+xml" title="AI Weekly — hoeltke.com" href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -121,11 +124,15 @@ const personSchema = {
         >
         <a href="/rss.xml" class="hover:text-accent transition-colors">rss</a>
         <span>© {new Date().getFullYear()} Fabian Hoeltke</span>
+        <ThemeToggle />
       </span>
     </footer>
 
     <script>
       import { initSiteNavigation } from '../lib/site-navigation';
+      import { initThemeToggle } from '../lib/site-theme';
+
+      initThemeToggle();
 
       const nav = document.querySelector<HTMLElement>('.site-tabs');
       if (nav) initSiteNavigation(nav);

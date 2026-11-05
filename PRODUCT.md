@@ -111,11 +111,15 @@ itself. That claim is only worth making while it is true.
 - **The identity is Fabian's own.** Name, GitHub and LinkedIn links, the Datadog
   affiliation, and the `Person` schema are factual and must stay accurate.
 
-**Current redesign commitment:** Fabian selected claude.dev's publication layout
-and two-route Home / Terminal navigation, explicitly retaining the current dark
-black/purple/green palette. The blog is the default entry point; the terminal is
-for exploring the person behind it. The reading index uses thin ruled rows rather
-than a terminal transcript or card stack.
+**Current redesign commitment:** Preserve the selected publication layout,
+introduction-left / dated-posts-right composition, and two-route Home / Terminal
+navigation. Reading surfaces default to white with OpenAI Sans, dark ink controls,
+and gray supporting text; green is reserved for dollar prompts and status dots.
+The original black/purple/green theme remains available through a persistent footer
+switch, independent of OS preference. Actual consoles remain black with JetBrains
+Mono in either page theme. The blog is the default entry point; the terminal is
+for exploring the person behind it. The reading index retains thin ruled rows.
+Email and share images use the light reading palette.
 
 ## Evidence on Hand
 
@@ -151,8 +155,9 @@ size until Fabian supplies a real number.
 
 ## Accessibility & Inclusion
 
-No standard has been committed to and no specific user need has been established.
-Recorded as open: given that the incumbent world is pure black with neon accents and
-a mono-first type stack, contrast, focus visibility, and reduced-motion handling are
-the likely first questions whenever the visual system is next touched — but nothing
-here is a confirmed requirement yet.
+No formal accessibility standard has been committed to and no specific user need
+has been established. The shipped interface includes visible keyboard focus,
+native route links and keyboard escape, reduced-motion handling, and an accessible
+footer theme switch. Reading defaults to white independently of OS preference;
+actual consoles retain their own dark contrast tokens. These implemented behaviors
+must survive visual changes; they do not constitute a formal conformance claim.

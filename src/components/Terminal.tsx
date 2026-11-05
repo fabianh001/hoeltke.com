@@ -271,8 +271,8 @@ export default function Terminal({ issues, children }: Props) {
 
   const prompt = (
     <span className="select-none">
-      <span className="text-prompt">fabian</span>
-      <span className="text-faint">:~$</span>
+      <span className="text-muted">fabian:~</span>
+      <span className="text-prompt">$</span>
     </span>
   );
 
@@ -394,7 +394,7 @@ export default function Terminal({ issues, children }: Props) {
 
   return (
     <div
-      className="term crt rounded-xl border border-line shadow-[0_0_50px_var(--glow)]"
+      className="term crt rounded-xl border border-line"
       onClick={() => {
         // on touch devices, focusing here would pop the keyboard on every tap;
         // the input itself stays tappable for intentional typing
@@ -403,9 +403,9 @@ export default function Terminal({ issues, children }: Props) {
     >
       {/* title bar */}
       <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
-        <span className="size-2.5 rounded-full bg-red/80" />
-        <span className="size-2.5 rounded-full bg-amber/80" />
-        <span className="size-2.5 rounded-full bg-green/80" />
+        <span className="size-2.5 rounded-full bg-line-bright" />
+        <span className="size-2.5 rounded-full bg-line-bright" />
+        <span className="size-2.5 rounded-full bg-line-bright" />
         <span className="ml-2 font-mono text-xs text-faint">
           fabian@hoeltke.com <span className="text-line-bright">:</span> ~/digest
         </span>
@@ -438,7 +438,7 @@ export default function Terminal({ issues, children }: Props) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             className={`min-w-0 flex-1 bg-transparent text-ink outline-none ${
-              input ? 'caret-[var(--prompt)]' : 'caret-transparent'
+              input ? 'caret-[var(--text)]' : 'caret-transparent'
             }`}
             spellCheck={false}
             autoComplete="off"

@@ -46,14 +46,14 @@ const articleSchema = {
 >
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
-  <article class="pt-10">
+  <article class="digest-article pt-10">
     <header class="border-b border-line pb-6">
       <div class="flex flex-wrap items-center gap-3 font-mono text-xs text-faint">
-        <span class="text-prompt">issue #{String(issue).padStart(2, '0')}</span>
+        <span class="text-muted">issue #{String(issue).padStart(2, '0')}</span>
         <span>{dateStr}</span>
-        {tags.map((tag) => <span class="rounded border border-line px-1.5 py-0.5">{tag}</span>)}
+        {tags.map((tag) => <span class="content-label border border-line px-1.5 py-0.5">{tag}</span>)}
       </div>
-      <h1 class="mt-3 font-mono text-3xl font-bold tracking-tight text-balance">{title}</h1>
+      <h1 class="mt-3 font-sans text-4xl max-sm:text-3xl font-semibold tracking-tight text-balance">{title}</h1>
       <p class="mt-3 max-w-2xl text-lg leading-relaxed text-muted">{description}</p>
     </header>
 
