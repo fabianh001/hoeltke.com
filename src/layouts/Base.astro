@@ -4,6 +4,7 @@ import StatusDot from '../components/StatusDot.astro';
 import HeaderSubscribe from '../components/HeaderSubscribe.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { THEME_BOOTSTRAP } from '../lib/site-theme';
+import terminalFont from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -54,6 +55,11 @@ const personSchema = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
 
+    {['Regular', 'Medium', 'Semibold', 'Bold'].map((weight) => (
+      <link rel="preload" href={`/fonts/openai-sans/OpenAISans-${weight}.woff2`} as="font" type="font/woff2" crossorigin />
+    ))}
+    {terminalActive && <link rel="preload" href={terminalFont} as="font" type="font/woff2" crossorigin />}
+
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -61,6 +67,7 @@ const personSchema = {
 
     <link id="site-favicon" rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script is:inline set:html={THEME_BOOTSTRAP}></script>
+    <script is:inline>document.documentElement.classList.add('header-signup-js');</script>
     <link rel="alternate" type="application/rss+xml" title="AI Weekly — hoeltke.com" href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -84,7 +91,9 @@ const personSchema = {
     {dotGrid && <div class="dot-spotlight" aria-hidden="true" />}
     <header class="site-header">
       <a href="/" class="site-brand" aria-label="hoeltke.com home">
-        <img src="/favicon.svg" width="32" height="32" alt="" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
+          <path d="m14 16 16 16-16 16m23 0h14" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
       </a>
       <nav class="site-tabs" aria-label="Main navigation">
         <a href="/" data-shortcut="h" aria-label="Home" aria-keyshortcuts="H" aria-current={!terminalActive ? 'page' : undefined}>
