@@ -10,6 +10,8 @@ Both themes share 14px action-button corners and 7px compact-label corners, foll
 
 ## Screenshots
 
+Screenshots are uploaded directly to PR #48 as GitHub attachments and are not tracked source files. The capture filenames below describe local, ignored evidence; validation reports remain in the repository.
+
 - `before-*`: clean main, original dark theme.
 - `after-*`: new default light theme.
 - `after-dark-*`: retained dark palette selected through the theme preference.
