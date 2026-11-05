@@ -1,6 +1,5 @@
 export const THEME_STORAGE_KEY = 'hoeltke-theme';
 type Theme = 'light' | 'dark';
-const FAVICONS: Record<Theme, string> = { light: '/favicon.svg', dark: '/favicon-dark.svg' };
 
 // Runs in the head, before the page paints. White is the deliberate default,
 // independently of the operating-system preference; only a saved choice wins.
@@ -9,8 +8,6 @@ export const THEME_BOOTSTRAP = `(() => {
   try { if (localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)}) === 'dark') theme = 'dark'; } catch {}
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
-  const icon = document.getElementById('site-favicon');
-  if (icon) icon.setAttribute('href', theme === 'dark' ? ${JSON.stringify(FAVICONS.dark)} : ${JSON.stringify(FAVICONS.light)});
 })();`;
 
 export function initThemeToggle(doc: Document = document): () => void {
@@ -21,7 +18,6 @@ export function initThemeToggle(doc: Document = document): () => void {
     const theme: Theme = value === 'dark' ? 'dark' : 'light';
     doc.documentElement.dataset.theme = theme;
     doc.documentElement.style.colorScheme = theme;
-    doc.querySelector<HTMLLinkElement>('#site-favicon')?.setAttribute('href', FAVICONS[theme]);
     button.setAttribute('aria-checked', String(theme === 'dark'));
     button.title = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
   };

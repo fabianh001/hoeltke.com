@@ -23,12 +23,12 @@ test('defaults to light even when the operating system prefers dark', () => {
   vi.unstubAllGlobals();
 });
 
-test('restores a saved dark theme and matching favicon before controls initialize', () => {
+test('restores a saved dark theme without replacing the original favicon before controls initialize', () => {
   localStorage.setItem(THEME_STORAGE_KEY, 'dark');
   bootstrap();
   expect(document.documentElement.dataset.theme).toBe('dark');
   expect(document.documentElement.style.colorScheme).toBe('dark');
-  expect(icon().getAttribute('href')).toBe('/favicon-dark.svg');
+  expect(icon().getAttribute('href')).toBe('/favicon.svg');
 });
 
 test('ignores invalid saved preferences', () => {
@@ -43,14 +43,14 @@ test('still starts in light when reading storage is blocked', () => {
   expect(document.documentElement.dataset.theme).toBe('light');
 });
 
-test('switches both ways with synchronized accessibility, persistence and favicon', () => {
+test('switches both ways with synchronized accessibility, persistence while preserving the original favicon', () => {
   bootstrap(); dispose = initThemeToggle();
   expect(button().hidden).toBe(false);
   button().click();
   expect(document.documentElement.dataset.theme).toBe('dark');
   expect(button().getAttribute('aria-checked')).toBe('true');
   expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
-  expect(icon().getAttribute('href')).toBe('/favicon-dark.svg');
+  expect(icon().getAttribute('href')).toBe('/favicon.svg');
   button().click();
   expect(document.documentElement.dataset.theme).toBe('light');
   expect(button().getAttribute('aria-checked')).toBe('false');

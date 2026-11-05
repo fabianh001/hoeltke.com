@@ -85,7 +85,8 @@ typography:
     lineHeight: "24px"
 rounded:
   focus: "2px"
-  chip: "4px"
+  chip: "7px"
+  action: "14px"
   control: "6px"
   plate: "12px"
 spacing:
@@ -115,14 +116,14 @@ components:
   button-subscribe:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.bg}"
-    rounded: "{rounded.control}"
+    rounded: "{rounded.action}"
     padding: "8px 16px"
     height: "44px"
   button-header:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.bg}"
     typography: "{typography.control}"
-    rounded: "{rounded.chip}"
+    rounded: "{rounded.action}"
     padding: "8px 16px"
     height: "44px"
   input-email:
@@ -170,7 +171,7 @@ The publication remains digest-first. OpenAI Sans carries reading, identity, met
 The default palette is neutral paper and ink with a narrowly placed green signal. Frontmatter records light primitives, independent console primitives, and the retained dark variants; `global.css` owns the theme assignment.
 
 ### Primary
-- **Prompt Green** (`{colors.prompt}`): Dollar prompts, favicon prompt, and status dots in the light theme. It is also the source's status-green value; it does not color surrounding status text or ordinary light-theme controls.
+- **Prompt Green** (`{colors.prompt}`): Dollar prompts and status dots in the light theme. It is also the source's status-green value; it does not color surrounding status text or ordinary light-theme controls.
 
 ### Secondary
 - **Electric Violet / Voltage Purple** (`{colors.dark-accent}`, `{colors.dark-accent-vivid}`): Retained dark-theme interaction, focus, and legacy colored edges.
@@ -234,7 +235,7 @@ Publication content is flat: one-pixel neutral rules and panel-toned hover estab
 
 ## Shapes
 
-Post rows are square and flat. Header Subscribe uses the chip radius; inputs, popover, command buttons, and the terminal route use the control radius. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
+Post rows are square and flat. Action buttons use the action radius (14px), with compact labels using the chip radius (7px), inspired by Twelve Labs. Inputs, popover, and the terminal route retain the control radius. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
 
 The console caret is a 0.6em by 1.15em block in console ink. Console chrome uses neutral dots. Rounded keyboard outlines follow the focus radius.
 
@@ -253,7 +254,7 @@ Light subscription and header actions use ink fill and paper text. Subscription 
 Email fields use the page canvas, bright one-pixel boundary, control radius, and 8px/12px padding; focus uses the current accent boundary. Publication and popover fields shrink and retain 44px minimum height. Terminal input and terminal subscription use the fixed console palette, with transparent fields and visible local focus feedback. Errors use the appropriate page or console error token.
 
 ### Theme Switch
-The footer button has role switch, the stable label Dark mode, and aria-checked reflecting selection. Light is the deliberate default, independent of OS preference. A head bootstrap applies a saved dark choice before paint; localStorage key `hoeltke-theme` persists the preference and storage events synchronize tabs. The favicon changes with the selected theme. Storage failures remain usable in-session. The switch stays hidden without JavaScript; default reading and native routes remain usable.
+The footer button has role switch, the stable label Dark mode, and aria-checked reflecting selection. Light is the deliberate default, independent of OS preference. A head bootstrap applies a saved dark choice before paint; localStorage key `hoeltke-theme` persists the preference and storage events synchronize tabs. The original black/green/purple favicon is fixed across themes. Storage failures remain usable in-session. The switch stays hidden without JavaScript; default reading and native routes remain usable.
 
 ### Terminal Plate
 The real React terminal keeps server-rendered welcome content, commands, completion, and history. It is always console black with JetBrains Mono, dedicated console ink/muted/boundary/error tokens, neutral chrome dots, and green dollar prompts. The transcript has 420px minimum height and 24px padding, reducing to 340px and 18px on mobile. Fine-pointer desktop retains a 34rem internal scroll limit. At 760px or on coarse pointers it expands into document scrolling. Empty Tab/Shift+Tab preserve native escape; Escape focuses route navigation. The shortcut hint below the plate uses Sans, 12px/1.7, and a 16px top margin.

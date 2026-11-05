@@ -583,5 +583,14 @@
     {
       "pageErrors": []
     }
-  ]
+  ],
+  "followUp": {
+    "date": "2026-11-05",
+    "routeThemeViewportChecks": 12,
+    "actionsRadius": "14px",
+    "labelsRadius": "7px",
+    "favicon": "Original origin/main SVG, fixed across themes",
+    "details": "rounded-validation.json",
+    "supersedes": "Initial favicon palette and theme-switch favicon expectations"
+  }
 }

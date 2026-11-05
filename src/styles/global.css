@@ -40,6 +40,8 @@
 
 :root {
   /* Approved white publication theme; green belongs to dollar prompts and status dots. */
+  --radius-action: 14px;
+  --radius-label: 7px;
   --bg: #ffffff;
   --bg-raised: #f7f7f7;
   --panel: #f7f7f7;
@@ -401,7 +403,7 @@ body > footer {
   justify-self: end;
   min-height: 44px;
   border: 1px solid var(--line-bright);
-  border-radius: 4px;
+  border-radius: var(--radius-action);
   padding: 8px 16px;
   background: var(--panel);
   color: var(--text);
@@ -863,3 +865,8 @@ body > footer {
 .theme-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; transition: transform 150ms ease-out; }
 :root[data-theme='dark'] .theme-toggle-track { background: var(--accent); }
 :root[data-theme='dark'] .theme-toggle-thumb { transform: translateX(14px); }
+
+/* Soft rectangles for actions; compact labels use a smaller matching curve. */
+.subscribe-form button,
+.terminal-content .term > div:last-child button { border-radius: var(--radius-action); }
+.latest-label, .content-label { border-radius: var(--radius-label); }

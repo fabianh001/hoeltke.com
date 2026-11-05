@@ -46,7 +46,7 @@ export function buildIssueEmail(
   /* site tokens: issue/date -> h1 is mt-3 (12px); h1 -> desc is mt-3 (12px);
      desc -> divider is pb-6 (24px); divider -> content is mt-8 (32px). */
   .tag { display:inline-block; font-family:${MONO}; font-size:12px; color:${t.faint};
-         border:1px solid ${t.line}; border-radius:4px; padding:2px 6px; margin:0 0 4px 12px; }
+         border:1px solid ${t.line}; border-radius:7px; padding:2px 6px; margin:0 0 4px 12px; }
   h1.title { font-family:${SANS}; font-size:24px; line-height:1.2; letter-spacing:-0.01em; color:${t.text}; margin:12px 0 0; }
   .desc { font-size:18px; line-height:1.5; color:${t.muted}; margin:12px 0 24px; }
   .rule { border-top:1px solid ${t.line}; margin:0 0 32px; }
@@ -95,8 +95,8 @@ export function buildIssueEmail(
     ? `
   <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;">
     <tr>
-      <td align="center" style="border-radius:6px; background:${t.green};">
-        <a href="${escapeAttr(webUrl)}" target="_blank" class="play-btn" style="font-family:${MONO}; font-size:13px; font-weight:600; color:${t.bg}; text-decoration:none; padding:9px 18px; display:inline-block; border-radius:6px;">&#9654; Listen</a>
+      <td align="center" style="border-radius:14px; background:${t.green};">
+        <a href="${escapeAttr(webUrl)}" target="_blank" class="play-btn" style="font-family:${MONO}; font-size:13px; font-weight:600; color:${t.bg}; text-decoration:none; padding:9px 18px; display:inline-block; border-radius:14px;">&#9654; Listen</a>
       </td>
     </tr>
   </table>`

@@ -328,7 +328,7 @@ export default function AudioPlayer({ src, title, issue }: AudioPlayerProps) {
           <button
             type="button"
             onClick={cycleSpeed}
-            className="rounded border border-line px-1.5 py-0.5 text-muted hover:text-accent hover:border-accent transition-colors cursor-pointer text-[11px] min-w-8 text-center font-medium"
+            className="content-label border border-line px-1.5 py-0.5 text-muted hover:text-accent hover:border-accent transition-colors cursor-pointer text-[11px] min-w-8 text-center font-medium"
             title="Playback speed"
             aria-label={`Playback speed: ${playbackRate}x`}
           >

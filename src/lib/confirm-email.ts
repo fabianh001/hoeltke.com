@@ -12,7 +12,7 @@ export function buildConfirmEmail(): { subject: string; html: string } {
   const extraCss = `
   .lead { font-size:16px; line-height:1.6; color:${t.text}; margin:16px 0 24px; }
   .btn { display:inline-block; background:${t.green}; color:${t.bg}; font-family:${MONO};
-         font-size:15px; font-weight:600; text-decoration:none; padding:12px 20px; border-radius:8px; }
+         font-size:15px; font-weight:600; text-decoration:none; padding:12px 20px; border-radius:14px; }
   .note { font-family:${MONO}; font-size:12px; color:${t.faint}; margin-top:24px; }`;
 
   const contentHtml = `
