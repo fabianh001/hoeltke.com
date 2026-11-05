@@ -41,6 +41,3 @@ server/confirm-email.json
 
 # local tool versions
 mise.toml
-
-# Local PR preview captures are uploaded as GitHub attachments
-/docs/design/2026-11-publication-redesign/**/*.png
