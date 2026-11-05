@@ -16,6 +16,7 @@ export function initHeaderSubscribe(root: HTMLElement): () => void {
     root.setAttribute('data-open', '');
     field.inert = confirmed;
     button.type = confirmed ? 'button' : 'submit';
+    if (!confirmed) button.textContent = 'Sign up';
     button.setAttribute('aria-expanded', 'true');
     if (!confirmed) email.focus({ preventScroll: true });
   };
@@ -55,10 +56,11 @@ export function initHeaderSubscribe(root: HTMLElement): () => void {
   doc.addEventListener('pointerdown', (event) => {
     if (!root.contains(event.target as Node)) collapse();
   }, options);
-  root.addEventListener('focusout', () => {
-    queueMicrotask(() => {
-      if (!listeners.signal.aborted && !root.contains(doc.activeElement)) collapse();
-    });
+  // A touch tap may blur email before click, without focusing the button.
+  // Collapse only when focus actually enters another control; outside taps
+  // are already handled by pointerdown.
+  doc.addEventListener('focusin', (event) => {
+    if (!root.contains(event.target as Node)) collapse();
   }, options);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -92,7 +94,7 @@ export function initHeaderSubscribe(root: HTMLElement): () => void {
       if (listeners.signal.aborted) return;
       error.textContent = 'Couldn’t subscribe. Please try again.';
       error.hidden = false;
-      button.textContent = 'Subscribe';
+      button.textContent = 'Sign up';
       email.focus({ preventScroll: true });
     } finally {
       pending = false;

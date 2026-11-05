@@ -36,9 +36,21 @@ test('the first click reveals and focuses email without sending a request', () =
   open();
   expect(document.activeElement).toBe(input);
   expect(button.type).toBe('submit');
+  expect(button.textContent).toBe('Sign up');
   expect(button.getAttribute('aria-expanded')).toBe('true');
   expect(root.querySelectorAll('button')).toHaveLength(1);
   expect(send).not.toHaveBeenCalled();
+});
+
+test('tapping the visible action submits after email blurs, without pressing Enter', async () => {
+  open();
+  input.value = 'fabian@example.com';
+  // Touch browsers can blur the field without focusing the tapped button.
+  input.blur();
+  await Promise.resolve();
+  fireEvent.click(button);
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+  expect(root.querySelector<HTMLElement>('[role=status]')!.hidden).toBe(false);
 });
 
 test('Escape collapses, restores focus and keeps an unfinished address', () => {
