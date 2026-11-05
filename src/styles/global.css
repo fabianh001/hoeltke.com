@@ -403,7 +403,6 @@ body > footer {
   justify-self: end;
   min-height: 44px;
   border: 1px solid var(--line-bright);
-  border-radius: var(--radius-action);
   padding: 8px 16px;
   background: var(--panel);
   color: var(--text);
@@ -569,12 +568,6 @@ body > footer {
   font-size: 23px;
   font-weight: 500;
   line-height: 1.4;
-}
-
-.latest-label {
-  border: 1px solid var(--line-bright);
-  padding: 2px 7px;
-  color: var(--text);
 }
 
 .post-description {
@@ -866,7 +859,8 @@ body > footer {
 :root[data-theme='dark'] .theme-toggle-track { background: var(--accent); }
 :root[data-theme='dark'] .theme-toggle-thumb { transform: translateX(14px); }
 
-/* Soft rectangles for actions; compact labels use a smaller matching curve. */
+/* Shared corner tokens apply to both light and dark themes. */
+.header-subscribe,
 .subscribe-form button,
 .terminal-content .term > div:last-child button { border-radius: var(--radius-action); }
-.latest-label, .content-label { border-radius: var(--radius-label); }
+.content-label { border-radius: var(--radius-label); }

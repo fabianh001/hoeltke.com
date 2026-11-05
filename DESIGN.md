@@ -235,7 +235,7 @@ Publication content is flat: one-pixel neutral rules and panel-toned hover estab
 
 ## Shapes
 
-Post rows are square and flat. Action buttons use the action radius (14px), with compact labels using the chip radius (7px), inspired by Twelve Labs. Inputs, popover, and the terminal route retain the control radius. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
+Post rows are square and flat. Both themes share the action radius (14px) and compact label radius (7px), inspired by Twelve Labs. Inputs, popover, and the terminal route retain the control radius. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
 
 The console caret is a 0.6em by 1.15em block in console ink. Console chrome uses neutral dots. Rounded keyboard outlines follow the focus radius.
 
@@ -245,7 +245,7 @@ The console caret is a 0.6em by 1.15em block in console ink. Console chrome uses
 Native Home / Terminal anchors use Sans, muted resting text, and ink with a themed bottom rule for the current route. Hover and focus use the theme accent; transitions are 150ms ease-out. Stable accessible labels accompany decorative shortcut labels. The bounded 420ms scramble resolves left to right, cancels on leave/blur, and is disabled for reduced motion. H / T shortcuts avoid editing controls, modifier combinations, repeats, and composition. Escape from the terminal prompt focuses the Terminal route link. Mobile routes remain visible on the second row.
 
 ### Post Rows
-Flat ruled links pair gray metadata with Sans titles. Hover adds panel fill, themed title color, and a one-pixel underline offset by 4px. Featured rows add a summary and source-count byline. Home and archive are server-rendered Astro surfaces.
+Flat ruled links pair gray metadata with Sans titles. Hover adds panel fill, themed title color, and a one-pixel underline offset by 4px. Featured rows add a summary and source-count byline, without a Latest issue chip. Home and archive are server-rendered Astro surfaces.
 
 ### Buttons
 Light subscription and header actions use ink fill and paper text. Subscription hover reduces opacity to 90%; header hover uses the deeper neutral. Dark subscription retains neon green with black text, and the dark header retains its graphite fill, bright boundary, and violet hover. Console command buttons stay transparent with console text and boundaries. Keyboard focus remains visible.
