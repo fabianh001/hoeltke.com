@@ -16,8 +16,7 @@ export function buildConfirmEmail(): { subject: string; html: string } {
 
   const contentHtml = `
   <p class="brand"><a href="https://hoeltke.com"><img src="https://hoeltke.com/logo-email.png" width="24" height="24" alt="">hoeltke.com</a></p>
-  <p class="lead">one click and you're on the list — AI Weekly, one issue every Friday.
-  no spam, unsubscribe anytime.</p>
+  <p class="lead">one click and you're on the list — AI Weekly, one issue every Friday.</p>
   <a class="btn" href="{{confirm_url}}">confirm subscription →</a>
   <p class="note">link expires in 48 h. didn't request this? just ignore it.</p>`;
 
