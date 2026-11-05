@@ -498,14 +498,11 @@ body > footer {
 }
 
 .post-index-heading {
+  justify-content: flex-end;
   min-height: 44px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
-}
-
-.post-index-heading p {
-  color: var(--text);
 }
 
 .post-row {
