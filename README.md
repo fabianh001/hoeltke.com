@@ -2,15 +2,12 @@
 
 A personal site that writes its own blog.
 
-<img width="1001" height="776" alt="image" src="https://github.com/user-attachments/assets/4a7da535-3f95-4906-8b7d-92a04a36ed90" />
-
+<img width="1512" height="861" alt="image" src="https://github.com/user-attachments/assets/c49c4a3a-1aa9-46e1-b8dc-6f2f78fb2457" />
 
 
 Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
 Hacker News, the usual suspects — hands everything to an LLM, and publishes
 **AI Weekly**: one digest of the stories that actually matter, with sources.
-No humans in the loop. Read it on the web, subscribe by email, or grab the RSS
-feed. The homepage is a terminal. Type `help`.
 
 **Live at [hoeltke.com](https://hoeltke.com)** · [RSS](https://hoeltke.com/rss.xml)
 
