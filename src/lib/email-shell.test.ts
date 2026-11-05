@@ -8,10 +8,10 @@ test('emits a complete light document with color-scheme metas', () => {
   expect(html).toMatch(/^<!doctype html>/i);
   expect(html).toContain('name="color-scheme" content="light"');
   expect(html).toContain('name="supported-color-schemes" content="light"');
-  expect(html).toContain('bgcolor="#fffffe"'); // email-safe near-white, edge to edge
+  expect(html).toContain('bgcolor="#fffffe"');
 });
 
-test('floors the page background in px so no client background shows below the card', () => {
+test('floors the background band in px so no client background shows below the card', () => {
   const html = renderEmailShell(base);
   const wrap = html.match(/<td class="wrap"[^>]*>/)![0];
   expect(wrap).toContain('height: 1200px');
@@ -27,8 +27,8 @@ test('floors the page background in px so no client background shows below the c
 
 test('keeps @font-face pointing at stable /fonts/ URLs after juice inlining', () => {
   const html = renderEmailShell(base);
-  expect(html).toContain('https://hoeltke.com/fonts/jetbrains-mono-latin-wght-normal.woff2');
   expect(html).toContain('https://hoeltke.com/fonts/openai-sans/OpenAISans-Regular.woff2');
+  expect(html).toContain('https://hoeltke.com/fonts/openai-sans/OpenAISans-Semibold.woff2');
   expect(html).toContain('@font-face'); // preserved in a retained <style>
 });
 
