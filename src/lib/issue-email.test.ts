@@ -9,10 +9,10 @@ const input = {
   date: new Date('2026-06-19'),
 };
 
-test('builds subject and light inline-styled HTML for an issue', () => {
+test('builds subject and inline-styled HTML for an issue', () => {
   const { subject, html } = buildIssueEmail(input);
   expect(subject).toBe('AI Weekly #2 — the week the agents grew up');
-  expect(html).toContain('cat ai-weekly/02.md'); // brand line, zero-padded
+  expect(html).toContain('hoeltke.com</a>'); // linked publication masthead
   expect(html).toContain('issue #02');
   expect(html).toContain('Story one'); // rendered content
   expect(html).toMatch(/<h2[^>]+style="/); // juice inlined the rules
@@ -52,7 +52,7 @@ test('omits the tag/source/audio markup entirely when none are given and file do
   const { html } = buildIssueEmail({ ...input, slug: 'nonexistent-issue' });
   expect(html).not.toContain('class="tag"');
   expect(html).not.toContain('class="sources"');
-  expect(html).not.toContain('cat sources.txt');
+  expect(html).not.toContain('>Sources</h2>');
   expect(html).not.toContain('play-btn');
 });
 
@@ -64,14 +64,14 @@ test('renders a sources box with escaped titles and hrefs', () => {
       { title: 'Second source', url: 'https://example.com/b' },
     ],
   });
-  expect(html).toContain('cat sources.txt');
+  expect(html).toContain('>Sources</h2>');
   expect(html).toContain('A &lt;script&gt; tag');
   expect(html).toContain('href="https://example.com/a?x=1&amp;y=2"');
   expect(html).toContain('Second source');
   expect(html.indexOf('A &lt;script&gt; tag')).toBeLessThan(html.indexOf('Second source'));
 });
 
-test('renders green play button when audio or existing slug is present', () => {
+test('renders monochrome play button when audio or existing slug is present', () => {
   const { html } = buildIssueEmail({
     ...input,
     slug: '2026-37',
@@ -82,7 +82,6 @@ test('renders green play button when audio or existing slug is present', () => {
   expect(html).not.toContain('(~');
   expect(html).toContain('https://hoeltke.com/digest/2026-37');
 });
-
 
 test('keeps the dark audio action readable in the light palette', () => {
   const { html } = buildIssueEmail({ ...input, audio: '/audio/example.mp3' });
