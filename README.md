@@ -1,122 +1,48 @@
 # hoeltke.com
 
-A personal site that writes its own blog.
+My personal site and home to **AI Weekly**, an automated AI news digest published
+every Friday. Read it on the web, subscribe by email or RSS, or listen to the
+audio edition.
 
 <img width="1624" height="1061" alt="image" src="https://github.com/user-attachments/assets/29d7ad82-ee0e-4d9f-9881-dbd47918479a" />
 
-
-Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
-Hacker News, the usual suspects — hands everything to an LLM, and publishes
-**AI Weekly**: one digest of the stories that actually matter.
+The homepage lists recent issues. There's also an interactive
+[terminal](https://hoeltke.com/terminal/) for exploring my work and the site.
+Type `help` to see the commands.
 
 **Live at [hoeltke.com](https://hoeltke.com)** · [RSS](https://hoeltke.com/rss.xml)
 
 ## How it works
 
-```
-                  ┌────────────────────────────────────────────┐
-  RSS feeds ──────▶                                            │
-  Hacker News ────▶  scripts/generate-digest.ts                │
-                  │  · collect last 7 days                     │
-                  │  · an LLM picks + summarizes top stories   │
-                  │  · validates every cited URL               │
-                  └──────────────┬─────────────────────────────┘
-                                 │ commits src/content/digest/YYYY-WW.md
-                                 ▼
-                  ┌────────────────────────────────────────────┐
-                  │  Astro build → rsync → Caddy on a VPS      │
-                  └──────────────┬─────────────────────────────┘
-                                 │ same run emails the new issue
-                                 ▼
-                  ┌────────────────────────────────────────────┐
-                  │  send-newsletter → Resend broadcast        │
-                  │  → subscribers (dark, on-brand email)      │
-                  └────────────────────────────────────────────┘
-```
+GitHub Actions starts the weekly run on Fridays at 07:00 UTC.
 
-Readers subscribe on the site; a zero-dependency Node service on the VPS
+1. `scripts/generate-digest.ts` collects the last seven days of articles from RSS
+   feeds and Hacker News. An LLM selects and summarizes the stories; the script
+   checks that every cited URL came from the collected articles.
+2. The issue is saved as Markdown in `src/content/digest/`. It either goes straight
+   to `main` or opens a PR for review, depending on `NEWSLETTER_REQUIRE_APPROVAL`.
+3. The Newsletter workflow generates audio from the final text, commits the audio,
+   and deploys the site. It checks the published audio before sending the email
+   through Resend. A failure in these steps holds the sendout.
+
+Readers subscribe on the site. A Node service with no external dependencies
 (`server/subscribe.mjs`, behind Caddy) handles HMAC double opt-in and adds
 confirmed contacts to Resend.
 
-- **Site**: [Astro](https://astro.build) + React islands + Tailwind CSS v4 — static HTML, one island (the terminal)
-- **Digest**: any model via [OpenRouter](https://openrouter.ai) (default `deepseek/deepseek-v4.1-flash-1017`, override with `DIGEST_MODEL`) using structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
-- **Newsletter**: each issue also goes out by email via [Resend](https://resend.com) as a dark, on-brand broadcast built from the site's own design tokens; $0 on the free tier at this scale
-- **CI**: GitHub Actions — `weekly-digest.yml` (cron: generate), `newsletter.yml` (email an issue), `deploy.yml` (rsync the site + subscribe service over SSH)
-- **Review gate**: with repo variable `NEWSLETTER_REQUIRE_APPROVAL=true` the weekly issue lands in a PR instead of on `main` — edit the copy, then merge to deploy the site and email subscribers; unset it and the issue publishes and sends automatically
-- **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
+- **Site:** [Astro](https://astro.build), Tailwind CSS v4, and React islands for the
+  terminal and audio player. The rest is static HTML.
+- **Digest:** structured model output via [OpenRouter](https://openrouter.ai).
+  The default is `deepseek/deepseek-v4.1-flash-1017`; set `DIGEST_MODEL` to override it.
+- **Email:** [Resend](https://resend.com) broadcasts, with HTML built from the site's
+  design tokens. Subscriptions use HMAC double opt-in.
+- **RSS and audio:** full issue text and podcast audio enclosures in the RSS feed,
+  plus an audio player on each issue page when audio is available.
+- **Deployment:** GitHub Actions builds the Astro site and syncs it and the
+  subscribe service to a VPS over SSH. Caddy serves the site.
 
-## Local development
+The digest is labeled as auto-curated and AI-summarized, with links to its sources.
+Set the repository variable `NEWSLETTER_REQUIRE_APPROVAL=true` to review each
+draft in a PR before publishing. Leave it unset to publish and send automatically.
 
-```sh
-npm install
-npm run dev               # dev server
-npm run build             # static build to dist/
-npm test                  # unit + component tests
-npm run digest -- --dry-run   # test feed collection without an API key
-OPENROUTER_API_KEY=... npm run digest -- --preview  # generate + print + write a gitignored preview (npm run dev → /digest/preview)
-OPENROUTER_API_KEY=... npm run digest  # generate this week's issue (writes the file)
-OPENROUTER_API_KEY=... npm run digest -- --slug 2026-24-extra  # extra issue under a custom slug
-DIGEST_MODEL=openai/gpt-5.1 OPENROUTER_API_KEY=... npm run digest -- --preview  # try another model
-npm run send-newsletter -- --dry-run  # build the most recently generated issue's email and print, no send (no key needed)
-```
-
-Sources live in [`scripts/sources.json`](scripts/sources.json) — PRs with good feeds welcome.
-OpenAI News, the Claude Developer Blog, The Pragmatic Engineer, and Latent Space
-use their official RSS feeds. Anthropic News and Anthropic Engineering use
-[community-maintained RSS mirrors](https://github.com/Olshansk/rss-feeds);
-story links point to the original articles on anthropic.com.
-
-Repetition guard: the generator reads the last 4 issues, drops any collected item whose URL was already cited, and hands the model the past headlines with an instruction to skip already-covered stories unless there is a genuinely new development (`LOOKBACK_ISSUES` in `scripts/generate-digest.ts`).
-
-Drafting guidelines: at most **5 stories**, a short intro, and a four-minute
-reading budget (**800 words at 200 words/minute**, targeting 600–700 words).
-Each story explains what changed and why it matters for everyone interested in
-AI, especially builders, with a source link. The generator and email CLI log
-estimated reading time and story count, with
-**warnings only** for overages. Manual edits may exceed either guideline;
-saving, building, publishing, and sending aren't blocked by these limits.
-
-Selection and ordering use HN traction after an AI relevance filter:
-`points + 0.25 × min(comments, points)`. Scores are current totals for submissions
-created in the last seven days. Matching feed/HN URLs are merged; related
-coverage of one development inherits its strongest score while citing the best
-primary source. A classification pass accounts for every candidate with an AI
-eligibility decision, group, and reason. Code selects the top five eligible
-groups; a separate writing pass must cover exactly those groups. `Selection
-audit:` logs explain inclusions, exclusions, and candidates below the cutoff.
-AI-assisted security research explicitly qualifies. Unmeasured stories fill
-remaining places; an HN outage uses the classifier's editorial ordering. Scores
-stay out of reader-facing copy. `--dry-run`
-prints ranked candidates without calling the model. See
-[`docs/newsletter-voice.md`](docs/newsletter-voice.md) for scope and limitations.
-
-Server + DNS setup: [`docs/server-setup.md`](docs/server-setup.md).
-
-### Newsletter approval and audio
-
-With `NEWSLETTER_REQUIRE_APPROVAL=true`, Friday's workflow opens a PR containing
-only the newsletter text. Review and edit it, then merge to approve the final
-copy. The Newsletter workflow generates audio from that merged commit, commits
-the MP3 and its content fingerprint to `main`, deploys the site, verifies the
-published audio matches the generated bytes, and sends the email.
-
-GitHub Actions shows **Generate and publish audio → Publish the site and audio
-→ Verify audio and send**, followed by a **Sendout status** summary with a listen
-link. A failed generation, publication, deployment, or verification holds the
-sendout. Choose **Re-run failed jobs** to retry the same approved revision:
-completed audio is restored from `main` or the Actions cache, and previously sent
-issues are skipped. If the issue text changed on `main`, start a new **Newsletter**
-run on `main` with the issue slug instead. Pushes containing multiple issues are
-held; release each separately using its slug.
-
-Without approval mode, the same audio/deploy/send pipeline runs after the text is
-published directly to `main`. Local `npm run digest` writes text only. To generate
-local audio explicitly, use `npm run digest:tts -- --slug 2026-41`; use `--force`
-when changing narration settings without changing the text.
-
-The workflow needs the existing OpenRouter, Resend, and deployment secrets plus
-permission for `GITHUB_TOKEN` to commit audio to `main`. Optional repository
-variables `DIGEST_SPEECH_MODEL`, `TTS_MODEL`, `TTS_VOICE`, and `TTS_BITRATE` configure
-the narration. Audio files remain versioned so future deployments retain them. Real sends via
-`npm run send-newsletter` use the same published-audio guard; `--draft` and
-`--dry-run` still support reviewing text before audio exists.
+[Development and publishing docs](docs/development.md) — local setup, digest
+generation, newsletter approval, and audio.
