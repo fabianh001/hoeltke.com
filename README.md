@@ -1,48 +1,50 @@
 # hoeltke.com
 
-My personal site and home to **AI Weekly**, an automated AI news digest published
-every Friday. Read it on the web, subscribe by email or RSS, or listen to the
-audio edition.
+A personal site that writes its own blog.
 
-<img width="1624" height="1061" alt="image" src="https://github.com/user-attachments/assets/29d7ad82-ee0e-4d9f-9881-dbd47918479a" />
+<img width="1624" height="1061" alt="image" src="https://github.com/user-attachments/assets/9429be5f-0bc4-4bdf-887b-c31080248cc8" />
 
-The homepage lists recent issues. There's also an interactive
-[terminal](https://hoeltke.com/terminal/) for exploring my work and the site.
-Type `help` to see the commands.
+
+
+Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
+Hacker News, the usual suspects — hands everything to an LLM, and publishes
+**AI Weekly**: one digest of the stories that actually matter.
 
 **Live at [hoeltke.com](https://hoeltke.com)** · [RSS](https://hoeltke.com/rss.xml)
 
 ## How it works
 
-GitHub Actions starts the weekly run on Fridays at 07:00 UTC.
+```
+                  ┌────────────────────────────────────────────┐
+  RSS feeds ──────▶                                            │
+  Hacker News ────▶  scripts/generate-digest.ts                │
+                  │  · collect last 7 days                     │
+                  │  · an LLM picks + summarizes top stories   │
+                  │  · validates every cited URL               │
+                  └──────────────┬─────────────────────────────┘
+                                 │ commits src/content/digest/YYYY-WW.md
+                                 ▼
+                  ┌────────────────────────────────────────────┐
+                  │  Astro build → rsync → Caddy on a VPS      │
+                  └──────────────┬─────────────────────────────┘
+                                 │ same run emails the new issue
+                                 ▼
+                  ┌────────────────────────────────────────────┐
+                  │  send-newsletter → Resend broadcast        │
+                  │  → subscribers (dark, on-brand email)      │
+                  └────────────────────────────────────────────┘
+```
 
-1. `scripts/generate-digest.ts` collects the last seven days of articles from RSS
-   feeds and Hacker News. An LLM selects and summarizes the stories; the script
-   checks that every cited URL came from the collected articles.
-2. The issue is saved as Markdown in `src/content/digest/`. It either goes straight
-   to `main` or opens a PR for review, depending on `NEWSLETTER_REQUIRE_APPROVAL`.
-3. The Newsletter workflow generates audio from the final text, commits the audio,
-   and deploys the site. It checks the published audio before sending the email
-   through Resend. A failure in these steps holds the sendout.
-
-Readers subscribe on the site. A Node service with no external dependencies
+Readers subscribe on the site; a zero-dependency Node service on the VPS
 (`server/subscribe.mjs`, behind Caddy) handles HMAC double opt-in and adds
 confirmed contacts to Resend.
 
-- **Site:** [Astro](https://astro.build), Tailwind CSS v4, and React islands for the
-  terminal and audio player. The rest is static HTML.
-- **Digest:** structured model output via [OpenRouter](https://openrouter.ai).
-  The default is `deepseek/deepseek-v4.1-flash-1017`; set `DIGEST_MODEL` to override it.
-- **Email:** [Resend](https://resend.com) broadcasts, with HTML built from the site's
-  design tokens. Subscriptions use HMAC double opt-in.
-- **RSS and audio:** full issue text and podcast audio enclosures in the RSS feed,
-  plus an audio player on each issue page when audio is available.
-- **Deployment:** GitHub Actions builds the Astro site and syncs it and the
-  subscribe service to a VPS over SSH. Caddy serves the site.
-
-The digest is labeled as auto-curated and AI-summarized, with links to its sources.
-Set the repository variable `NEWSLETTER_REQUIRE_APPROVAL=true` to review each
-draft in a PR before publishing. Leave it unset to publish and send automatically.
+- **Site**: [Astro](https://astro.build) + React islands + Tailwind CSS v4 — static HTML, one island (the terminal)
+- **Digest**: any model via [OpenRouter](https://openrouter.ai) (default `deepseek/deepseek-v4.1-flash-1017`, override with `DIGEST_MODEL`) using structured outputs; the pipeline refuses to publish if a story cites a URL it wasn't given
+- **Newsletter**: each issue also goes out by email via [Resend](https://resend.com) as a dark, on-brand broadcast built from the site's own design tokens; $0 on the free tier at this scale
+- **CI**: GitHub Actions — `weekly-digest.yml` (cron: generate), `newsletter.yml` (email an issue), `deploy.yml` (rsync the site + subscribe service over SSH)
+- **Review gate**: with repo variable `NEWSLETTER_REQUIRE_APPROVAL=true` the weekly issue lands in a PR instead of on `main` — edit the copy, then merge to deploy the site and email subscribers; unset it and the issue publishes and sends automatically
+- **Honesty**: every issue is labeled as auto-curated & AI-summarized, sources linked
 
 [Development and publishing docs](docs/development.md) — local setup, digest
 generation, newsletter approval, and audio.

@@ -5,7 +5,7 @@
 ## Local development
 
 ```sh
-npm ci                    # Node.js >=22.12.0
+npm install
 npm run dev               # dev server
 npm run build             # static build to dist/
 npm test                  # unit + component tests
