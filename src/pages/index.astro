@@ -32,7 +32,6 @@ const issues = (await getCollection('digest')).sort(
       {issues.length === 0 && <p class="index-empty">The first issue is on its way. Subscribe to get it in your inbox.</p>}
       <div class="post-index-footer">
         <a href="/digest/">View all {issues.length} posts <span aria-hidden="true">→</span></a>
-        <span>One issue every Friday</span>
       </div>
       <section class="newsletter-section" aria-labelledby="newsletter-heading">
         <div>
