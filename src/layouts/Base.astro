@@ -7,6 +7,7 @@ import { THEME_BOOTSTRAP } from '../lib/site-theme';
 
 interface Props {
   title: string;
+  titleSeparator?: string;
   description: string;
   /** absolute path to an OG image, defaults to the site-wide one */
   ogImage?: string;
@@ -20,6 +21,7 @@ interface Props {
 
 const {
   title,
+  titleSeparator = ' · ',
   description,
   ogImage = '/og/default.png',
   noindex = false,
@@ -32,7 +34,7 @@ const terminalActive = /^\/(terminal|about|travel)(\/|$)/.test(Astro.url.pathnam
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImageUrl = new URL(ogImage, Astro.site);
-const fullTitle = Astro.url.pathname === '/' ? title : `${title} · hoeltke.com`;
+const fullTitle = Astro.url.pathname === '/' ? title : `${title}${titleSeparator}hoeltke.com`;
 
 const personSchema = {
   '@context': 'https://schema.org',
@@ -82,8 +84,7 @@ const personSchema = {
     {dotGrid && <div class="dot-spotlight" aria-hidden="true" />}
     <header class="site-header">
       <a href="/" class="site-brand" aria-label="hoeltke.com home">
-        <span aria-hidden="true" class="text-prompt">$</span>
-        <span>hoeltke.com</span>
+        <img src="/favicon.svg" width="32" height="32" alt="" />
       </a>
       <nav class="site-tabs" aria-label="Main navigation">
         <a href="/" data-shortcut="h" aria-label="Home" aria-keyshortcuts="H" aria-current={!terminalActive ? 'page' : undefined}>

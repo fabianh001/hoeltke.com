@@ -7,7 +7,7 @@ interface Props {
 }
 
 const { entry, featured = false } = Astro.props;
-const { title, description, date, sources } = entry.data;
+const { title, description, date } = entry.data;
 const dateLabel = date.toLocaleDateString('en-US', {
   month: 'short', day: '2-digit', year: 'numeric', timeZone: 'UTC',
 });
@@ -22,8 +22,7 @@ const minutes = Math.max(2, Math.round((entry.body ?? '').split(/\s+/).length / 
     <div class="post-copy">
       <h2>{title}</h2>
       {featured && <p class="post-description">{description}</p>}
-      {featured && <p class="post-byline">AI Weekly · {sources.length} sources linked</p>}
     </div>
-    <span class="post-time">{minutes} <span class="sr-only">minutes to read</span><span aria-hidden="true">min read</span></span>
+    <span class="post-time">{minutes} <span class="sr-only">minutes to read</span><span aria-hidden="true">min</span></span>
   </a>
 </li>

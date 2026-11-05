@@ -407,7 +407,7 @@ export default function Terminal({ issues, children }: Props) {
         <span className="size-2.5 rounded-full bg-line-bright" />
         <span className="size-2.5 rounded-full bg-line-bright" />
         <span className="ml-2 font-mono text-xs text-faint">
-          fabian@hoeltke.com <span className="text-line-bright">:</span> ~/digest
+          ~/digest
         </span>
       </div>
 

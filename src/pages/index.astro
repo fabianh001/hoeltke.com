@@ -10,7 +10,7 @@ const issues = (await getCollection('digest')).sort(
 ---
 
 <Base
-  title="hoeltke.com — Fabian Hoeltke’s blog · AI Weekly"
+  title="hoeltke.com"
   description="Fabian Hoeltke’s blog. Read AI Weekly: a weekly AI digest, auto-curated and AI-summarized, with every source linked."
   wide
 >
@@ -19,12 +19,11 @@ const issues = (await getCollection('digest')).sort(
       <h1>hoeltke.com</h1>
       <p class="blog-description">A blog about the week in AI.</p>
       <p class="blog-author">By Fabian Hoeltke.</p>
-      <p class="blog-disclosure">The week’s top AI stories in a quick read. Catch up in one place, every Friday. Sources always linked.</p>
+      <p class="blog-disclosure">The week’s top AI stories in a quick read. Catch up in one place, every Friday.</p>
     </header>
 
     <section class="post-index" aria-label="Recent blog posts">
       <div class="post-index-heading">
-        <p>Recent posts</p>
         <a href="/rss.xml">RSS feed</a>
       </div>
       <ul class="post-list">
@@ -33,7 +32,6 @@ const issues = (await getCollection('digest')).sort(
       {issues.length === 0 && <p class="index-empty">The first issue is on its way. Subscribe to get it in your inbox.</p>}
       <div class="post-index-footer">
         <a href="/digest/">View all {issues.length} posts <span aria-hidden="true">→</span></a>
-        <span>One issue every Friday</span>
       </div>
       <section class="newsletter-section" aria-labelledby="newsletter-heading">
         <div>
