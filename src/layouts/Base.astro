@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import StatusDot from '../components/StatusDot.astro';
-import SubscribeForm from '../components/SubscribeForm.astro';
+import HeaderSubscribe from '../components/HeaderSubscribe.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { THEME_BOOTSTRAP } from '../lib/site-theme';
 
@@ -96,16 +96,8 @@ const personSchema = {
           <span aria-hidden="true" class="tab-label">Terminal</span>
         </a>
       </nav>
-      <button popovertarget="subscribe-pop" class="header-subscribe">Subscribe</button>
+      <HeaderSubscribe />
     </header>
-
-    <div
-      id="subscribe-pop"
-      popover
-      class="subscribe-popover"
-    >
-      <SubscribeForm variant="inline" />
-    </div>
 
     <main id="main-content" class:list={['site-main', wide && 'site-main-wide']}>
       <slot />

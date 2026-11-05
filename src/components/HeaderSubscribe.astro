@@ -1,0 +1,144 @@
+<div class="header-signup">
+  <form action="/api/subscribe" method="post" aria-label="Subscribe to AI Weekly" class="header-signup-form">
+    <div class="header-signup-tray" aria-hidden="true"></div>
+    <div class="header-signup-field" id="header-subscribe-email" data-email-field>
+      <input type="email" name="email" required autocomplete="email" aria-label="Email address" placeholder="you@example.com" />
+    </div>
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" hidden />
+    <button type="submit" class="header-subscribe" aria-controls="header-subscribe-email">Subscribe</button>
+  </form>
+  <p class="header-signup-status" role="status" data-subscribe-status hidden></p>
+  <p class="header-signup-error" id="header-subscribe-error" role="alert" data-subscribe-error hidden></p>
+</div>
+
+<script>
+  import { initHeaderSubscribe } from '../lib/header-subscribe';
+  document.querySelectorAll<HTMLElement>('.header-signup').forEach(initHeaderSubscribe);
+</script>
+
+<style>
+  .header-signup {
+    position: relative;
+    justify-self: end;
+    width: min(360px, calc(100vw - 40px));
+    height: 44px;
+    z-index: 2;
+  }
+  .header-signup[data-enhanced] { width: 98px; }
+  .header-signup-form {
+    position: absolute;
+    inset: 0 0 auto auto;
+    width: min(360px, calc(100vw - 40px));
+    height: 44px;
+    isolation: isolate;
+    pointer-events: none;
+  }
+  .header-signup-tray {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--panel);
+    border-radius: var(--radius-action);
+    clip-path: inset(0 round var(--radius-action));
+    transition: clip-path 200ms cubic-bezier(0.4, 0, 1, 1);
+  }
+  [data-enhanced]:not([data-open]) .header-signup-tray {
+    clip-path: inset(0 0 0 calc(100% - 98px) round var(--radius-action));
+  }
+  [data-open] .header-signup-tray {
+    transition: clip-path 360ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .header-signup-field {
+    position: absolute;
+    inset: 0 110px 0 0;
+    visibility: visible;
+    transition: opacity 180ms 70ms, clip-path 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+    pointer-events: auto;
+  }
+  [data-enhanced]:not([data-open]) .header-signup-field {
+    opacity: 0;
+    visibility: hidden;
+    clip-path: inset(0 0 0 100%);
+    transform: translateX(8px);
+    transition: opacity 120ms, clip-path 180ms, transform 180ms, visibility 0s 180ms;
+    pointer-events: none;
+  }
+  .header-signup-field input {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    border: 0;
+    border-radius: var(--radius-action);
+    padding: 0 16px;
+    background: transparent;
+    color: var(--text);
+    caret-color: var(--text);
+    font: inherit;
+    outline: none;
+  }
+  .header-signup-field input::placeholder { color: var(--muted); }
+  .header-signup-field input:focus-visible { box-shadow: inset 0 0 0 1px var(--line-bright); }
+  .header-subscribe {
+    position: absolute;
+    inset: 0 0 auto auto;
+    width: 98px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--radius-action);
+    padding: 0 12px;
+    background: var(--text);
+    color: var(--bg);
+    font: inherit;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background-color 140ms ease-out;
+  }
+  .header-subscribe:hover { background: var(--accent-vivid); }
+  :global([data-theme=dark]) .header-subscribe:hover { color: var(--text); }
+  .header-subscribe:focus-visible { border-radius: var(--radius-action); }
+  .header-subscribe:disabled { cursor: wait; opacity: 0.7; }
+  .header-signup-status {
+    position: absolute;
+    top: 0;
+    right: 110px;
+    width: min(250px, calc(100vw - 150px));
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+  .header-signup-error {
+    position: absolute;
+    right: 0;
+    top: 52px;
+    width: min(360px, calc(100vw - 40px));
+    padding: 10px 14px;
+    border-radius: var(--radius-action);
+    background: var(--panel);
+    color: var(--red);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  [hidden] { display: none; }
+  [data-confirmed] .header-signup-field { visibility: hidden; }
+  @media (min-width: 761px) and (max-width: 1050px) {
+    .header-signup-form { width: calc(50vw - 180px); }
+    .header-signup-status { width: calc(50vw - 290px); font-size: 11px; padding-left: 10px; }
+  }
+  @media (max-width: 760px) {
+    .header-signup { grid-column: 2; grid-row: 1; }
+    :global(.site-header:has(.header-signup[data-open]) .site-brand),
+    :global(.site-header:has(.header-signup:not([data-enhanced])) .site-brand) { visibility: hidden; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .header-signup-tray, .header-signup-field,
+    [data-enhanced]:not([data-open]) .header-signup-field {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

@@ -124,8 +124,9 @@ components:
     textColor: "{colors.bg}"
     typography: "{typography.control}"
     rounded: "{rounded.action}"
-    padding: "8px 16px"
+    padding: "0 12px"
     height: "44px"
+    width: "98px"
   input-email:
     backgroundColor: "{colors.bg}"
     textColor: "{colors.ink}"
@@ -206,7 +207,7 @@ OpenAI Sans is self-hosted in regular, medium, semibold, and bold files. JetBrai
 - **Body:** Article prose uses the body token. Intro copy has 1.6 line-height and reduces to 17px on mobile, with a 30ch desktop and 35ch mobile measure.
 - **Description:** Post summaries and disclosure use the final 16px override across viewports. Author and newsletter supporting copy remain 14px.
 - **Label:** Dates, reading times, and bylines use the final 13px override and tabular numerals. Footer remains 11px; index headings and terminal shortcut hints remain 12px.
-- **Control:** Navigation and email controls use the control token; mobile route labels are 13px and the header action is 12px.
+- **Control:** Navigation and email controls use the control token; mobile route labels are 13px; the header action and email field retain 14px on every viewport. Header feedback uses 13px, with the constrained intermediate-width success message at 11px.
 - **Terminal:** Transcript uses the terminal token, including the terminal-route mobile override; command buttons remain 12px. The about transcript uses 14px with 28px line-height.
 
 ### Named Rules
@@ -224,7 +225,7 @@ The default page background is plain. The terminal route opts into the 28px dot 
 
 ## Elevation & Depth
 
-Publication content is flat: one-pixel neutral rules and panel-toned hover establish hierarchy. The terminal has a soft downward shadow, light on paper and stronger on dark, without the former purple halo. The popover is a solid panel with a bright border and transparent backdrop. Console glow resolves to transparent; CRT vignette is disabled. Legacy digest cards retain their scoped hover/lift implementation and do not define current index depth.
+Publication content is flat: one-pixel neutral rules and panel-toned hover establish hierarchy. The terminal has a soft downward shadow, light on paper and stronger on dark, without the former purple halo. The header subscription tray uses solid panel fill without resting borders, shadows, or a backdrop; only its focused email field gains an inset one-pixel boundary. Console glow resolves to transparent; CRT vignette is disabled. Legacy digest cards retain their scoped hover/lift implementation and do not define current index depth.
 
 ### Shadow Vocabulary
 - **Light terminal float:** `0 18px 48px rgba(24, 24, 24, 0.08)`.
@@ -235,7 +236,7 @@ Publication content is flat: one-pixel neutral rules and panel-toned hover estab
 
 ## Shapes
 
-Post rows are square and flat. Both themes share the action radius (14px) and compact label radius (7px), inspired by Twelve Labs. Inputs, popover, and the terminal route retain the control radius. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
+Post rows are square and flat. Both themes share the action radius (14px) and compact label radius (7px), inspired by Twelve Labs. Ordinary email inputs and the terminal route retain the control radius. The header subscription action, tray, email field, and error notice use the action radius throughout. Article sources, subscription panels, about transcript, travel tiles, and retained legacy cards use the plate radius. Circular status/chrome dots and the rounded footer switch remain functional details. The switch track is 32px by 18px with a 14px thumb; its dark state translates the thumb by 14px.
 
 The console caret is a 0.6em by 1.15em block in console ink. Console chrome uses neutral dots. Rounded keyboard outlines follow the focus radius.
 
@@ -248,10 +249,17 @@ Native Home / Terminal anchors use Sans, muted resting text, and ink with a them
 Flat ruled links pair gray metadata with Sans titles. Hover adds panel fill, themed title color, and a one-pixel underline offset by 4px. Featured rows add a summary and source-count byline, without a Latest issue chip. Home and archive are server-rendered Astro surfaces.
 
 ### Buttons
-Light subscription and header actions use ink fill and paper text. Subscription hover reduces opacity to 90%; header hover uses the deeper neutral. Dark subscription retains neon green with black text, and the dark header retains its graphite fill, bright boundary, and violet hover. Console command buttons stay transparent with console text and boundaries. Keyboard focus remains visible.
+Light subscription and header actions use ink fill and paper text. Subscription hover reduces opacity to 90%; header hover uses the deeper neutral. Dark subscription retains neon green with black text. The dark header action rests on white with black text and changes to violet with white text on hover; neither theme adds a resting action border or shadow. Console command buttons stay transparent with console text and boundaries. Keyboard focus remains visible.
 
 ### Inputs / Fields
-Email fields use the page canvas, bright one-pixel boundary, control radius, and 8px/12px padding; focus uses the current accent boundary. Publication and popover fields shrink and retain 44px minimum height. Terminal input and terminal subscription use the fixed console palette, with transparent fields and visible local focus feedback. Errors use the appropriate page or console error token.
+Email fields use the page canvas, bright one-pixel boundary, control radius, and 8px/12px padding; focus uses the current accent boundary. Publication fields shrink and retain 44px minimum height. The header field uses a transparent fill, no resting border, action corners, and 0/16px padding within the panel-toned tray; keyboard focus adds an inset one-pixel bright boundary. Terminal input and terminal subscription use the fixed console palette, with transparent fields and visible local focus feedback. Errors use the appropriate page or console error token.
+
+### Header Subscription
+One anchored action becomes the form. The right-aligned button remains 98px by 44px while a panel-toned tray reveals leftward, up to 360px wide and capped at viewport width minus 40px. The email field ends 110px before the right edge, leaving a 12px gap before the same action. At 761–1050px the form narrows to `calc(50vw - 180px)` to preserve route space; success text narrows with it. At 760px and below, opening temporarily hides the brand while the route links remain visible below. Without JavaScript the complete native POST form is visible from the start; on mobile the brand yields to that form.
+
+The initial click opens and focuses the email field; the same Subscribe button then submits. The field uses native email validation, autocomplete, and a hidden honeypot. Pending submission makes the field read-only, disables the action, labels it Sending…, and marks the form busy. An accepted response replaces the field with “Check your inbox to confirm.” and changes that same action to Done; this acknowledges the request, not completed double opt-in. Done collapses the tray and restores Subscribe. Failed requests retain the form, announce “Couldn’t subscribe. Please try again.” beneath it, and return focus to the email field.
+
+Escape dismisses and restores action focus; outside pointer input and focus leaving the component also dismiss. Dismissal waits while a request is pending. Closed fields are inert. The tray reveals with a 360ms `cubic-bezier(0.16, 1, 0.3, 1)` clip-path transition and closes in 200ms with `cubic-bezier(0.4, 0, 1, 1)`. The field fades in over 180ms after 70ms and reveals/translates over 300ms; exit opacity is 120ms with 180ms clipping and translation. Reduced motion removes these transitions and translation immediately. Header action hover changes background over 140ms ease-out. Surface authority remains `.impeccable/surfaces/header-subscribe.md`.
 
 ### Theme Switch
 The footer button has role switch, the stable label Dark mode, and aria-checked reflecting selection. Light is the deliberate default, independent of OS preference. A head bootstrap applies a saved dark choice before paint; localStorage key `hoeltke-theme` persists the preference and storage events synchronize tabs. The original black/green/purple favicon is fixed across themes. Storage failures remain usable in-session. The switch stays hidden without JavaScript; default reading and native routes remain usable.

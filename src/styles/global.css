@@ -385,7 +385,6 @@ body > footer {
 
 .site-brand,
 .site-tabs a,
-.header-subscribe,
 .post-index a,
 .terminal-about {
   transition: color 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out;
@@ -397,37 +396,6 @@ body > footer {
 .post-index-footer a:hover,
 .terminal-about:hover {
   color: var(--accent);
-}
-
-.header-subscribe {
-  justify-self: end;
-  min-height: 44px;
-  border: 1px solid var(--line-bright);
-  padding: 8px 16px;
-  background: var(--panel);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.header-subscribe:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.subscribe-popover {
-  position: fixed;
-  inset: 78px 36px auto auto;
-  margin: 0;
-  width: min(calc(100vw - 40px), 360px);
-  padding: 20px;
-  border: 1px solid var(--line-bright);
-  border-radius: 6px;
-  background: var(--panel);
-  color: var(--text);
-}
-
-.subscribe-popover::backdrop {
-  background: transparent;
 }
 
 .site-main {
@@ -621,14 +589,12 @@ body > footer {
   max-width: 520px;
 }
 
-.newsletter-section input[type='email'],
-.subscribe-popover input[type='email'] {
+.newsletter-section input[type='email'] {
   min-width: 0;
   min-height: 44px;
 }
 
-.newsletter-section button,
-.subscribe-popover button {
+.newsletter-section button {
   min-height: 44px;
 }
 
@@ -755,12 +721,6 @@ body > footer {
   .site-brand {
     font-size: 14px;
   }
-  .header-subscribe {
-    grid-column: 2;
-    grid-row: 1;
-    padding-inline: 12px;
-    font-size: 12px;
-  }
   .site-tabs {
     grid-column: 1 / -1;
     justify-content: start;
@@ -769,9 +729,6 @@ body > footer {
   .site-tabs a {
     min-height: 44px;
     font-size: 13px;
-  }
-  .subscribe-popover {
-    inset: 68px 20px auto auto;
   }
   .blog-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -836,8 +793,6 @@ body > footer {
 }
 
 /* Typography and control refinements preserve the publication's existing grid. */
-.header-subscribe { background: var(--text); color: var(--bg); border-color: var(--text); }
-.header-subscribe:hover { background: var(--accent-vivid); color: var(--bg); }
 .post-date, .post-time, .post-byline { font-size: 13px; }
 .post-description, .blog-disclosure { font-size: 16px; }
 .post-row a:hover h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
@@ -847,8 +802,6 @@ body > footer {
 .term, .term .font-mono, .term.font-mono { font-family: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace; }
 .term .cursor-block { background: var(--text); }
 
-:root[data-theme='dark'] .header-subscribe { background: var(--panel); color: var(--text); border-color: var(--line-bright); }
-:root[data-theme='dark'] .header-subscribe:hover { background: var(--panel); color: var(--accent); border-color: var(--accent); }
 .theme-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; }
 .theme-toggle[hidden] { display: none; }
 .theme-toggle-track { position: relative; display: inline-block; width: 32px; height: 18px; flex-shrink: 0; border-radius: 99px; background: var(--line-bright); transition: background-color 150ms ease-out; }
@@ -857,7 +810,6 @@ body > footer {
 :root[data-theme='dark'] .theme-toggle-thumb { transform: translateX(14px); }
 
 /* Shared corner tokens apply to both light and dark themes. */
-.header-subscribe,
 .subscribe-form button,
 .terminal-content .term > div:last-child button { border-radius: var(--radius-action); }
 .content-label { border-radius: var(--radius-label); }
