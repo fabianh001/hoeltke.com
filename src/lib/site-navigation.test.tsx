@@ -58,18 +58,31 @@ test('Escape leaves the terminal prompt so H and T become available', () => {
   expect(navigate).toHaveBeenCalledTimes(1);
 });
 
-test('header labels stay static on hover and keyboard focus', () => {
+test('label scramble settles without changing the accessible link name', () => {
   vi.useFakeTimers({toFake:['requestAnimationFrame','cancelAnimationFrame','performance']});
-  for (const link of document.querySelectorAll<HTMLAnchorElement>('.site-tabs a')) {
-    const label = link.querySelector('.tab-label')!;
-    const text = label.textContent;
-    link.dispatchEvent(new MouseEvent('mouseenter'));
-    link.focus();
-    vi.advanceTimersByTime(32);
-    expect(label.textContent).toBe(text);
-    expect(link.getAttribute('aria-label')).toBe(text);
-    link.dispatchEvent(new MouseEvent('mouseleave'));
-    link.blur();
-  }
+  const link = document.querySelector<HTMLAnchorElement>('[data-shortcut="t"]')!;
+  const label = link.querySelector('.tab-label')!;
+  link.dispatchEvent(new MouseEvent('mouseenter'));
+  vi.advanceTimersByTime(32);
+  expect(label.textContent).not.toBe('Terminal');
+  expect(link.getAttribute('aria-label')).toBe('Terminal');
+  vi.advanceTimersByTime(450);
+  expect(label.textContent).toBe('Terminal');
+});
+
+test('leaving the link cancels the scramble and restores its label', () => {
+  vi.useFakeTimers({toFake:['requestAnimationFrame','cancelAnimationFrame','performance']});
+  const link = document.querySelector<HTMLAnchorElement>('[data-shortcut="h"]')!;
+  link.dispatchEvent(new MouseEvent('mouseenter'));
+  vi.advanceTimersByTime(32);
+  link.dispatchEvent(new MouseEvent('mouseleave'));
+  expect(link.querySelector('.tab-label')!.textContent).toBe('Home');
   expect(vi.getTimerCount()).toBe(0);
+});
+
+test('reduced motion preserves labels instead of scrambling', () => {
+  vi.stubGlobal('matchMedia', () => ({matches:true}));
+  const link = document.querySelector<HTMLAnchorElement>('[data-shortcut="h"]')!;
+  link.dispatchEvent(new MouseEvent('mouseenter'));
+  expect(link.querySelector('.tab-label')!.textContent).toBe('Home');
 });
