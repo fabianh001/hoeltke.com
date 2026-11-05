@@ -2,7 +2,7 @@
   <form action="/api/subscribe" method="post" aria-label="Subscribe to AI Weekly" class="header-signup-form">
     <div class="header-signup-tray" aria-hidden="true"></div>
     <div class="header-signup-field" id="header-subscribe-email" data-email-field>
-      <input type="email" name="email" required autocomplete="email" aria-label="Email address" placeholder="you@example.com" />
+      <input type="email" name="email" required autocomplete="email" enterkeyhint="send" aria-label="Email address" placeholder="you@example.com" />
     </div>
     <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" hidden />
     <button type="submit" class="header-subscribe" aria-controls="header-subscribe-email">Subscribe</button>
@@ -131,6 +131,7 @@
   }
   @media (max-width: 760px) {
     .header-signup { grid-column: 2; grid-row: 1; }
+    .header-signup-field input { font-size: 16px; }
     :global(.site-header:has(.header-signup[data-open]) .site-brand),
     :global(.site-header:has(.header-signup:not([data-enhanced])) .site-brand) { visibility: hidden; }
   }
