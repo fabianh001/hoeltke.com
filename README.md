@@ -7,7 +7,7 @@ A personal site that writes its own blog.
 
 Every Friday at 07:00 UTC, a pipeline reads the week's AI news — research blogs,
 Hacker News, the usual suspects — hands everything to an LLM, and publishes
-**AI Weekly**: one digest of the stories that actually matter, with sources.
+**AI Weekly**: one digest of the stories that actually matter.
 
 **Live at [hoeltke.com](https://hoeltke.com)** · [RSS](https://hoeltke.com/rss.xml)
 
