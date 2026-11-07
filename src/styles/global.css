@@ -383,14 +383,6 @@ body > footer {
   white-space: pre;
 }
 
-.terminal-shortcuts {
-  margin-top: 16px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.7;
-}
-
 .site-brand,
 .site-tabs a,
 .post-index a,
